@@ -133,4 +133,22 @@ function mkWheel(Dmm,Wmm,tire,rimCol,tireCol){const g=new THREE.Group(),R=Dmm/20
  const rm=mPaint(rimCol,'metal');const dish=cyl(rr,rr,W*.92,rm,0,0,0,32);dish.rotation.z=Math.PI/2;g.add(dish);
  const face=cyl(rr*.9,rr*.9,.08,mPlastic('#111',.5),W*.47,0,0,32);face.rotation.z=Math.PI/2;g.add(face);
  for(let k=0;k<5;k++){const a=k/5*Math.PI*2,sp=box(.12,rr*.85,rr*.22,rm);sp.position.set(W*.5,Math.cos(a)*rr*.45,Math.sin(a)*rr*.45);sp.rotation.x=a;g.add(sp)}
- const hub=cyl(rr*.22,rr*.22,.15,mMetal('#9aa'),W*.52,0,0,6);hub.rotation.z=Math.PI/2;g.add(hub);g.userData.R=R;return g}
+ const hub=cyl(rr*.22,rr*.22,.15,mMetal('#9aa'),W*.52,0,0,6);hub.rotation.z=Math.PI/2;g.add(hub);
+ // beadlock halqa: shinani diskka siqib turuvchi tashqi halqa va 12 ta bolt
+ const ring=new THREE.Mesh(GEO('bead'+rr.toFixed(2),()=>new THREE.TorusGeometry(rr*.93,rr*.07,6,36)),mMetal('#2b2e33',.35));ring.rotation.y=Math.PI/2;ring.position.x=W*.49;g.add(ring);
+ for(let k=0;k<12;k++){const a=k/12*Math.PI*2,b=cyl(rr*.035,rr*.035,.12,mMetal('#d0d4da',.2),W*.53,Math.cos(a)*rr*.93,Math.sin(a)*rr*.93,6);b.rotation.z=Math.PI/2;g.add(b)}
+ g.userData.R=R;return g}
+
+// ---- silliq qobiq (loft): ketma-ket ko'ndalang kesimlar orqali — fuzelyaj, kabina, kuzov ----
+// st: [{z,w,h,y}] (z o'sib boradi); kesim — superellips: n=2 ellips, n>2 yumaloq to'rtburchak
+function loftGeo(st,n=2.6,seg=40){const pos=[],uv=[],idx=[],ring=seg+1;
+ st.forEach((s,i)=>{for(let j=0;j<=seg;j++){const a=j/seg*Math.PI*2,ca=Math.cos(a),sa=Math.sin(a);pos.push(s.w/2*Math.sign(ca)*Math.pow(Math.abs(ca),2/n),s.y+s.h/2*Math.sign(sa)*Math.pow(Math.abs(sa),2/n),s.z);uv.push(j/seg,i/(st.length-1))}});
+ for(let i=0;i<st.length-1;i++)for(let j=0;j<seg;j++){const a=i*ring+j,b=a+1,c=a+ring,d=c+1;idx.push(a,b,c,b,d,c)}
+ for(const[i,first]of[[0,true],[st.length-1,false]]){const s=st[i],ci=pos.length/3;pos.push(0,s.y,s.z);uv.push(.5,first?0:1);for(let j=0;j<seg;j++){const a=i*ring+j;first?idx.push(ci,a+1,a):idx.push(ci,a,a+1)}}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();return g}
+// st jadvalini qulay yozish: [[z, w, h, y], ...] → loft mesh
+function loft(rows,mat,n,seg){const m=new THREE.Mesh(loftGeo(rows.map(([z,w,h,y])=>({z,w,h,y})),n,seg),mat);m.castShadow=true;m.receiveShadow=true;m.userData.dispose=true;return m}
+// yupqa simmetrik profilli yuza (stabilizator, kil): x bo'ylab "span", z bo'ylab vatar (oldingi qirra −z da)
+function foilSurface(span,chord,mat){const t=chord*.09,s=new THREE.Shape(),N=16,yt=x=>5*t*(.2969*Math.sqrt(x)-.126*x-.3516*x*x+.2843*x*x*x-.1036*x*x*x*x);
+ for(let i=0;i<=N;i++){const x=1-i/N;s[i?'lineTo':'moveTo'](x*chord,yt(x))}for(let i=1;i<=N;i++){const x=i/N;s.lineTo(x*chord,-yt(x))}
+ const g=new THREE.ExtrudeGeometry(s,{depth:span,bevelEnabled:false,curveSegments:8});g.rotateY(-Math.PI/2);g.translate(span/2,0,-chord/2);const m=new THREE.Mesh(g,mat);m.castShadow=true;m.userData.dispose=true;return m}

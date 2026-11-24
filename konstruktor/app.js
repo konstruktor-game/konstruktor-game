@@ -45,13 +45,13 @@ function stepStatus(s){if(s.kind==='wiring'){const W=wcheck(B);return{done:W.tot
  if(s.slots){const L=s.slots(B),n=L.filter(x=>B.inst[x]).length;return{done:L.length>0&&n===L.length,pg:L.length?`${n}/${L.length}`:''}}
  if(s.kind==='check'){const I=T.issues(B,D||T.derive(B)),built=T.steps.every(x=>!x.slots||x.kind==='paint'||x.slots(B).every(y=>B.inst[y]));return{done:built&&!I.some(i=>i.lvl==='bad'),pg:''}}
  if(s.kind==='test')return{done:!!(B.passed&&B.passed[B.type]),pg:''};return{done:false,pg:''}}
-function renderSteps(){$('steps').innerHTML=`<div class="stHead">${esc(T.name.toUpperCase())} · BOSQICHLAR</div>`+T.steps.map((s,i)=>{const st=stepStatus(s);
+function renderSteps(){const sts=T.steps.map(stepStatus),dn=sts.filter(x=>x.done).length;$('steps').innerHTML=`<div class="stHead">${esc(T.name)}</div><div class="stProg" title="${dn} / ${T.steps.length} bosqich"><i style="width:${dn/T.steps.length*100}%"></i></div>`+T.steps.map((s,i)=>{const st=sts[i];
  return `<button class="st ${i===stepIdx?'on':''} ${st.done?'done':''}" data-i="${i}" title="${esc(s.t)}"><span class="n">${st.done?IC('check'):i+1}</span><span>${IC(s.ic)} ${esc(s.t)}</span><span class="pg">${st.pg}</span></button>`}).join('');
  $('steps').querySelectorAll('.st').forEach(b=>b.onclick=()=>{snd('click');goStep(+b.dataset.i)})}
 function goStep(i,first){if(insp)exitInspect(true);stepIdx=clamp(i,0,T.steps.length-1);B.step=stepIdx;saveLocal();const s=step();
  if(s.kind!=='test')simStop();showWireStatus=false;
  $('wires').classList.toggle('hidden',s.kind!=='wiring');$('hud').classList.toggle('hidden',s.kind!=='test');$('vtools').classList.toggle('hidden',s.kind==='wiring');
- rebuild();renderPanel();if(s.kind==='wiring')renderWires();if(s.kind==='test')startSim();
+ rebuild();renderPanel();if(s.kind==='wiring')renderWires();if(s.kind==='test')startSim();else $('simStart').classList.add('hidden');
  setHint();$('panel').scrollTop=0}
 function setHint(t){const s=step(),h=$('hint');if(t){h.innerHTML=esc(t);h.classList.remove('hidden');return}
  if(insp){h.innerHTML=`<i class=i-orbit></i> 360° ko'rish: ${glossName(insp.label)} — sichqoncha bilan aylantiring, g'ildirak bilan yaqinlashtiring`;return}
@@ -113,7 +113,7 @@ function renderPanel(){const s=step(),P=$('panel');closePop();
  else if(s.kind==='check')h+=checkPanel();
  else if(s.kind==='test')h+=testPanel();
  else if(s.kind==='bom')h+=bomPanel();
- else{if(s.kind==='props')h+=propsTools();h+=(s.cats||[]).map(catCard).join('')+slotsHTML()+`<h3 style="font-size:14px;margin:6px 0 8px"><i class=i-warn></i> Tekshiruv natijasi</h3><div id="stepIssues">${issuesHTML(true)}</div>`}
+ else{if(s.kind==='props')h+=propsTools();h+=(s.cats||[]).map(catCard).join('')+slotsHTML()+`<h3 style="font-size:13px;font-weight:600;margin:6px 0 6px"><i class=i-warn></i> Tekshiruv natijasi</h3><div id="stepIssues">${issuesHTML(true)}</div>`}
  P.innerHTML=h+navHTML();bindPanel()}
 function bindPanel(){const P=$('panel');
  P.querySelectorAll('.q').forEach(b=>b.onclick=e=>{e.stopPropagation();pop(b,b.dataset.g)});
@@ -276,7 +276,7 @@ function checkPanel(){const W=wcheck(B),I=T.issues(B,D),bad=I.filter(i=>i.lvl===
  <div class="card"><h3><i class=i-globe></i> Muhit sharoiti <button class="q" data-g="twr">?</button></h3><div class="grid2"><div class="fld"><div class="fl"><span>Balandlik (dengizdan), m</span></div><input class="inp" type="number" id="envAlt" min="0" max="5000" step="50" value="${B.env.alt}"></div>
  <div class="fld"><div class="fl"><span>Harorat, °C</span></div><input class="inp" type="number" id="envTemp" min="-30" max="50" step="1" value="${B.env.temp}"></div></div>
  <p style="font-size:12px;color:var(--mu);margin-bottom:8px">Havo zichligi: ${fmt(airDensity(B.env.alt,B.env.temp),3)} kg/m³ (dengiz sathida 1.225). Tog'da va issiqda havo siyrak — tortish kamayadi.</p></div>
- <h3 style="font-size:14px;margin:6px 0 8px"><i class=i-search></i> Batafsil tekshiruv</h3>
+ <h3 style="font-size:13px;font-weight:600;margin:6px 0 6px"><i class=i-search></i> Batafsil tekshiruv</h3>
  ${W.fatal.map(f=>`<div class="iss bad"><b><i class=i-bolt></i> ${esc(f.t)}</b><span>${esc(f.why)}</span></div>`).join('')}${W.complete?'':`<div class="iss warn"><b><i class=i-plug></i> Simlar to'liq ulanmagan (${W.connected}/${W.total})</b><span>Kavsharlash bosqichiga qayting.</span></div>`}
  ${issuesHTML(false)}<p style="font-size:11.5px;color:var(--mu);margin-top:10px"><i class=i-info></i> Hisob-kitoblar taxminiy (±15–25%): ommabop detallarning sinov natijalariga moslangan formulalar asosida. Haqiqiy detal sotib olishdan oldin ishlab chiqaruvchining sinov jadvallarini tekshiring.</p>`}
 function bindCheck(P){const a=P.querySelector('#envAlt'),t=P.querySelector('#envTemp');const ch=()=>{pushUndo();B.env.alt=clamp(+a.value||0,0,5000);B.env.temp=clamp(+t.value||20,-30,50);commit()};a.onchange=ch;t.onchange=ch;drawChart()}
@@ -288,21 +288,41 @@ function drawChart(){const c=$('chart');if(!c)return;const g=c.getContext('2d'),
  line('thrust',mx,'#4aa3ff');line('amp',ma,'#ffb020');g.fillStyle='#4aa3ff';g.textAlign='left';g.fillText(B.type==='car'?'■ Tezlik (km/soat)':'■ Tortish (g)',L,14);g.fillStyle='#ffb020';g.fillText('■ Tok (A)',L+150,14)}
 
 // ---------------- sinov ----------------
-function testPanel(){const pf=preflight(B),W=pf.WC;
+// boshqaruv tugmalari — turiga va rejimga qarab
+const CTRL={copter:{easy:[['W','Yuqoriga ko\'tarilish'],['S','Pastga tushish'],['A D','O\'z o\'qi atrofida burilish'],['↑ ↓','Oldinga / orqaga uchish'],['← →','Chapga / o\'ngga uchish']],
+  manual:[['W S','Gazni oshirish / kamaytirish (qo\'yib yuborilsa ham saqlanadi)'],['A D','O\'z o\'qi atrofida burilish'],['↑ ↓ ← →','Egilish — tezlikni o\'zingiz to\'xtatasiz']]},
+ plane:{easy:[['W S','Gazni oshirish / kamaytirish'],['↑','Burun tepaga (ko\'tarilish)'],['↓','Burun pastga'],['← →','Yonboshlab burilish (eleronlar)'],['A D','Yo\'nalish ruli']]},
+ car:{easy:[['W ↑','Gaz'],['S ↓','Tormoz, so\'ng orqaga'],['A D ← →','Rul']]}};
+const MODES={copter:[['easy','Oson','Balandlik va joyni o\'zi ushlaydi — boshlovchilar uchun'],['manual','Qo\'lda','Gaz to\'liq sizda — haqiqiy FPV dron kabi']],plane:[['easy','Barqaror','Qo\'yib yuborilsa o\'zi tekislanadi'],['manual','Qo\'lda','Hech qanday yordamsiz']]};
+const simMode=()=>window.SIM_MODE||'easy';
+function ctrlHTML(){const L=CTRL[B.type][simMode()]||CTRL[B.type].easy;return`<div class="keys">${L.map(([k,t])=>`<div><span>${k.split(' ').map(x=>`<kbd>${esc(x)}</kbd>`).join(' ')}</span><em>${esc(t)}</em></div>`).join('')}${isTouch?'<div><span>Joystiklar</span><em>Chap — gaz va burilish, o\'ng — yo\'nalish</em></div>':''}</div>`}
+function modeHTML(){const M=MODES[B.type];if(!M)return'';return`<div class="seg">${M.map(([k,l,t])=>`<button data-mode="${k}" class="${simMode()===k?'on':''}" title="${esc(t)}">${esc(l)}</button>`).join('')}</div><p class="note">${esc(M.find(m=>m[0]===simMode())[2])}</p>`}
+function fixStep(pf){if(pf.miss&&pf.miss.length)return T.steps.findIndex(s=>s.slots&&s.kind!=='paint'&&s.slots(B).some(x=>!B.inst[x]));return T.steps.findIndex(s=>s.kind==='wiring')}
+function testPanel(){const pf=preflight(B);
  const items=[];if(!pf.ok)items.push({lvl:'bad',t:pf.block});for(const f of pf.fatal)items.push({lvl:'bad',t:f.t,why:f.why,ic:'bolt'});
- if(pf.ok&&!pf.fatal.length)items.push({lvl:'ok',t:"Yig'ish tugallangan — sinovga tayyor",why:"Sinovda simlar va parraklardagi xatolar o'zini ko'rsatadi."});
- const keys=B.type==='copter'?['W / S — gaz','A / D — o\'z o\'qi atrofida burilish','↑ ↓ ← → — egilish (oldinga/yon)']:B.type==='plane'?['W / S — gaz','↑ ↓ — balandlik ruli (burun)','← → — eleronlar (yonboshlash)','A / D — yo\'nalish ruli']:['W / S yoki ↑ ↓ — gaz / tormoz / orqaga','A / D yoki ← → — rul'];
+ if(pf.ok&&!pf.fatal.length)items.push({lvl:'ok',t:"Yig'ish tugallangan — sinovga tayyor",why:"Simlar yoki parraklardagi xatolar sinovda o'zini ko'rsatadi — xuddi haqiqiy hayotdagidek."});
  return`${items.map(i=>`<div class="iss ${i.lvl}"><b>${IC(i.ic||{bad:'bad',ok:'ok'}[i.lvl])} ${esc(i.t)}</b>${i.why?`<span>${esc(i.why)}</span>`:''}</div>`).join('')}
- <div class="card"><h3><i class=i-gamepad></i> Boshqaruv</h3><div class="row" style="margin-bottom:8px"><button class="btn pri" id="bArm">▶ Ishga tushirish</button><button class="btn" id="bReset"><i class=i-ccw></i> Qaytadan</button></div>
- <div class="row" style="margin-bottom:8px">${[['chase','<i class=i-video></i> Kuzatish'],...(B.type==='copter'?[['fpv','<i class=i-goggles></i> FPV kamera']]:[]),['pilot','<i class=i-person></i> Uchuvchi ko\'zi']].map(([k,l])=>`<button class="btn" data-cam="${k}">${l}</button>`).join('')}</div>
- <ul style="font-size:12.5px;color:#c4cee0;margin:4px 0 8px 18px">${keys.map(k=>`<li>${esc(k)}</li>`).join('')}${isTouch?'<li>Ekrandagi joystiklardan foydalaning</li>':''}</ul></div>
- <div class="card"><h3><i class=i-gauge></i> Telemetriya</h3><div class="grid2" id="telem"></div></div><div id="report"></div>`}
+ <div class="card"><h3><i class=i-gamepad></i> Boshqaruv</h3>${modeHTML()}${ctrlHTML()}
+ <div class="row" style="margin:10px 0 8px"><button class="btn pri" id="bArm"><i class=i-play></i> Boshlash</button><button class="btn" id="bReset"><i class=i-ccw></i> Qaytadan</button></div>
+ <div class="tg" style="margin-bottom:4px"><span>Kamera</span></div><div class="seg">${[['chase','Orqadan'],...(B.type==='copter'?[['fpv','FPV kamera']]:[]),['pilot','Yerdan']].map(([k,l])=>`<button data-cam="${k}" class="${(SIM&&SIM.cam||'chase')===k?'on':''}">${l}</button>`).join('')}</div></div>
+ <div class="card"><h3><i class=i-gauge></i> Natijalar</h3><div class="grid2" id="telem" style="margin-bottom:8px"></div></div>`}
 function bindTest(P){P.querySelector('#bArm').onclick=()=>{audioInit();simArm();updateHud(true)};P.querySelector('#bReset').onclick=()=>{startSim();snd('click')};
- P.querySelectorAll('[data-cam]').forEach(b=>b.onclick=()=>{if(SIM){SIM.cam=b.dataset.cam;snd('click')}})}
-function startSim(){simStart(B);$('hudFail').classList.add('hidden');resize();$('stL').classList.toggle('hidden',!isTouch);$('stR').classList.toggle('hidden',!isTouch);updateHud(true)}
+ P.querySelectorAll('[data-cam]').forEach(b=>b.onclick=()=>{if(SIM){SIM.cam=b.dataset.cam;snd('click');P.querySelectorAll('[data-cam]').forEach(x=>x.classList.toggle('on',x===b))}});
+ P.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{window.SIM_MODE=b.dataset.mode;if(SIM)SIM.mode=window.SIM_MODE;snd('click');renderPanel();renderStartCard()})}
+// sinov oldidan ekrandagi karta: nima qilish kerak, qaysi tugmalar, katta "Boshlash"
+function renderStartCard(){const el=$('simStart'),S=SIM;if(!S||S.armed||S.fail||step().kind!=='test'){el.classList.add('hidden');return}const pf=S.pf;
+ if(!pf.ok){el.innerHTML=`<div class="simCard"><h3><i class=i-warn></i> Sinovni boshlab bo'lmaydi</h3><p class="note">${esc(pf.block)}</p><div class="row" style="margin-top:10px"><button class="btn pri" id="ovFix"><i class=i-wrench></i> Tuzatishga o'tish</button></div></div>`;
+  el.classList.remove('hidden');$('ovFix').onclick=()=>goStep(Math.max(0,fixStep(pf)));return}
+ el.innerHTML=`<div class="simCard"><h3><i class=i-rocket></i> ${B.type==='car'?'Sinov haydashga tayyor':'Sinov parvoziga tayyor'}</h3>
+  <p class="note">${B.type==='copter'?"Dron qo'nish maydonchasida turibdi. Boshlang, so'ng <b>W</b> ni bosib turing — dron ko'tariladi.":B.type==='plane'?"Samolyot uchish yo'lagida. <b>W</b> bilan to'liq gaz bering, tezlik yig'ilgach <b>↑</b> bilan burunni ko'taring.":"Mashina konuslar oldida. <b>W</b> — oldinga, <b>A/D</b> — rul."}</p>
+  ${modeHTML()}${ctrlHTML()}<button class="btn pri big" id="ovStart"><i class=i-play></i> Boshlash</button></div>`;
+ el.classList.remove('hidden');el.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{window.SIM_MODE=b.dataset.mode;S.mode=window.SIM_MODE;snd('click');renderStartCard();renderPanel()});
+ $('ovStart').onclick=()=>{audioInit();simArm();el.classList.add('hidden');updateHud(true)}}
+function startSim(){simStart(B);$('hudFail').classList.add('hidden');resize();$('stL').classList.toggle('hidden',!isTouch);$('stR').classList.toggle('hidden',!isTouch);renderStartCard();updateHud(true)}
 let hudT=0;function updateHud(force){const S=SIM;if(!S)return;const n=performance.now();if(!force&&n-hudT<150)return;hudT=n;const soc=clamp(1-S.used/S.B.p.bat.mah,0,1),sp=S.vel.length()*3.6;
- $('hudL').innerHTML=`<div>${S.armed?'<i class=i-dot></i> ISHLAYAPTI':'<i class=i-dot></i> TO\'XTAGAN'}</div><div>Tezlik: <b>${fmt(sp)}</b> km/soat</div><div>Balandlik: <b>${fmt(S.pos.y,1)}</b> m</div>
-  <div>Gaz: <b>${fmt((S.B.type==='car'?Math.abs(S.spd)/Math.max(1,S.D.vTop):S.thr)*100)}</b> %</div><div>Batareya: <b style="color:${soc<.2?'#ff5a5a':'#2ecc71'}">${fmt(soc*100)}%</b> · ${fmt(S.volt||S.D.V,1)} V</div><div>Tok: <b>${fmt(S.amp||0,1)}</b> A · ${fmt(S.used)} mAh</div><div>Vaqt: <b>${mmss(S.t)}</b></div>`;
+ const mode=S.B.type==='car'?'':`<div class="hm">${S.mode==='manual'?"Qo'lda":S.B.type==='copter'?'Oson':'Barqaror'} rejim</div>`;
+ $('hudL').innerHTML=`<div class="hs ${S.armed?'on':''}"><i></i>${S.armed?'Ishlayapti':"To'xtagan"}</div>${mode}<div>Tezlik <b>${fmt(sp)}</b> km/soat</div>${S.B.type!=='car'?`<div>Balandlik <b>${fmt(S.pos.y,1)}</b> m</div>`:''}
+  <div>Batareya <b>${fmt(soc*100)}%</b> · ${fmt(S.volt||S.D.V,1)} V</div><div class="batbar"><i style="width:${soc*100}%;background:${soc<.2?'#ff5a5a':soc<.4?'#ffb020':'#2ecc71'}"></i></div><div>Vaqt <b>${mmss(S.t)}</b> · ${fmt(S.amp||0,1)} A</div>`;
  $('hudMsg').textContent=S.status;$('hudMsg').classList.toggle('hidden',!S.status);
  const tl=$('telem');if(tl)tl.innerHTML=[['Maks. tezlik',fmt(S.maxV*3.6)+' km/soat'],['Maks. balandlik',fmt(S.maxH,1)+' m'],['Sarflangan',fmt(S.used)+' mAh'],['Min. kuchlanish',S.minV<99?fmt(S.minV,1)+' V':'—']].map(([l,v])=>`<div class="kv"><small>${l}</small><b>${v}</b></div>`).join('');
  if(S.fail&&$('hudFail').classList.contains('hidden')){$('hudFail').innerHTML=`<div><h3><i class=i-explode></i> ${esc(S.fail.t)}</h3><p style="color:#c4cee0;margin-bottom:12px">${esc(S.fail.why)}</p><button class="btn pri" id="bFailR"><i class=i-ccw></i> Qaytadan</button></div>`;$('hudFail').classList.remove('hidden');$('bFailR').onclick=()=>startSim()}

@@ -32,6 +32,10 @@ class ApiTests(TestCase):
         # faqat ruxsat etilgan nomlar (yo'lni chetlab o'tish mumkin emas)
         self.assertEqual(self.client.get('/konstruktor/..%2F..%2Fbackend%2Fmanage.py').status_code, 404)
         self.assertEqual(self.client.get('/konstruktor/index.html').status_code, 404)
+        r = self.client.get('/konstruktor/img/logo-mark.png')
+        self.assertEqual((r.status_code, r['Content-Type']), (200, 'image/png'))
+        self.assertEqual(self.client.get('/konstruktor/img/..%2F..%2Fbackend%2Fdb.sqlite3').status_code, 404)
+        self.assertEqual(self.client.get('/konstruktor/img/logo.svg').status_code, 404)
 
     def test_register_login_logout(self):
         tok = self.register()

@@ -10,12 +10,12 @@ const TIRE={slick:{n:'Silliq (asfalt)',road:.95,dirt:.35},pin:{n:"Mayda tishli (
 const KIND={buggy:{n:'Buggy',crr:.04,stab:[1,1.3],use:.15},truck:{n:'Monster truck',crr:.045,stab:[.85,1.1],use:.18},crawler:{n:'Crawler (toshlarga chiqish)',crr:.07,stab:[.7,.9],use:.04},onroad:{n:'Shosse (asfalt)',crr:.02,stab:[1,1.3],use:.15}};
 const T={id:'car',name:'RC mashina',ic:'car',desc:"Buggy, monster truck, crawler yoki shosse mashinasi.",defPreset:'buggy',defPurpose:'basher',
  purposes:{basher:{t:"Har qanday yo'lda o'ynash",note:'Chidamlilik va kuch'},race:{t:'Poyga',note:'Yengillik va tezlanish'},crawler:{t:'Toshlarga chiqish',note:"Past tezlik, katta moment, yuqori klirens"},speed:{t:'Tezlik rekordi',note:'Uzun uzatma, aerodinamika, yaxshi sovutish'}},
- colors:{body:'#e53935',body2:'#ffffff',chassis:'#2b2f36',rim:'#d0d4da',tire:'#1a1a1a',motor:'#1565c0',spring:'#ffc107',bat:'#2e7d32'},
+ colors:{body:'#9c1c1c',body2:'#e6e8ea',chassis:'#2b2f36',rim:'#d0d4da',tire:'#1a1a1a',motor:'#1565c0',spring:'#ffc107',bat:'#2e7d32'},
  paint:[['body','Kuzov asosiy rangi'],['body2','Kuzov ikkinchi rangi'],['chassis','Shassi'],['rim',"G'ildirak diski"],['tire','Shina'],['motor','Motor'],['spring','Prujinalar'],['bat','Batareya']],
  spec:{
   chassis:{t:'Shassi',ic:'chassis',g:'chassis',f:[{k:'kind',l:'Turi',type:'sel',o:Object.fromEntries(Object.entries(KIND).map(([k,v])=>[k,v.n]))},
    {k:'wb',l:"G'ildiraklar orasi (bo'yiga)",min:120,max:500,step:5,u:'mm'},{k:'track',l:'Koleya (eniga)',min:100,max:450,step:5,u:'mm'},{k:'clear',l:'Klirens (yerdan balandlik)',min:5,max:120,step:1,u:'mm'},
-   {k:'drive',l:'Yuritma',type:'sel',o:{'4wd':"4×4 (to'liq)",'2wd':'2×4 (orqa)'}},{k:'mat',l:'Material',type:'sel',o:{alu:'Alyuminiy',plastic:'Kompozit plastik',carbon:'Karbon'},g:'material'}]},
+   {k:'drive',l:'Yuritma',type:'sel',o:{'4wd':"4×4 (to'liq)",'2wd':'2×4 (orqa)'}},{k:'body',l:'Kuzov turi',type:'sel',o:{jeep:'Jip (SUV)',pickup:'Pikap / monster truck',buggy:'Buggy (sport)',sedan:'Sedan (shosse)'},g:'body'},{k:'mat',l:'Material',type:'sel',o:{alu:'Alyuminiy',plastic:'Kompozit plastik',carbon:'Karbon'},g:'material'}]},
   motor:{t:'Motor',ic:'motor',g:'motor',f:[{k:'type',l:'Turi',type:'sel',o:{bl:"Cho'tkasiz (brushless)",br:"Cho'tkali (brushed)"},g:'brushed'},{k:'kv',l:"KV (cho'tkasiz)",min:800,max:8000,step:50,u:'KV',g:'kv'},{k:'turns',l:"O'ramlar (cho'tkali)",min:10,max:80,step:1,u:'T',g:'brushed'},
    {k:'d',l:'Korpus diametri',min:24,max:60,step:1,u:'mm'},{k:'len',l:'Korpus uzunligi',min:30,max:100,step:1,u:'mm'}]},
   gear:{t:'Uzatma',ic:'gear',g:'gear',f:[{k:'pin',l:'Pinion tishlari',min:8,max:50,step:1,u:'T',g:'gear'},{k:'spur',l:'Spur tishlari',min:30,max:120,step:1,u:'T',g:'gear'},{k:'int',l:'Ichki uzatma',min:1,max:40,step:.1,u:':1'}]},
@@ -25,10 +25,10 @@ const T={id:'car',name:'RC mashina',ic:'car',desc:"Buggy, monster truck, crawler
   rx:{t:'Qabul qilgich',ic:'antenna',g:'rx',f:[{k:'ch',l:'Kanallar',type:'sel',o:{3:'3 kanal',4:'4 kanal'},g:'channel'}]},
   bat:{t:'Batareya',ic:'battery',g:'battery',f:[{k:'chem',l:'Kimyo',type:'sel',o:{lipo:'LiPo',liion:'Li-ion'},g:'chem'},{k:'cells',l:'Yacheykalar',min:1,max:8,step:1,u:'S',g:'cells'},{k:'mah',l:"Sig'im",min:500,max:10000,step:100,u:'mAh',g:'mah'},{k:'c',l:'C reyting',min:5,max:150,step:5,u:'C',g:'crating'}]}},
  presets:{
-  buggy:{name:'1/10 buggy 4×4',desc:"Har qanday yo'l, tez va chidamli",purpose:'basher',p:{chassis:{kind:'buggy',wb:280,track:250,clear:30,drive:'4wd',mat:'plastic'},motor:{type:'bl',kv:3300,turns:27,d:36,len:50},gear:{pin:18,spur:46,int:2.6},wheel:{d:85,w:40,tire:'pin'},esc:{a:80,cells:3,bec:6},servo:{tq:9},rx:{ch:3},bat:{chem:'lipo',cells:2,mah:5000,c:50}}},
-  monster:{name:'1/10 monster truck',desc:"Katta g'ildirak, sakrash va to'siqlar",purpose:'basher',p:{chassis:{kind:'truck',wb:330,track:300,clear:65,drive:'4wd',mat:'plastic'},motor:{type:'bl',kv:2400,turns:27,d:40,len:60},gear:{pin:15,spur:52,int:2.6},wheel:{d:150,w:65,tire:'terrain'},esc:{a:100,cells:4,bec:6},servo:{tq:15},rx:{ch:3},bat:{chem:'lipo',cells:3,mah:5000,c:50}}},
-  crawler:{name:'1/10 crawler',desc:'Toshlarga sekin, ishonchli chiqadi',purpose:'crawler',p:{chassis:{kind:'crawler',wb:313,track:250,clear:70,drive:'4wd',mat:'alu'},motor:{type:'br',kv:1000,turns:35,d:36,len:50},gear:{pin:11,spur:56,int:9},wheel:{d:115,w:45,tire:'terrain'},esc:{a:40,cells:3,bec:7.4},servo:{tq:25},rx:{ch:4},bat:{chem:'lipo',cells:2,mah:3200,c:30}}},
-  onroad:{name:'1/10 shosse (touring)',desc:'Asfaltda yuqori tezlik',purpose:'race',p:{chassis:{kind:'onroad',wb:257,track:190,clear:6,drive:'4wd',mat:'carbon'},motor:{type:'bl',kv:4500,turns:27,d:36,len:50},gear:{pin:28,spur:80,int:1.9},wheel:{d:64,w:26,tire:'slick'},esc:{a:120,cells:2,bec:6},servo:{tq:10},rx:{ch:3},bat:{chem:'lipo',cells:2,mah:5000,c:100}}}},
+  buggy:{name:'1/10 buggy 4×4',desc:"Har qanday yo'l, tez va chidamli",purpose:'basher',p:{chassis:{kind:'buggy',wb:280,track:250,clear:30,drive:'4wd',mat:'plastic',body:'jeep'},motor:{type:'bl',kv:3300,turns:27,d:36,len:50},gear:{pin:18,spur:46,int:2.6},wheel:{d:85,w:40,tire:'pin'},esc:{a:80,cells:3,bec:6},servo:{tq:9},rx:{ch:3},bat:{chem:'lipo',cells:2,mah:5000,c:50}}},
+  monster:{name:'1/10 monster truck',desc:"Katta g'ildirak, sakrash va to'siqlar",purpose:'basher',p:{chassis:{kind:'truck',wb:330,track:300,clear:65,drive:'4wd',mat:'plastic',body:'pickup'},motor:{type:'bl',kv:2400,turns:27,d:40,len:60},gear:{pin:15,spur:52,int:2.6},wheel:{d:150,w:65,tire:'terrain'},esc:{a:100,cells:4,bec:6},servo:{tq:15},rx:{ch:3},bat:{chem:'lipo',cells:3,mah:5000,c:50}}},
+  crawler:{name:'1/10 crawler',desc:'Toshlarga sekin, ishonchli chiqadi',purpose:'crawler',p:{chassis:{kind:'crawler',wb:313,track:250,clear:70,drive:'4wd',mat:'alu',body:'jeep'},motor:{type:'br',kv:1000,turns:35,d:36,len:50},gear:{pin:11,spur:56,int:9},wheel:{d:115,w:45,tire:'terrain'},esc:{a:40,cells:3,bec:7.4},servo:{tq:25},rx:{ch:4},bat:{chem:'lipo',cells:2,mah:3200,c:30}}},
+  onroad:{name:'1/10 shosse (touring)',desc:'Asfaltda yuqori tezlik',purpose:'race',p:{chassis:{kind:'onroad',wb:257,track:190,clear:6,drive:'4wd',mat:'carbon',body:'sedan'},motor:{type:'bl',kv:4500,turns:27,d:36,len:50},gear:{pin:28,spur:80,int:1.9},wheel:{d:64,w:26,tire:'slick'},esc:{a:120,cells:2,bec:6},servo:{tq:10},rx:{ch:3},bat:{chem:'lipo',cells:2,mah:5000,c:100}}}},
  steps:[
   {id:'chassis',t:'Shassi va osma',ic:'chassis',cats:['chassis'],slots:()=>['chassis'],intro:"Shassi — mashinaning asosi. Koleya (eni) qanchalik keng va og'irlik markazi past bo'lsa, burilishda shunchalik kam ag'dariladi."},
   {id:'drive',t:'Motor va uzatma',ic:'motor',cats:['motor','gear'],slots:()=>['mot1','gear'],intro:"Uzatma soni (spur/pinion × ichki) — tezlik va kuch o'rtasidagi tanlov. Uzun uzatma motorni qizdiradi."},
@@ -91,16 +91,19 @@ T.wiring=B=>{const p=B.p,bl=p.motor.type==='bl',boards=[],comps=[];
 T.wextra=B=>{const w=B.wires;if(B.p.motor.type==='br')return{motorReversed:w.ma==='M-'&&w.mb==='M+'};const o=[w.ma,w.mb,w.mc];if(o.some(x=>!x)||new Set(o).size<3)return{};const i=o.map(x=>'ABC'.indexOf(x));let n=0;for(let a=0;a<3;a++)for(let b=a+1;b<3;b++)if(i[a]>i[b])n++;return{motorReversed:n%2===1}};
 
 T.build=(B,D,ctx)=>{const p=B.p,ch=p.chassis,wh=p.wheel,c=B.col,u=v=>v/10,X=!!window.XRAY;
+ // kuzov balandligi ichidagi eng baland detalga (ESC ventilyatori ~3 sm) va g'ildirakka qarab tanlanadi
+ const BH={onroad:4.6,buggy:4.8,truck:5.6,crawler:6.2}[ch.kind];
  const R=u(wh.d)/2,W=u(wh.w),hx=u(ch.track)/2,hz=u(ch.wb)/2,plateY=Math.max(.6,u(ch.clear));
  const cm=mMat(ch.mat==='carbon'?'carbon':ch.mat==='alu'?'alu':'plastic',c.chassis,'satin'),dark=mPlastic('#232323',.55);
+ const Hl=Math.max(BH,R*1.15),towerY=Math.min(R+u(ch.clear)*.6+2.4,plateY+.4+Hl*.72);
  // shassi: asosiy plastina, oldi/orqa reduktor qutilari, pastki richaglar, amortizatorlar (spiral prujina), kardan vali
  {const g=new THREE.Group();g.add(rbox(u(ch.track)*.55,.35,u(ch.wb)*1.15,.8,cm,0,plateY,0));
   for(const sz of[-1,1]){g.add(rbox(u(ch.track)*.36,2.2,2.8,.4,dark,0,R,sz*hz));
-   const tower=rbox(u(ch.track)*.7,.4,1.2,.2,mMetal('#4a5058',.4),0,R+u(ch.clear)*.6+2.4,sz*(hz-1.6));g.add(tower);
+   const tower=rbox(u(ch.track)*.7,.4,1.2,.2,mMetal('#4a5058',.4),0,towerY,sz*(hz-1.6));g.add(tower);
    for(const sx of[-1,1]){const arm=new THREE.Group();arm.position.set(sx*u(ch.track)*.17,R-.5,sz*hz);
      const L=hx-u(ch.track)*.17-.6;arm.add(rbox(L,.45,2.6,.3,dark,sx*L/2,0,0));arm.add(cyl(.2,.2,3,mMetal('#b0b6bf'),sx*.2,0,0,10).rotateX(Math.PI/2));g.add(arm);
      g.add(rbox(1,1.6,1.6,.2,dark,sx*(hx-.9),R,sz*hz));
-     const sh=new THREE.Group(),bot=new V3(sx*(hx-1.6),R-.2,sz*(hz-1)),top=new V3(sx*u(ch.track)*.3,R+u(ch.clear)*.6+2.4,sz*(hz-1.6)),len=bot.distanceTo(top);
+     const sh=new THREE.Group(),bot=new V3(sx*(hx-1.6),R-.2,sz*(hz-1)),top=new V3(sx*u(ch.track)*.3,towerY,sz*(hz-1.6)),len=bot.distanceTo(top);
      sh.position.copy(bot);sh.quaternion.setFromUnitVectors(new V3(0,1,0),top.clone().sub(bot).normalize());
      sh.add(cyl(.6,.6,len*.55,mMetal('#9aa3ad',.25),0,len*.62,0,20));sh.add(cyl(.18,.18,len*.6,mMetal('#e0e4e8',.15),0,len*.3,0,10));
      sh.add(new THREE.Mesh(springGeo(.72,7,len*.62,.09),mPaint(c.spring,'gloss')).translateY(len*.12));sh.add(cyl(.35,.35,.5,mMetal('#666'),0,.2,0,10));g.add(sh)}}
@@ -127,19 +130,61 @@ T.build=(B,D,ctx)=>{const p=B.p,ch=p.chassis,wh=p.wheel,c=B.col,u=v=>v/10,X=!!wi
   for(let k=0;k<7;k++){const b=box(1,.05,.32,mPlastic('#263238'),ex,plateY+3.05,ez);b.rotation.y=k/7*Math.PI*2;g.add(b)}
   g.add(rbox(1.2,.8,.7,.15,mPlastic('#111'),ex+2.4,plateY+.8,ez-1.4));g.add(box(.3,.25,.4,mPlastic('#e53935'),ex+2.4,plateY+1.3,ez-1.4));ctx.add('esc',g,[3,5,0])}
  // rul servosi (standart 40×20×37 mm) va rul tortqichi
- {const g=new THREE.Group(),sv=mkServo('std','#1565c0');sv.position.set(u(ch.track)*.08,plateY+.2,-hz*.6);sv.rotation.y=Math.PI/2;g.add(sv);
-  g.add(wireMesh([[u(ch.track)*.08,plateY+4.2,-hz*.6-1.2],[hx*.4,R+.5,-hz+.4],[hx-1,R,-hz]],'#c0c4c9',.1));ctx.add('servo',g,[0,4,-2])}
+ {const g=new THREE.Group(),sv=mkServo('std','#1565c0'),sx=u(ch.track)*.08,sz=-hz*.55;sv.rotation.x=Math.PI/2;sv.position.set(sx,plateY+1.2,sz-1.85);g.add(sv);
+  // servo yotqizilgan (real 1/10 shassidagidek), shox oldinga qaragan; rul tortqichi g'ildirak tirgagigacha
+  g.add(wireMesh([[sx+1.3,plateY+1.2,sz-4.2],[hx*.45,R+.2,-hz+.6],[hx-1,R,-hz+.3]],'#c0c4c9',.1));g.add(wireMesh([[sx+1.3,plateY+1.2,sz-4.2],[-hx*.45,R+.2,-hz+.6],[-hx+1,R,-hz+.3]],'#c0c4c9',.1));ctx.add('servo',g,[0,4,-2])}
  ctx.add('rx',(()=>{const g=new THREE.Group(),x=-u(ch.track)*.12,y=plateY+.7,z=-hz*.35;g.add(rbox(2.6,1.2,3.4,.3,mPlastic('#202020',.4),x,y,z));for(let k=0;k<+p.rx.ch;k++)g.add(box(.25,.25,1.4,mPlastic('#111'),x-.8+k*.5,y+.7,z));
   g.add(cyl(.06,.06,8,mPlastic('#111'),x,y+4.5,z-1.2,6));g.add(cyl(.22,.22,1,mPlastic('#333'),x,y+.9,z-1.2,10));return g})(),[-2,5,0]);
  // batareya: qattiq korpusli LiPo (hardcase), shassi o'rtasida pastda
  {const g=mkBattery(p.bat.cells,p.bat.mah,p.bat.chem,c.bat,[`${p.bat.cells}S ${p.bat.mah}mAh`,`${p.bat.c}C hardcase`,`${fmt(D.Vn,1)} V`],{hard:true,awg:12,lead:3});g.position.set(u(ch.track)*.02,plateY+.2,-hz*.05);ctx.add('bat',g,[0,8,0])}
- // kuzov
- {const g=new THREE.Group(),bm=X?MAT('xrb'+c.body,()=>new THREE.MeshPhysicalMaterial({color:c.body,transparent:true,opacity:.2,depthWrite:false})):mPaint(c.body,B.fin),bm2=mPaint(c.body2,B.fin),by=plateY+.5,bwid=u(ch.track)*.82,blen=u(ch.wb)*1.25;
-  if(ch.kind==='truck'||ch.kind==='crawler'){g.add(rbox(bwid,3.5,blen*.45,1,bm,0,by+4,-blen*.22));g.add(rbox(bwid*.92,3.2,blen*.35,1,bm,0,by+7,blen*.02));g.add(rbox(bwid,2.8,blen*.4,.8,bm2,0,by+4.2,blen*.3));
-   for(const s of[-1,1])g.add(box(.1,2,blen*.2,mGlass(),s*bwid*.46,by+7.2,blen*.02));if(ch.kind==='crawler')for(const s of[-1,1])g.add(cyl(.2,.2,blen*.8,mMetal('#222'),s*bwid*.45,by+9,0).rotateX(Math.PI/2))}
-  else if(ch.kind==='buggy'){g.add(rbox(bwid*.7,2.6,blen*.8,1.2,bm,0,by+2.6,0));g.add(rbox(bwid*.4,1.8,blen*.25,.8,mGlass(),0,by+4.6,-blen*.05));g.add(box(bwid*1.05,.25,3,bm2,0,by+5.8,blen*.42));for(const s of[-1,1])g.add(box(.25,2.2,1.2,bm2,s*bwid*.4,by+4.6,blen*.42))}
-  else{g.add(rbox(bwid,2.2,blen,1.5,bm,0,by+2.2,0));g.add(rbox(bwid*.8,2,blen*.38,1.2,bm,0,by+4.2,blen*.02));g.add(box(bwid*.78,.1,blen*.2,mGlass(),0,by+5.25,-blen*.05));g.add(box(bwid*.95,.2,2.2,bm2,0,by+5.4,blen*.46))}
-  for(const s of[-1,1]){g.add(sph(.45,mGlow('#fff8e1'),s*bwid*.32,by+2.2,-blen*.5));g.add(sph(.4,mGlow('#ff1744'),s*bwid*.32,by+2.4,blen*.5))}
+ // kuzov: turi bo'yicha — jip / pikap (qutisimon, yumaloq qirrali panellar), buggy / sedan (silliq qobiq)
+ {const g=new THREE.Group(),bs=ch.body||'jeep',bm=X?MAT('xrb'+c.body,()=>new THREE.MeshPhysicalMaterial({color:c.body,transparent:true,opacity:.2,depthWrite:false})):mPaint(c.body,B.fin),bm2=mPaint(c.body2,B.fin),
+   gl=MAT('carglass',()=>new THREE.MeshPhysicalMaterial({color:'#0c1218',roughness:.05,metalness:.3,clearcoat:1,transparent:true,opacity:.85})),blk=mPlastic('#1b1d20',.7),chr=mMetal('#c9ced4',.2),
+   y0=plateY+.4,Wd=u(ch.track)*.84,L=u(ch.wb)*1.32,Z=f=>f*L;
+  if(bs==='jeep'||bs==='pickup'){
+   // proporsiyalar g'ildirakka bog'langan (real 1/10 crawler jiplar kabi): kuzov pastki qirrasi o'q balandligida,
+   // korpus ≈ 0,52·D, kabina ≈ 0,72·D — tom g'ildirak tepasidan ancha baland bo'ladi
+   const Dw=2*R,y0=Math.max(plateY+.4,R*.78),tub=Dw*.52,cabH=Dw*.72,zf=-L/2,hoodL=L*.31,ws=zf+hoodL+L*.02,cabEnd=bs==='pickup'?ws+L*.3:L/2-L*.05,cabL=cabEnd-ws,roofY=y0+tub+cabH,cw=Wd*.88,top=mPlastic('#1d2024',.55);
+   // korpus va kapot
+   g.add(box(Wd,tub,L*.96,bm,0,y0+tub/2,0));
+   g.add(box(Wd*.9,Dw*.07,hoodL,bm,0,y0+tub+Dw*.03,zf+hoodL/2+L*.02));
+   g.add(box(Wd*.55,Dw*.035,hoodL*.78,bm,0,y0+tub+Dw*.075,zf+hoodL/2+L*.03));
+   for(const sx of[-1,1]){g.add(box(.5,.25,.9,blk,sx*Wd*.32,y0+tub+Dw*.08,ws-.6));g.add(box(.3,.18,1.4,mPlastic('#111',.5),sx*(Wd*.5+.02),y0+tub*.82,ws+cabL*.3))}
+   // panjara (7 ta tirqish), dumaloq faralar, burilish chiroqlari
+   g.add(box(Wd*.84,tub*.66,.3,blk,0,y0+tub*.6,zf+.02));for(let k=-3;k<=3;k++)g.add(box(Wd*.055,tub*.48,.14,mPlastic('#050505',.5),k*Wd*.1,y0+tub*.62,zf-.08));
+   for(const sx of[-1,1]){const hl=cyl(tub*.16,tub*.16,.32,chr,sx*Wd*.37,y0+tub*.64,zf-.02,32);hl.rotation.x=Math.PI/2;g.add(hl);const ln=cyl(tub*.125,tub*.125,.06,mGlow('#fffbe6'),sx*Wd*.37,y0+tub*.64,zf-.2,28);ln.rotation.x=Math.PI/2;g.add(ln);
+    g.add(box(Wd*.08,tub*.08,.1,mGlow('#ff9800'),sx*Wd*.37,y0+tub*.36,zf-.1))}
+   // old oyna: biroz orqaga og'gan ramka, shisha, ikki artgich
+   const wf=new THREE.Group();wf.position.set(0,y0+tub+Dw*.06,ws);wf.rotation.x=-.18;wf.add(box(Wd*.9,cabH*.92,.24,bm,0,cabH*.46,0));wf.add(box(Wd*.8,cabH*.76,.06,gl,0,cabH*.48,-.13));
+   for(const sx of[-.22,.22])wf.add(box(Wd*.3,.06,.06,mPlastic('#0a0a0a',.4),sx*Wd,cabH*.14,-.2));g.add(wf);
+   // kabina: qora qattiq tom (hardtop), ozgina toraygan yon devorlar, eshik va orqa oynalar, eshik tutqichlari
+   for(const sx of[-1,1]){const side=box(.18,cabH,cabL,top,sx*cw*.5,y0+tub+cabH/2,ws+cabL/2);side.rotation.z=-sx*.05;g.add(side);
+    g.add(box(.06,cabH*.55,cabL*.4,gl,sx*(cw*.5+.05),y0+tub+cabH*.58,ws+cabL*.27));g.add(box(.06,cabH*.55,cabL*.38,gl,sx*(cw*.5+.05),y0+tub+cabH*.58,ws+cabL*.73));
+    g.add(box(.06,tub*.78,.06,mPlastic('#000',.6),sx*(Wd*.5+.01),y0+tub*.52,ws+cabL*.5));g.add(box(.1,.12,.5,chr,sx*(Wd*.5+.04),y0+tub*.78,ws+cabL*.42));
+    g.add(box(.55,.5,.28,blk,sx*(Wd*.5+.35),y0+tub+cabH*.5,ws+.3))}
+   g.add(box(cw*.96,.34,cabL+.3,top,0,roofY,ws+cabL/2));
+   // tom bagajnigi va LED chiroq paneli
+   for(const sx of[-1,1])g.add(box(.18,.18,cabL*.85,mMetal('#2a2d31',.4),sx*cw*.42,roofY+.45,ws+cabL/2));for(let k=0;k<4;k++)g.add(box(cw*.86,.12,.15,mMetal('#2a2d31',.4),0,roofY+.45,ws+cabL*(.12+k*.25)));
+   g.add(box(cw*.8,.5,.45,blk,0,roofY+.75,ws+.3));g.add(box(cw*.74,.32,.06,mGlow('#fff7d6'),0,roofY+.75,ws+.06));
+   // havo quvuri (snorkel) o'ng old qanot yonidan tom tomonga
+   if(bs==='jeep'){const sn=wireMesh([[Wd*.52,y0+tub*.8,ws-hoodL*.35],[Wd*.56,y0+tub+.4,ws-.2],[Wd*.5,roofY-.2,ws+.25]],'#141414',.32);g.add(sn);g.add(box(.7,.6,.8,mPlastic('#141414',.5),Wd*.5,roofY+.1,ws+.45))}
+   if(bs==='pickup'){const bedL=L/2-cabEnd-.2;for(const sx of[-1,1])g.add(box(.2,Dw*.3,bedL,bm,sx*Wd*.45,y0+tub+Dw*.15,cabEnd+bedL/2+.1));g.add(box(Wd*.9,Dw*.3,.2,bm,0,y0+tub+Dw*.15,L/2-.2));
+    g.add(box(Wd*.86,.1,bedL,blk,0,y0+tub+.06,cabEnd+bedL/2+.1));for(const sx of[-1,1])g.add(cyl(.14,.14,cabH*.9,mMetal('#222'),sx*Wd*.38,y0+tub+cabH*.45,cabEnd+.5,10))}
+   else{const sp=mkWheel(wh.d*.9,wh.w*.85,wh.tire,c.rim,c.tire);sp.rotation.y=Math.PI/2;sp.position.set(0,y0+tub*.62,L/2+u(wh.w)*.45);g.add(sp);g.add(box(.4,.4,.6,mMetal('#333'),0,y0+tub*.62,L/2+.2))}
+   // bamperlar, tortish ilgaklari, ostona himoyasi (rock slider), qanot kengaytmalari
+   g.add(box(Wd*1.06,tub*.26,.8,blk,0,y0+tub*.16,zf-.3));g.add(box(Wd*1.02,tub*.26,.7,blk,0,y0+tub*.16,L/2+.25));
+   for(const sx of[-1,1]){const th=new THREE.Mesh(GEO('towhook',()=>new THREE.TorusGeometry(.35,.1,8,16)),mPaint('#c62828','gloss'));th.position.set(sx*Wd*.3,y0+tub*.16,zf-.8);th.castShadow=true;g.add(th);
+    g.add(box(.45,.45,L*.46,mMetal('#26292d',.45),sx*(Wd*.5+.15),y0-.05,ws+cabL*.35))}
+   for(const sz of[-1,1])for(const sx of[-1,1]){const fl=new THREE.Mesh(GEO(`flare${R.toFixed(1)},${W.toFixed(1)}`,()=>new THREE.TorusGeometry(R*1.1,W*.2,8,28,Math.PI)),blk);fl.scale.set(1,1,1.9);fl.rotation.y=Math.PI/2;fl.position.set(sx*(hx+W/2-.3),R,sz*hz);fl.castShadow=true;g.add(fl)}
+   for(const sx of[-1,1]){g.add(box(Wd*.1,tub*.22,.12,mGlow('#b71c1c'),sx*Wd*.42,y0+tub*.62,L/2+.02));g.add(box(Wd*.1,tub*.08,.12,mPlastic('#f0f0f0',.3),sx*Wd*.42,y0+tub*.46,L/2+.02))}}
+  else{const Hl=Math.max(3,R*1.15),S={sedan:{lo:[[-.5,.8,.42],[-.47,.93,.68],[-.38,.99,.8],[-.1,1,.88],[.2,1,.9],[.42,.98,.86],[.49,.9,.7],[.5,.8,.48]],gh:[-.17,.31],ghH:.62,wing:[.47,.9]},
+    buggy:{lo:[[-.5,.55,.36],[-.42,.72,.55],[-.22,.88,.75],[0,.94,.9],[.25,.95,.92],[.44,.88,.75],[.5,.72,.5]],gh:[-.12,.18],ghH:.6,wing:[.44,1.05]}}[bs];
+   g.add(loft(S.lo.map(([z,w,h])=>[Z(z),Wd*w,Hl*h,y0+Hl*h/2]),bm,3.2));
+   const top=Math.max(...S.lo.filter(r=>r[0]>=S.gh[0]&&r[0]<=S.gh[1]).map(r=>r[2]).concat([S.lo[2][2]]))*Hl,gb=y0+top-.2,gH=Hl*S.ghH,gz=t=>Z(S.gh[0]+(S.gh[1]-S.gh[0])*t);
+   g.add(loft([[gz(0),Wd*.84,gH*.05,gb],[gz(.18),Wd*.8,gH*.85,gb+gH*.42],[gz(.8),Wd*.76,gH*.88,gb+gH*.44],[gz(1),Wd*.7,gH*.06,gb+.02]],gl,3));
+   g.add(loft([[gz(.2),Wd*.74,.18,gb+gH*.86],[gz(.3),Wd*.78,.24,gb+gH*.9],[gz(.75),Wd*.74,.24,gb+gH*.9],[gz(.82),Wd*.7,.18,gb+gH*.84]],bm,3));
+   g.add(box(Wd*S.wing[1],.22,2.6,bm2,0,y0+Hl*.9+1.4,Z(S.wing[0])));for(const s2 of[-1,1])g.add(box(.2,1.5,1.4,bm2,s2*Wd*.36,y0+Hl*.82+.7,Z(S.wing[0])));
+   for(const s2 of[-1,1]){g.add(box(Wd*.16,Hl*.12,.15,mPlastic('#f5f0d0',.2),s2*Wd*.3,y0+Hl*.5,Z(-.5)+.12));g.add(box(Wd*.14,Hl*.1,.15,mGlow('#b71c1c'),s2*Wd*.32,y0+Hl*.55,Z(.5)-.12))}}
   ctx.add('body',g,[0,12,0])}};
 
 T.bom=(B,D)=>{const p=B.p;return[

@@ -5,6 +5,7 @@ from api import views
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('konstruktor/img/<str:name>', views.image, name='image'),
     path('konstruktor/<str:name>', views.asset, name='asset'),
     path('lib/three.js', views.three_js, name='three-js'),
     path('admin/', admin.site.urls),

@@ -23,6 +23,8 @@ from .models import PROJECT_TYPES, AuthToken, Build
 
 USER_RE = re.compile(r'^[A-Za-z0-9_.-]{3,24}$')
 ASSET_RE = re.compile(r'^[a-z_]+\.js$')
+IMG_RE = re.compile(r'^[a-z0-9-]+\.(png|jpg|webp)$')
+IMG_TYPES = {'png': 'image/png', 'jpg': 'image/jpeg', 'webp': 'image/webp'}
 TYPES = {k for k, _ in PROJECT_TYPES}
 THUMB_PREFIXES = ('data:image/jpeg;base64,', 'data:image/png;base64,')
 LOGIN_FAIL_LIMIT = 10      # 10 daqiqada shuncha xato urinishdan keyin bloklanadi
@@ -82,6 +84,16 @@ def asset(request, name):
     if not path.is_file():
         raise Http404
     return FileResponse(open(path, 'rb'), content_type='application/javascript; charset=utf-8')
+
+
+def image(request, name):
+    m = IMG_RE.match(name)
+    if not m:
+        raise Http404
+    path = settings.SITE_DIR / 'konstruktor' / 'img' / name
+    if not path.is_file():
+        raise Http404
+    return FileResponse(open(path, 'rb'), content_type=IMG_TYPES[m.group(1)])
 
 
 def three_js(request):

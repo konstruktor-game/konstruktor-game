@@ -11,7 +11,7 @@ const NOM={lipo:3.7,lihv:3.8,liion:3.6,life:3.2},DENS={lipo:.026,lihv:.025,liion
 const CL={clarky:1.25,semi:1.1,sym:.95,flat:.85},LDF={clarky:1,semi:.95,sym:.85,flat:.75},AREAL={foam:.06,balsa:.05,carbon:.045},STR={foam:.6,balsa:.8,carbon:1};
 const T={id:'plane',name:'Qanotli samolyot',ic:'plane',desc:"Radio boshqariladigan samolyot: trener, planer, tezyurar.",defPreset:'trainer',defPurpose:'trainer',
  purposes:{trainer:{t:'Boshlovchi (trener)',twr:[.5,.9],note:'Sekin va barqaror uchish'},sport:{t:'Sport / akrobatika',twr:[.8,1.4],note:"Kuchli dvigatel, o'rtacha qanot yuklamasi"},glider:{t:'Motorli planer',twr:[.35,.7],note:'Uzun qanot, past yuklama, uzoq parvoz'},fpv:{t:'FPV / uzoq masofa',twr:[.5,.9],note:'Samaradorlik va barqarorlik'}},
- colors:{fuse:'#f5f5f5',wing:'#f5f5f5',tail:'#f5f5f5',accent:'#e53935',motor:'#333333',prop:'#202020',canopy:'#1a237e',bat:'#2e7d32'},
+ colors:{fuse:'#eceff2',wing:'#eceff2',tail:'#eceff2',accent:'#b8402f',motor:'#30343a',prop:'#1e1e1e',canopy:'#1b2a3a',bat:'#2e7d32'},
  paint:[['fuse','Fuzelyaj'],['wing','Qanot'],['tail','Dum'],['accent','Boshqaruv yuzalari'],['canopy','Kabina'],['motor','Motor'],['prop','Parrak'],['bat','Batareya']],
  spec:{
   fuse:{t:'Fuzelyaj',ic:'plane',g:'fuse',f:[{k:'len',l:'Uzunligi',min:40,max:200,step:1,u:'sm'},{k:'w',l:'Kengligi',min:4,max:20,step:.5,u:'sm'},{k:'mount',l:'Motor joyi',type:'sel',o:{tractor:'Oldinda (tortuvchi)',pusher:'Orqada (itaruvchi)'}},{k:'mat',l:'Material',type:'sel',o:{foam:'Ko\'pik (EPO/EPP)',balsa:'Balza yog\'och',carbon:'Kompozit/karbon'},g:'material'}]},
@@ -107,9 +107,12 @@ T.build=(B,D,ctx)=>{const p=B.p,fu=p.fuse,w=p.wing,c=B.col,X=!!window.XRAY;
  const shell=(col)=>X?MAT('xr'+col,()=>new THREE.MeshPhysicalMaterial({color:col,transparent:true,opacity:.22,roughness:.3,depthWrite:false})):mMat(fu.mat==='carbon'?'paint':fu.mat==='balsa'?'wood':'paint',col,fu.mat==='foam'?'matte':B.fin);
  const z0=-fu.len/2,zAt=x=>z0+x,fh=fu.w*1.15,baseY=fh/2+6,acc=mPaint(c.accent,B.fin),white=mPlastic('#f5f5f5',.45);
  // fuzelyaj, kabina, 3 mm po'lat simli shassi va ko'pik g'ildiraklar
- {const g=new THREE.Group(),front=fu.len*.62;g.add(rbox(fu.w,fh,front,fu.w*.35,shell(c.fuse),0,baseY,zAt(front/2)));
-  const boom=cyl(fu.w*.22,fu.w*.38,fu.len-front,shell(c.fuse),0,baseY+fh*.15,zAt(front+(fu.len-front)/2),16);boom.rotation.x=Math.PI/2;g.add(boom);
-  const can=sph(fu.w*.48,mPaint(c.canopy,'gloss'),0,baseY+fh/2,zAt(fu.len*w.pos/100-fu.w*.6));can.scale.set(.9,.55,2.4);g.add(can);
+ {const g=new THREE.Group();
+  // fuzelyaj: burundan dumgacha silliq kesimlar (burun yumaloq, eng keng joyi qanot oldida, dum tomon ingichkalashadi)
+  g.add(loft([[0,.25,.28,0],[.015,.6,.62,0],[.05,.88,.9,0],[.13,1,1,0],[.34,1,1,0],[.52,.78,.74,.07],[.72,.46,.46,.15],[.9,.28,.3,.19],[1,.16,.2,.2]].map(([t,ww,hh,yo])=>[zAt(t*fu.len),fu.w*ww,fh*hh,baseY+yo*fh]),shell(c.fuse),2.7));
+  // kabina: shaffof qopqoq, fuzelyaj ustida qanot oldida
+  const LEc=fu.len*w.pos/100,cz=t=>zAt(LEc-fu.len*.17+t*fu.len*.19);
+  g.add(loft([[cz(0),fu.w*.3,fh*.06,baseY+fh*.47],[cz(.25),fu.w*.74,fh*.5,baseY+fh*.52],[cz(.65),fu.w*.8,fh*.56,baseY+fh*.52],[cz(1),fu.w*.6,fh*.1,baseY+fh*.48]],MAT('canopy'+c.canopy,()=>new THREE.MeshPhysicalMaterial({color:c.canopy,roughness:.04,metalness:.2,clearcoat:1,transparent:true,opacity:.62,depthWrite:false})),2.2));
   const gz=zAt(fu.len*w.pos/100-2),gy=baseY-fh/2;
   for(const s of[-1,1]){g.add(wireMesh([[s*fu.w*.3,gy,gz],[s*fu.w*.9,gy-2.5,gz-.5],[s*fu.w*1.5,2.75,gz-.8]],'#b0b6bf',.15));const wh=mkWheel(55,18,'slick','#e0e0e0','#2b2b2b');wh.position.set(s*(fu.w*1.5+.9),2.75,gz-.8);g.add(wh)}
   g.add(wireMesh([[0,gy+fh*.3,zAt(fu.len-6)],[0,baseY-fh/2-1.2,zAt(fu.len-4)]],'#b0b6bf',.08));const tw=mkWheel(25,8,'slick','#e0e0e0','#2b2b2b');tw.position.set(0,1.25+.2,zAt(fu.len-3.6));g.add(tw);
@@ -118,16 +121,17 @@ T.build=(B,D,ctx)=>{const p=B.p,fu=p.fuse,w=p.wing,c=B.col,X=!!window.XRAY;
  // qanot: haqiqiy profil (NACA qalinlik taqsimoti) bilan, eleronlar, boshqaruv shoxchalari va sharnirlar
  {const g=new THREE.Group(),half=w.span/2;const shp=foilShape(w.chord,thick,w.foil),geo=GEO(`wing${w.chord},${thick},${half},${w.foil}`,()=>new THREE.ExtrudeGeometry(shp,{depth:half,bevelEnabled:false,curveSegments:16}));
   for(const s of[-1,1]){const h=new THREE.Group();h.position.set(0,wy,LEz);h.rotation.z=s*w.dih*DEG;const mg=new THREE.Group();if(s>0)mg.scale.x=-1;const m=mesh(geo,shell(c.wing));m.rotation.y=-Math.PI/2;mg.add(m);h.add(mg);
-   h.add(box(half*.42,thick*.32,w.chord*.22,acc,s*half*.72,thick*.12,w.chord*.89));
+   h.add(box(half*.42,Math.max(.12,thick*.16),w.chord*.2,acc,s*half*.72,thick*.08,w.chord*.9));h.add(box(half*.42,.03,.06,mPlastic('#2a2a2a',.6),s*half*.72,thick*.14,w.chord*.8));
    for(const k of[.55,.72,.89])h.add(box(.8,.05,.6,white,s*half*k,thick*.3,w.chord*.78));
    h.add(box(.08,.9,.7,white,s*half*.62,thick*.5,w.chord*.83));g.add(h)}
   ctx.add('wing',g,[0,10,0])}
  // dum: stabilizator, kil, balandlik va yo'nalish rullari, shoxchalar
  const St=D.St,cT=Math.sqrt(St/3.2),sT=St/cT,ty=baseY+fh*.15,tz=zAt(fu.len-cT*.6);
  {const g=new THREE.Group();
-  if(p.tail.type==='conv'){g.add(rbox(sT,.5,cT,cT*.2,shell(c.tail),0,ty,tz));g.add(box(sT*.9,.45,cT*.3,acc,0,ty,tz+cT*.55));g.add(box(.08,.9,.7,white,.8,ty-.5,tz+cT*.45));
-   g.add(rbox(.5,cT*1.1,cT,cT*.15,shell(c.tail),0,ty+cT*.55,tz));g.add(box(.45,cT*.9,cT*.3,acc,0,ty+cT*.55,tz+cT*.6));g.add(box(.9,.08,.7,white,.5,ty+cT*.3,tz+cT*.5))}
-  else for(const s of[-1,1]){const v=new THREE.Group();v.position.set(0,ty,tz);v.rotation.z=s*(Math.PI/2-35*DEG);v.add(rbox(.5,sT*.62,cT,cT*.15,shell(c.tail),0,sT*.31,0));v.add(box(.45,sT*.5,cT*.3,acc,0,sT*.3,cT*.55));g.add(v)}
+  // stabilizator va kil — simmetrik profilli (9%) yuzalar; harakatlanuvchi qismlari (rul) boshqa rangda
+  if(p.tail.type==='conv'){const hs=foilSurface(sT,cT*.72,shell(c.tail));hs.position.set(0,ty,tz-cT*.14);g.add(hs);g.add(box(sT*.92,.14,cT*.28,acc,0,ty,tz+cT*.37));g.add(box(.08,.9,.7,white,.8,ty-.5,tz+cT*.4));
+   const fin=foilSurface(cT*1.1,cT*.75,shell(c.tail));fin.rotation.z=Math.PI/2;fin.position.set(0,ty+cT*.55,tz-cT*.12);g.add(fin);g.add(box(.14,cT*.95,cT*.26,acc,0,ty+cT*.55,tz+cT*.38));g.add(box(.9,.08,.7,white,.5,ty+cT*.3,tz+cT*.45))}
+  else for(const s of[-1,1]){const v=new THREE.Group();v.position.set(0,ty,tz);v.rotation.z=s*(Math.PI/2-35*DEG);const f=foilSurface(sT*.62,cT*.74,shell(c.tail));f.rotation.z=Math.PI/2;f.position.set(0,sT*.31,-cT*.13);v.add(f);v.add(box(.14,sT*.5,cT*.26,acc,0,sT*.3,cT*.38));g.add(v)}
   ctx.add('tail',g,[0,6,8])}
  // motor: fanera firewall'ga X-mount bilan; parrak haqiqiy buralishli
  const tr=fu.mount==='tractor',mot=mkMotor(p.motor.d,p.motor.h,c.motor),mTop=mot.userData.top,my=tr?baseY:wy+mot.userData.R+1.4,mz=tr?zAt(-.2):zAt(D.LE+w.chord+2.5);
@@ -152,7 +156,7 @@ T.build=(B,D,ctx)=>{const p=B.p,fu=p.fuse,w=p.wing,c=B.col,X=!!window.XRAY;
  {const g=mkBattery(p.bat.cells,p.bat.mah,p.bat.chem,c.bat,[`${p.bat.cells}S ${p.bat.mah}mAh`,`${p.bat.c}C ${CHEM[p.bat.chem]}`,`${fmt(D.Vn,1)} V`],{awg:14,lead:3});const d=g.userData.dims;g.position.set(0,baseY-fh/2+.25,zAt(p.bat.pos));
   const k=Math.min(1,fu.w*.85/d.w,fh*.75/d.h);if(k<1)g.scale.set(k,k,1);ctx.add('bat',g,[0,9,0])}
  // og'irlik markazi ko'rsatkichi
- if(ctx.inst('wing')){const cgz=zAt(D.CG),okA=zAt(D.LE+w.chord*.25),okB=zAt(D.LE+w.chord*.33);
+ if(ctx.inst('wing')&&(ctx.step==='battery'||ctx.step==='check')){const cgz=zAt(D.CG),okA=zAt(D.LE+w.chord*.25),okB=zAt(D.LE+w.chord*.33);
   const band=box(w.span*.16,.05,okB-okA,mGlow('#2ecc71'),0,wy+thick+.1,(okA+okB)/2);band.material=MAT('cgband',()=>new THREE.MeshBasicMaterial({color:'#2ecc71',transparent:true,opacity:.45,depthWrite:false}));band.userData.label='cg';ctx.deco(band);
   const ok=D.cgPct>=22&&D.cgPct<=34,cone=new THREE.Mesh(new THREE.ConeGeometry(1.2,3,16),mGlow(ok?'#2ecc71':'#ff5252'));cone.rotation.x=Math.PI;cone.position.set(0,wy+thick+3.5,cgz);cone.userData.label='cg';cone.userData.dispose=true;ctx.deco(cone)}};
 function foilShape(c,t,k){const s=new THREE.Shape(),N=18;const yt=x=>5*t*(.2969*Math.sqrt(x)-.126*x-.3516*x*x+.2843*x*x*x-.1036*x*x*x*x);const cam=k==='clarky'?.04:k==='semi'?.02:0;

@@ -36,7 +36,7 @@ function humSet(on,f=0){if(!AC)return;if(!hum){const o=AC.createOscillator(),o2=
 // ---------------- renderer ----------------
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',preserveDrawingBuffer:true});
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.AgXToneMapping!==undefined?THREE.AgXToneMapping:THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;renderer.outputColorSpace=THREE.SRGBColorSpace;
 const MAXANI=renderer.capabilities.getMaxAnisotropy();
 let dynScale=1,simCam=null;
 function resize(){const el=$('view');if(!el)return;const w=Math.max(1,el.clientWidth),h=Math.max(1,el.clientHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,2)*dynScale);renderer.setSize(w,h,false);
@@ -56,7 +56,7 @@ function pcbTex(base,label){return ctex('pcb'+base+label,256,256,(g,w,h)=>{g.fil
  g.fillStyle='rgba(255,255,255,.85)';g.font='bold 18px monospace';g.fillText(label,14,h-16);g.font='10px monospace';g.fillText('REV 2.1',w-60,18);
  g.strokeStyle='rgba(255,255,255,.5)';g.lineWidth=1;g.strokeRect(8,8,w-16,h-16)})}
 // ustaxona gilami (o'lchov to'ri, 1 katak = 1 sm)
-const matTex=ctex('mat',512,512,(g,w,h)=>{g.fillStyle='#1c4f43';g.fillRect(0,0,w,h);
+const matTex=ctex('mat',512,512,(g,w,h)=>{g.fillStyle='#22332f';g.fillRect(0,0,w,h);
  for(let i=0;i<=w;i+=16){g.strokeStyle=i%80===0?'rgba(255,255,255,.28)':'rgba(255,255,255,.1)';g.lineWidth=i%80===0?1.5:1;g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.moveTo(0,i);g.lineTo(w,i);g.stroke()}
  for(let i=0;i<4000;i++){g.fillStyle=`rgba(0,0,0,${rnd(0,.06)})`;g.fillRect(rnd(0,w),rnd(0,h),2,2)}});
 function wrapTex(col,lines){return ctex('wrap'+col+lines.join('|'),256,128,(g,w,h)=>{g.fillStyle=col;g.fillRect(0,0,w,h);const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(255,255,255,.18)');gr.addColorStop(.5,'rgba(255,255,255,0)');gr.addColorStop(1,'rgba(0,0,0,.25)');g.fillStyle=gr;g.fillRect(0,0,w,h);
@@ -67,12 +67,17 @@ function wrapTex(col,lines){return ctex('wrap'+col+lines.join('|'),256,128,(g,w,
 const matCache={};
 const MAT=(k,f)=>matCache[k]||(matCache[k]=f());
 // sirt turi: yaltiroq / mat / metall / atlas — rang tanlashda ishlatiladi
-const FIN={gloss:{r:.32,m:.05,cc:.8},matte:{r:.75,m:0,cc:0},metal:{r:.3,m:.85,cc:.2},satin:{r:.5,m:.1,cc:.35}};
+const FIN={gloss:{r:.38,m:.12,cc:1},matte:{r:.78,m:0,cc:0},metal:{r:.32,m:.75,cc:.35},satin:{r:.55,m:.08,cc:.3}};
 function mPaint(col,fin='gloss'){const f=FIN[fin]||FIN.gloss;return MAT('p'+col+fin,()=>new THREE.MeshPhysicalMaterial({color:col,roughness:f.r,metalness:f.m,clearcoat:f.cc,clearcoatRoughness:.25}))}
 function mCarbon(tint='#ffffff'){return MAT('cf'+tint,()=>new THREE.MeshPhysicalMaterial({map:carbonTex,color:tint,roughness:.42,metalness:.15,clearcoat:.9,clearcoatRoughness:.18}))}
-const mMetal=(col='#b0b6bf',r=.28)=>MAT('m'+col+r,()=>new THREE.MeshStandardMaterial({color:col,roughness:r,metalness:.95}));
-const mPlastic=(col,r=.55)=>MAT('pl'+col+r,()=>new THREE.MeshStandardMaterial({color:col,roughness:r,metalness:0}));
-const mRubber=(col='#151515')=>MAT('rb'+col,()=>new THREE.MeshStandardMaterial({color:col,roughness:.92,metalness:0}));
+// mayda shovqin teksturasi: yuzalar bir tekis "o'yinchoq" bo'lib ko'rinmasligi uchun (g'adir-budurlik va bo'rtiq xaritasi)
+const noiseTex=ctex('noise',256,256,(g,w,h)=>{const d=g.createImageData(w,h);for(let i=0;i<d.data.length;i+=4){const v=200+Math.random()*55;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255}g.putImageData(d,0,0)},[3,3]);
+noiseTex.colorSpace=THREE.NoColorSpace;
+const brushTex=ctex('brush',256,256,(g,w,h)=>{g.fillStyle='#bdbdbd';g.fillRect(0,0,w,h);for(let i=0;i<900;i++){g.fillStyle=`rgba(${Math.random()<.5?255:120},${Math.random()<.5?255:120},${Math.random()<.5?255:120},.18)`;g.fillRect(0,Math.random()*h,w,Math.random()*1.4)}},[2,2]);
+brushTex.colorSpace=THREE.NoColorSpace;
+const mMetal=(col='#b0b6bf',r=.28)=>MAT('m'+col+r,()=>new THREE.MeshPhysicalMaterial({color:col,roughness:r+.06,roughnessMap:brushTex,metalness:.92,anisotropy:.55,clearcoat:.05}));
+const mPlastic=(col,r=.55)=>MAT('pl'+col+r,()=>new THREE.MeshStandardMaterial({color:col,roughness:Math.min(1,r+.08),roughnessMap:noiseTex,bumpMap:noiseTex,bumpScale:.25,metalness:0}));
+const mRubber=(col='#151515')=>MAT('rb'+col,()=>new THREE.MeshStandardMaterial({color:col,roughness:.95,roughnessMap:noiseTex,bumpMap:noiseTex,bumpScale:.6,metalness:0}));
 const mCopper=()=>MAT('cu',()=>new THREE.MeshStandardMaterial({color:'#c97a3a',roughness:.35,metalness:1}));
 const mGold=()=>MAT('au',()=>new THREE.MeshStandardMaterial({color:'#e0b050',roughness:.3,metalness:1}));
 const mPCB=(base,label)=>MAT('pcbm'+base+label,()=>new THREE.MeshStandardMaterial({map:pcbTex(base,label),roughness:.45,metalness:.2}));
@@ -83,7 +88,15 @@ function mMat(kind,col,fin){if(kind==='carbon')return mCarbon(col);if(kind==='al
 // ---------------- geometriya yordamchilari ----------------
 const geoCache={};const GEO=(k,f)=>geoCache[k]||(geoCache[k]=f());
 function mesh(geo,mat,x=0,y=0,z=0){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;return m}
-const box=(w,h,d,mat,x,y,z)=>mesh(GEO(`b${w},${h},${d}`,()=>new THREE.BoxGeometry(w,h,d)),mat,x,y,z);
+// Yumaloq qirrali quti: qirralar atrofida qo'shimcha nuqtalar to'planadi va r radiusli chorak aylanaga
+// "o'raladi"; normallar analitik hisoblanadi (yorug'lik qirralarda yumshoq akslanadi).
+function roundedBoxGeo(w,h,d,r){const N=10,K=3,g=new THREE.BoxGeometry(1,1,1,N,N,N),P=g.attributes.position,Nm=g.attributes.normal,hs=[w/2,h/2,d/2],inner=hs.map(v=>v-r),edge=1-2*K/N;
+ const map=(s,i)=>{const a=Math.abs(s*2),sg=Math.sign(s);return sg*(a<=edge?a/edge*inner[i]:inner[i]+(a-edge)/(1-edge)*r)};
+ const v=new V3(),c=new V3(),n=new V3();
+ for(let i=0;i<P.count;i++){v.set(map(P.getX(i),0),map(P.getY(i),1),map(P.getZ(i),2));c.set(clamp(v.x,-inner[0],inner[0]),clamp(v.y,-inner[1],inner[1]),clamp(v.z,-inner[2],inner[2]));n.subVectors(v,c);const L=n.length();
+  if(L>1e-6){n.multiplyScalar(1/L);v.copy(c).addScaledVector(n,r);Nm.setXYZ(i,n.x,n.y,n.z)}P.setXYZ(i,v.x,v.y,v.z)}
+ return g}
+const box=(w,h,d,mat,x,y,z)=>{const m=Math.min(w,h,d),r=Math.min(.14,m*.22);return mesh(GEO(`b${w},${h},${d}`,()=>r<.012?new THREE.BoxGeometry(w,h,d):roundedBoxGeo(w,h,d,r)),mat,x,y,z)};
 const cyl=(rt,rb,h,mat,x,y,z,seg=24)=>mesh(GEO(`c${rt},${rb},${h},${seg}`,()=>new THREE.CylinderGeometry(rt,rb,h,seg)),mat,x,y,z);
 const sph=(r,mat,x,y,z)=>mesh(GEO('s'+r,()=>new THREE.SphereGeometry(r,20,14)),mat,x,y,z);
 // yumaloq burchakli quti (plastinalar va korpuslar realistik ko'rinishi uchun)
@@ -114,7 +127,11 @@ matTex.repeat.set(50,50);
 const orb={th:.7,ph:1.0,r:60,tr:60,tg:new V3(0,4,0),auto:true,idle:0};
 function camUpdate(dt){if(orb.auto&&orb.idle>6)orb.th+=dt*.1;orb.idle+=dt;orb.r+=(orb.tr-orb.r)*Math.min(1,dt*6);
  camera.position.set(orb.tg.x+orb.r*Math.sin(orb.ph)*Math.cos(orb.th),orb.tg.y+orb.r*Math.cos(orb.ph),orb.tg.z+orb.r*Math.sin(orb.ph)*Math.sin(orb.th));camera.lookAt(orb.tg)}
+const contactTex=ctex('contact',128,128,(g,w,h)=>{const r=g.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2);r.addColorStop(0,'rgba(0,0,0,.75)');r.addColorStop(.55,'rgba(0,0,0,.3)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,w,h)});
+const contact=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:contactTex,transparent:true,depthWrite:false,opacity:.8}));contact.rotation.x=-Math.PI/2;contact.position.y=.03;contact.renderOrder=1;
 function fitCamera(size){orb.tr=clamp(size*1.9+12,28,900);orb.tg.set(0,Math.min(size*.1,14),0)}
+// soya kamerasi modelga moslanadi: kichik dronda ham soyalar aniq bo'ladi
+function fitLights(size){const s=Math.max(20,size*.85);Object.assign(key.shadow.camera,{left:-s,right:s,top:s,bottom:-s});key.shadow.camera.updateProjectionMatrix();key.shadow.mapSize.set(4096,4096);if(key.shadow.map){key.shadow.map.dispose();key.shadow.map=null}}
 const ptrs=new Map();let pinch0=0,downAt=null;
 function bindOrbit(el,onPick,onHover){
  el.addEventListener('pointerdown',e=>{el.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);downAt=[e.clientX,e.clientY,performance.now()];orb.idle=0;
@@ -161,6 +178,7 @@ function buildModel(B,activeSlots,step){
  T.build(B,D,ctx);
  scene.add(model);
  const bb=new THREE.Box3().setFromObject(model),sz=bb.isEmpty()?new V3(20,10,20):bb.getSize(new V3());model.userData.size=Math.max(sz.x,sz.z,sz.y*1.5,12);
+ contact.scale.set(Math.max(sz.x,8)*1.35,Math.max(sz.z,8)*1.35,1);if(!contact.parent)scene.add(contact);if(Math.abs((model.userData.lastFit||0)-model.userData.size)>2){model.userData.lastFit=model.userData.size;fitLights(model.userData.size)}
  return{model,D}}
 function animateDrop(slot){const o=modelObjs[slot];if(!o)return;dropAnim.push({o,t:0,from:o.userData.base.y+Math.max(6,(model.userData.size||20)*.25)})}
 function modelTick(dt,time){

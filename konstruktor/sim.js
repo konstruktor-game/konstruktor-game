@@ -20,22 +20,34 @@ let SIM=null;
  const hl=new THREE.HemisphereLight('#dbe9ff','#4a5a3a',.6);simScene.add(hl);
  const sun=new THREE.DirectionalLight('#fff2dc',2.6);sun.position.set(80,150,60);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:1,far:400});sun.shadow.bias=-.0004;simScene.add(sun,sun.target);simScene.userData.sun=sun;
  const grass=ctex('simgrass',256,256,(g,w,h)=>{g.fillStyle='#5c7b3d';g.fillRect(0,0,w,h);for(let i=0;i<220;i++){const x=rnd(0,w),y=rnd(0,h),r=rnd(6,30),gr=g.createRadialGradient(x,y,0,x,y,r),c=['72,96,48','104,124,64','118,112,70'][i%3];gr.addColorStop(0,`rgba(${c},.35)`);gr.addColorStop(1,`rgba(${c},0)`);g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2)}
-  for(let i=0;i<6000;i++){g.fillStyle=Math.random()<.5?`rgba(36,60,24,${rnd(.1,.35)})`:`rgba(150,175,95,${rnd(.08,.22)})`;g.fillRect(rnd(0,w),rnd(0,h),rnd(.6,1.4),rnd(2,4))}},[600,600]);
+  for(let i=0;i<9000;i++){g.fillStyle=Math.random()<.5?`rgba(36,60,24,${rnd(.1,.35)})`:`rgba(150,175,95,${rnd(.08,.22)})`;g.fillRect(rnd(0,w),rnd(0,h),rnd(.5,1.2),rnd(1.5,3.5))}},[1500,1500]);
  const ground=new THREE.Mesh(new THREE.PlaneGeometry(3000,3000),new THREE.MeshStandardMaterial({map:grass,roughness:.95}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;simScene.add(ground);
  const asphalt=ctex('asph',128,128,(g,w,h)=>{g.fillStyle='#3d4045';g.fillRect(0,0,w,h);for(let i=0;i<1500;i++){g.fillStyle=`rgba(${Math.random()<.5?0:255},${Math.random()<.5?0:255},255,${rnd(0,.07)})`;g.fillRect(rnd(0,w),rnd(0,h),1.5,1.5)}},[4,40]);
  const rw=new THREE.Mesh(new THREE.PlaneGeometry(14,160),new THREE.MeshStandardMaterial({map:asphalt,roughness:.9,polygonOffset:true,polygonOffsetFactor:-2}));rw.rotation.x=-Math.PI/2;rw.position.set(0,.01,-60);rw.receiveShadow=true;simScene.add(rw);
  for(let z=-135;z<15;z+=10){const l=new THREE.Mesh(new THREE.PlaneGeometry(.3,4),new THREE.MeshBasicMaterial({color:'#e8e8e8'}));l.rotation.x=-Math.PI/2;l.position.set(0,.02,z);simScene.add(l)}
  const pad=new THREE.Mesh(new THREE.CircleGeometry(2.2,40),new THREE.MeshStandardMaterial({color:'#8d9096',roughness:.8,polygonOffset:true,polygonOffsetFactor:-3}));pad.rotation.x=-Math.PI/2;pad.position.set(0,.015,6);simScene.add(pad);
- const H=new THREE.Mesh(new THREE.RingGeometry(1.6,1.9,40),new THREE.MeshBasicMaterial({color:'#ff9800'}));H.rotation.x=-Math.PI/2;H.position.set(0,.02,6);simScene.add(H);
+ const H=new THREE.Mesh(new THREE.RingGeometry(1.75,1.95,48),new THREE.MeshStandardMaterial({color:'#f5f5f5',roughness:.8}));H.rotation.x=-Math.PI/2;H.position.set(0,.02,6);simScene.add(H);
+ for(const[w,h,x]of[[.25,1.6,-.55],[.25,1.6,.55],[1.1,.25,0]]){const b=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({color:'#f5f5f5',roughness:.8}));b.rotation.x=-Math.PI/2;b.position.set(x,.021,6);simScene.add(b)}
  // FPV darvozalari
- const gm=new THREE.MeshStandardMaterial({color:'#ff5722',roughness:.6});[[0,4,-25],[12,5,-50],[-10,6,-75],[0,3,-100]].forEach(([x,y,z],i)=>{const g=new THREE.Mesh(new THREE.TorusGeometry(2.2,.15,10,40),gm);g.position.set(x,y,z);g.castShadow=true;simScene.add(g);
-  const p=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,y-2.2,8),new THREE.MeshStandardMaterial({color:'#333'}));p.position.set(x,(y-2.2)/2,z);simScene.add(p)});
+  // FPV poyga darvozalari: 1,5×1,5 m ichki o'lchamli, yumshoq qoplamali ramka (to'q sariq/oq chiziqli)
+ const padT=ctex('gatepad',128,16,(g,w,h)=>{for(let x=0;x<w;x+=32){g.fillStyle='#ff6d00';g.fillRect(x,0,16,h);g.fillStyle='#f5f5f5';g.fillRect(x+16,0,16,h)}},[6,1]),gm=new THREE.MeshStandardMaterial({map:padT,roughness:.7});
+ [[0,-22,0],[8,-42,.4],[-6,-62,-.3],[0,-82,0]].forEach(([x,z,r])=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=r;const s=1.5,t=.22;
+  for(const[w,h,px,py]of[[s+2*t,t,0,s+t*1.5],[s+2*t,t,0,t/2],[t,s,-(s+t)/2,s/2+t],[t,s,(s+t)/2,s/2+t]]){const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,t),gm);b.position.set(px,py,0);b.castShadow=true;g.add(b)}
+  for(const sx of[-1,1]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.06,.06,.8),new THREE.MeshStandardMaterial({color:'#333'}));leg.position.set(sx*(s+t)/2,.03,0);g.add(leg)}simScene.add(g)});
  // mashina uchun konuslar va tramplin
- const cm=new THREE.MeshStandardMaterial({color:'#ff6d00',roughness:.6});for(let i=0;i<14;i++){const a=i/14*Math.PI*2,c=new THREE.Mesh(new THREE.ConeGeometry(.18,.45,14),cm);c.position.set(28+Math.cos(a)*12,.22,18+Math.sin(a)*7);c.castShadow=true;simScene.add(c)}
+  // yo'l konuslari: 45 sm, oq aks ettiruvchi chiziqli
+ const coneT=ctex('cone',16,64,(g,w,h)=>{g.fillStyle='#ff5a00';g.fillRect(0,0,w,h);g.fillStyle='#f0f0f0';g.fillRect(0,22,w,12)}),cm=new THREE.MeshStandardMaterial({map:coneT,roughness:.55});
+ for(let i=0;i<14;i++){const a=i/14*Math.PI*2,c=new THREE.Group(),cn=new THREE.Mesh(new THREE.CylinderGeometry(.03,.14,.45,16,1,true),cm);cn.position.y=.25;c.add(cn);const b=new THREE.Mesh(new THREE.BoxGeometry(.32,.03,.32),new THREE.MeshStandardMaterial({color:'#e65100',roughness:.7}));b.position.y=.015;c.add(b);
+  c.position.set(28+Math.cos(a)*12,0,18+Math.sin(a)*7);c.traverse(o=>{if(o.isMesh)o.castShadow=true});simScene.add(c)}
  const ramp=new THREE.Mesh(new THREE.BoxGeometry(3,.6,4),new THREE.MeshStandardMaterial({color:'#8d6e63',roughness:.9}));ramp.position.set(-22,.15,10);ramp.rotation.x=-.16;ramp.castShadow=true;ramp.receiveShadow=true;simScene.add(ramp);simScene.userData.ramp=ramp;
+ // tuproq trek: konuslar atrofida ellips halqa, g'ildirak izlari bilan
+ const dirt=ctex('dirt',256,256,(g,w,h)=>{g.fillStyle='#7a6248';g.fillRect(0,0,w,h);for(let i=0;i<5000;i++){g.fillStyle=`rgba(${Math.random()<.5?40:150},${Math.random()<.5?30:120},${Math.random()<.5?20:90},${rnd(.05,.25)})`;g.fillRect(rnd(0,w),rnd(0,h),rnd(1,3),rnd(1,3))}
+  g.fillStyle='rgba(50,38,28,.25)';for(const x of[80,100,156,176])g.fillRect(x,0,8,h)},[1,30]);
+ {const tr=new THREE.Mesh(new THREE.RingGeometry(9.5,14.5,96,1),new THREE.MeshStandardMaterial({map:dirt,roughness:.95,polygonOffset:true,polygonOffsetFactor:-2}));tr.rotation.x=-Math.PI/2;tr.scale.set(1,.62,1);tr.position.set(28,.012,18);tr.receiveShadow=true;simScene.add(tr)}
  // daraxtlar
- const tg=new THREE.ConeGeometry(2.4,7,10).translate(0,5,0),tk=new THREE.CylinderGeometry(.25,.35,2,8).translate(0,1,0),N=160,iT=new THREE.InstancedMesh(tg,new THREE.MeshStandardMaterial({color:'#2f4a2b',roughness:.9}),N),iK=new THREE.InstancedMesh(tk,new THREE.MeshStandardMaterial({color:'#4a3a2c'}),N),mx=new THREE.Matrix4();
- for(let i=0;i<N;i++){const a=Math.random()*Math.PI*2,r=rnd(110,400),s=rnd(.8,1.8);mx.makeScale(s,s*rnd(.9,1.3),s).setPosition(Math.cos(a)*r,0,Math.sin(a)*r);iT.setMatrixAt(i,mx);iK.setMatrixAt(i,mx)}iT.castShadow=true;simScene.add(iT,iK);
+ const N=220,tm=new THREE.MeshStandardMaterial({color:'#2a4227',roughness:.92}),tiers=[[2.6,3.6,3.4],[2.1,3.2,5.3],[1.4,2.8,7.1]].map(([r,h,y])=>new THREE.InstancedMesh(new THREE.ConeGeometry(r,h,12).translate(0,y,0),tm,N)),iK=new THREE.InstancedMesh(new THREE.CylinderGeometry(.22,.32,2.2,8).translate(0,1.1,0),new THREE.MeshStandardMaterial({color:'#4a3a2c',roughness:.9}),N),mx=new THREE.Matrix4(),tc=new THREE.Color();
+ for(let i=0;i<N;i++){const a=Math.random()*Math.PI*2,r=rnd(90,420),s=rnd(.8,1.9);mx.makeScale(s,s*rnd(.9,1.3),s).setPosition(Math.cos(a)*r,0,Math.sin(a)*r);iK.setMatrixAt(i,mx);tc.setHSL(rnd(.27,.33),rnd(.25,.4),rnd(.16,.24));for(const t of tiers){t.setMatrixAt(i,mx);t.setColorAt(i,tc)}}
+ for(const t of tiers){t.castShadow=true;simScene.add(t)}simScene.add(iK);
 })();
 
 // Modelni faqat o'rnatilgan detallar bilan qurish (sinov uchun)
@@ -57,10 +69,16 @@ function preflight(B){const T=TYPES[B.type],D=T.derive(B),WC=wcheck(B),miss=[];
 
 function simStart(B){const pf=preflight(B);simStop();
  const{g,D}=buildStatic(B);const S={B,T:pf.T,D,pf,on:true,obj:new THREE.Group(),pos:new V3(),vel:new V3(),q:new THREE.Quaternion(),yaw:0,pitch:0,roll:0,w:new V3(),thr:0,armed:false,
-  used:0,t:0,maxV:0,maxH:0,minV:99,status:'',fail:null,cam:'chase',burnT:0,heat:0,smoke:[],log:[],flipT:0,landed:true,steer:0,spd:0};
+  used:0,t:0,maxV:0,maxH:0,minV:99,status:'',fail:null,cam:'chase',mode:window.SIM_MODE||'easy',burnT:0,heat:0,smoke:[],log:[],flipT:0,landed:true,steer:0,spd:0};
  g.scale.setScalar(.01);S.obj.add(g);S.model=g;simScene.add(S.obj);SIM=S;
  if(B.type==='copter'){S.pos.set(0,0,6)}else if(B.type==='plane'){S.pos.set(0,0,10);S.yaw=0}else{S.pos.set(28,0,6);S.yaw=Math.PI/2}
  const bb=new THREE.Box3().setFromObject(g);S.groundOff=-bb.min.y;S.size=Math.max(bb.getSize(new V3()).length(),.2);
+ // mashina g'ildiraklari: aylanish (yo'l/radius) va old g'ildiraklar uchun rul burchagi
+ S.wheels=[];g.traverse(o=>{const m=/^wheel(\d)$/.exec(o.userData.slot||'');if(m){o.rotation.order='YXZ';S.wheels.push({o,front:+m[1]<=2,left:o.position.x<0,base:o.rotation.y})}});
+ // quyosh soyasi qurilma atrofida tor oynada — kichik modelda ham aniq soya
+ {const sun=simScene.userData.sun,s=clamp(S.size*3,1.5,30);Object.assign(sun.shadow.camera,{left:-s,right:s,top:s,bottom:-s,near:1,far:300});sun.shadow.camera.updateProjectionMatrix();if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}}
+ if(!simScene.userData.blob){const b=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:contactTex,transparent:true,depthWrite:false,opacity:.7}));b.rotation.x=-Math.PI/2;b.renderOrder=1;simScene.add(b);simScene.userData.blob=b}
+ S.blob=simScene.userData.blob;S.blob.scale.set(S.size*.9,S.size*.9,1);
  // sinov natijalarini oldindan aniqlash
  const WC=pf.WC,ex=WC.extra||{};S.ok=pf.ok&&!pf.fatal.length;
  if(B.type==='copter'){S.link=WC.works.rx;S.escLink=WC.works.escfc;S.video=B.p.vid.type==='none'?null:(WC.works.cam!==false&&WC.works.vtx);
@@ -91,10 +109,18 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
  if(S.fail&&S.burnT<3){S.burnT+=dt;if(Math.random()<.3)puff(S,1,'#333')}
  const g=9.81;
  if(B.type==='copter'){const m=D.AUW/1000,Tmax=D.n*D.Tm/1000*g,soc=1-S.used/B.p.bat.mah;
-  if(S.armed){if(I.stickThr!==0)S.thr=clamp(-I.stickThr*.5+.5,0,1);else S.thr=clamp(S.thr+((I.thrUp?1:0)-(I.thrDn?1:0))*dt*.4,0,1)}else S.thr=Math.max(0,S.thr-dt);
-  const sag=.82+.18*clamp(soc,0,1),upNow=new V3(0,1,0).applyQuaternion(S.obj.quaternion),vAx=Math.max(0,S.vel.dot(upNow)),vP=T_pitch(S),unload=clamp(1-vAx/(vP*1.15),0,1),T=S.armed&&soc>0?Tmax*S.thr*S.thr*sag*unload:0;
+  const sag=.82+.18*clamp(soc,0,1),upNow=new V3(0,1,0).applyQuaternion(S.obj.quaternion),vAx=Math.max(0,S.vel.dot(upNow)),vP=T_pitch(S),unload=clamp(1-vAx/(vP*1.15),.05,1),easy=S.mode!=='manual';
+  if(!S.armed)S.thr=Math.max(0,S.thr-dt);
+  else if(easy){// Oson: W/S — ko'tarilish/pasayish tezligi; qo'yib yuborilsa balandlik ushlanadi
+   const vzIn=clamp((I.thrUp?1:0)-(I.thrDn?1:0)-I.stickThr,-1,1),vz=vzIn*3,tilt=Math.max(.5,Math.cos(S.roll)*Math.cos(S.pitch)),need=m*(g+(vz-S.vel.y)*3.5)/tilt;
+   S.thr+=(Math.sqrt(clamp(need/(Tmax*sag*unload),0,1))-S.thr)*Math.min(1,dt*10)}
+  else{if(I.stickThr!==0)S.thr=clamp(-I.stickThr*.5+.5,0,1);else S.thr=clamp(S.thr+((I.thrUp?1:0)-(I.thrDn?1:0))*dt*.4,0,1)}
+  const T=S.armed&&soc>0?Tmax*S.thr*S.thr*sag*unload:0;
   if(S.armed&&D.overload>1.4&&S.thr>.7){S.heat+=dt;if(S.heat>5&&!S.motorDead){S.motorDead=true;S.status="Motor qizib kuydi! (motor juda yuklangan edi)";puff(S,8,'#444');snd('err')}}
-  const tgtR=clamp(I.roll,-1,1)*35*DEG,tgtP=-clamp(I.pitch,-1,1)*35*DEG;
+  // burchak rejimi: strelka — egilish (35° gacha). Oson rejimda strelka qo'yib yuborilsa dron o'zi tormozlanadi.
+  const fl=new V3(-Math.sin(S.yaw),0,-Math.cos(S.yaw)),rt=new V3(Math.cos(S.yaw),0,-Math.sin(S.yaw)),vf=S.vel.dot(fl),vr=S.vel.dot(rt);
+  let tgtR=-clamp(I.roll,-1,1)*35*DEG,tgtP=-clamp(I.pitch,-1,1)*35*DEG;
+  if(easy&&Math.abs(I.roll)<.05)tgtR=clamp(vr*.08,-.4,.4);if(easy&&Math.abs(I.pitch)<.05)tgtP=clamp(vf*.08,-.4,.4);
   if(!S.landed||T>m*g*.3){S.roll+=(tgtR-S.roll)*Math.min(1,dt*8);S.pitch+=(tgtP-S.pitch)*Math.min(1,dt*8);S.yaw+=clamp(I.yaw,-1,1)*3.2*dt}
   if(S.flip&&T>m*g*.5&&S.armed){S.flipT+=dt;S.roll+=dt*14*(S.flip==='prop'?1:-1);if(S.flipT>.15&&!S.flipMsg){S.flipMsg=1;S.status=S.flip==='prop'?"Dron ag'darildi: parrak aylanish yo'nalishiga mos emas (CW/CCW).":"Dron ag'darildi: motor simlari noto'g'ri ESC kontaktlariga ulangan (motor tartibi)."}}
   if(S.motorDead){S.roll+=dt*6;S.yaw+=dt*8}
@@ -122,7 +148,8 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
   const cgUnst=D.cgPct>36?(D.cgPct-36)*.25:0;
   S.w.x+=(-el*2.2*eff-S.w.x*3)*dt+(V>3&&!S.onGround?-alpha*2.5*clamp(D.Vh/.45,.3,1.5)*eff+cgUnst*alpha*3:0)*dt*4;
   S.w.z+=(-ail*3.2*eff-S.w.z*4)*dt;S.w.y+=(rd*1.2*eff-S.w.y*3)*dt;
-  if(V>3&&!S.onGround){const side=vdir.dot(rgt);S.w.y+=-side*2*dt*eff;const bank=Math.asin(clamp(rgt.y,-1,1));S.w.z+=-bank*.25*(p.wing.dih/5)*dt}
+  if(V>3&&!S.onGround){const side=vdir.dot(rgt);S.w.y+=-side*2*dt*eff;const bank=Math.asin(clamp(rgt.y,-1,1));S.w.z+=-bank*.25*(p.wing.dih/5)*dt;
+   if(S.mode!=='manual'){if(Math.abs(ail)<.1)S.w.z+=-bank*3*dt*eff;if(Math.abs(el)<.1){const pa=Math.asin(clamp(fwd.y,-1,1));S.w.x+=-(pa-.05)*2.2*dt*eff}}}
   const dq=new THREE.Quaternion().setFromEuler(new THREE.Euler(S.w.x*dt,S.w.y*dt,S.w.z*dt,'YXZ'));S.q.multiply(dq).normalize();
   S.vel.addScaledVector(F,dt/m);S.pos.addScaledVector(S.vel,dt);
   S.onGround=false;if(S.pos.y<=0){const vy=S.vel.y,lvl=Math.abs(upv.y);if(vy<-3.5||lvl<.75||fwd.y<-.35)crash(S,`Yerga urildi (${fmt(-vy,1)} m/s, ${upv.y<.75?'qanot qiyshiq':'burun pastda'}).`);
@@ -155,12 +182,14 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
   if(soc<=0&&S.armed){S.armed=false;S.status='Batareya tugadi.'}
   if(S.rev&&thr!==0&&!S.revMsg&&S.armed){S.revMsg=1;S.status="Mashina teskari yurmoqda: motor yo'nalishi teskari. ESC'da yo'nalishni o'zgartiring yoki ikki simni almashtiring."}
   if(S.ctl.steer!=='CH1'&&!S.steerMsg&&S.armed&&(steerIn!==0||thr!==0)){S.steerMsg=1;S.status=S.ctl.steer==='CH2'?"Rul gaz bilan birga buriladi: servo CH2 ga ulangan (CH1 bo'lishi kerak).":"Rul ishlamayapti: servo CH1 ga ulanmagan."}
-  humSet(S.armed&&Math.abs(S.spd)>.1,Math.min(1,Math.abs(S.spd)/Math.max(1,D.vTop)));
+  humSet(S.armed&&Math.abs(S.spd)>.1,Math.min(1,Math.abs(S.spd)/Math.max(1,D.vTop)));S.thrIn=Math.abs(thr);
+  const wr=p.wheel.d/2000,da=S.spd*dt/wr;for(const w of S.wheels){w.o.rotation.x+=w.left?da:-da;if(w.front)w.o.rotation.y=w.base+S.steer}
   }
  S.t+=dt;const sp=S.vel.length();S.maxV=Math.max(S.maxV,sp);S.maxH=Math.max(S.maxH,S.pos.y);if(S.volt)S.minV=Math.min(S.minV,S.volt);
  if(Math.hypot(S.pos.x,S.pos.z)>600){S.pos.multiplyScalar(600/Math.hypot(S.pos.x,S.pos.z))}
  if(B.type!=='plane'){S.obj.position.copy(S.pos);S.obj.position.y+=S.groundOff;S.obj.quaternion.setFromEuler(new THREE.Euler(S.pitch,S.yaw,S.roll,'YXZ'))}
  else{S.obj.position.copy(S.pos);S.obj.position.y+=S.groundOff;S.obj.quaternion.copy(S.q)}
+ if(S.blob){S.blob.position.set(S.obj.position.x,.015,S.obj.position.z);const hh=S.pos.y;S.blob.material.opacity=.7*clamp(1-hh/(S.size*4),0,1);S.blob.visible=hh<S.size*4}
  // kamera
  const sun=simScene.userData.sun;sun.position.copy(S.obj.position).add(new V3(40,80,30));sun.target.position.copy(S.obj.position);
  const fwd=new V3(0,0,-1).applyQuaternion(S.obj.quaternion),dist=Math.max(1.2,S.size*3.2);
@@ -168,5 +197,5 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
   simCam.quaternion.copy(S.obj.quaternion).multiply(new THREE.Quaternion().setFromAxisAngle(new V3(1,0,0),tilt));if(simCam.fov!==B.p.vid.fov*.6){simCam.fov=clamp(B.p.vid.fov*.6,60,110);simCam.updateProjectionMatrix()}}}
  else if(S.cam==='pilot'){simCam.position.set(B.type==='car'?20:3,1.7,B.type==='car'?2:14);simCam.lookAt(S.obj.position);if(simCam.fov!==55){simCam.fov=55;simCam.updateProjectionMatrix()}}
  else{const flat=new V3(fwd.x,0,fwd.z);if(flat.lengthSq()<1e-4)flat.set(0,0,-1);flat.normalize();const want=S.obj.position.clone().addScaledVector(flat,-dist).add(new V3(0,dist*.42,0));
-  simCam.position.lerp(want,Math.min(1,dt*4));simCam.lookAt(S.obj.position.clone().add(new V3(0,S.size*.2,0)));if(simCam.fov!==65){simCam.fov=65;simCam.updateProjectionMatrix()}}
+  want.y=Math.max(want.y,.35);simCam.position.lerp(want,Math.min(1,dt*3.5));if(simCam.position.y<.3)simCam.position.y=.3;simCam.lookAt(S.obj.position.clone().add(new V3(0,S.size*.15,0)));if(simCam.fov!==62){simCam.fov=62;simCam.updateProjectionMatrix()}}
  const sky=simScene.children.find(o=>o.userData.sky);sky.position.copy(simCam.position)}

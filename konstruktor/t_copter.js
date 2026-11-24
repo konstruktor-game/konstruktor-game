@@ -31,7 +31,7 @@ const T={id:'copter',name:'Multikopter (dron)',ic:'drone',desc:"4, 6 yoki 8 moto
  purposes:{freestyle:{t:'Freestyle',twr:[6,14],note:"Akrobatika: kuchli zaxira va tez javob kerak"},racing:{t:'Poyga',twr:[9,20],note:'Maksimal tezlanish, yengil va kuchli'},
   cinematic:{t:'Kino / silliq suratga olish',twr:[3,7],note:"Silliq parvoz; og'irroq kamera ko'tariladi"},longrange:{t:'Uzoq masofa',twr:[2.5,8],note:'Samaradorlik va parvoz vaqti muhim'},
   cargo:{t:'Yuk tashish',twr:[2,4],note:"TWR 2:1 dan past bo'lsa boshqaruv qiyinlashadi"}},
- colors:{frame:'#e8eaee',stand:'#d32f2f',motor:'#d32f2f',prop:'#ff9800',cam:'#1d1d1f',bat:'#1565c0',ant:'#ffd600',led:'#00e5ff'},
+ colors:{frame:'#e8eaee',stand:'#b71c1c',motor:'#a3201c',prop:'#e0861a',cam:'#1d1d1f',bat:'#1565c0',ant:'#ffd600',led:'#00e5ff'},
  paint:[['frame','Ramka (lak rangi)'],['stand','Stoykalar'],['motor','Motor qo\'ng\'irog\'i'],['prop','Parraklar'],['cam','Kamera'],['bat','Batareya o\'rami'],['ant','Antennalar'],['led','LED chiroq']],
  spec:{
   frame:{t:'Ramka',ic:'frame',g:'frame',f:[
