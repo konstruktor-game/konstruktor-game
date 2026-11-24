@@ -25,9 +25,9 @@ const T={id:'plane',name:'Qanotli samolyot',ic:'✈️',desc:"Radio boshqariladi
   rx:{t:'Qabul qilgich',ic:'📡',g:'rx',f:[{k:'ch',l:'Kanallar',type:'sel',o:{6:'6 kanal',8:'8 kanal'},g:'channel'}]},
   bat:{t:'Batareya',ic:'🔋',g:'battery',f:[{k:'chem',l:'Kimyo',type:'sel',o:{lipo:'LiPo',lihv:'LiHV',liion:'Li-ion',life:'LiFePO4'},g:'chem'},{k:'cells',l:'Yacheykalar',min:1,max:6,step:1,u:'S',g:'cells'},{k:'mah',l:"Sig'im",min:300,max:8000,step:50,u:'mAh',g:'mah'},{k:'c',l:'C reyting',min:5,max:100,step:5,u:'C',g:'crating'},{k:'pos',l:"Joyi (burundan)",min:2,max:100,step:.5,u:'sm',g:'cg'}]}},
  presets:{
-  trainer:{name:'Boshlovchi trener 120 sm',desc:'Yuqori qanot, sekin va barqaror',p:{fuse:{len:90,w:8,mount:'tractor',mat:'foam'},wing:{span:120,chord:20,foil:'clarky',dih:4,pos:25},tail:{type:'conv',area:22},motor:{d:28,h:12,kv:1100},prop:{d:9,p:5,b:2},esc:{a:30,cells:4,bec:5},servo:{tq:1.8},rx:{ch:6},bat:{chem:'lipo',cells:3,mah:2200,c:30,pos:14}}},
-  glider:{name:'Motorli planer 200 sm',desc:'Termiklarda uzoq uchadi',p:{fuse:{len:115,w:6,mount:'tractor',mat:'foam'},wing:{span:200,chord:17,foil:'clarky',dih:6,pos:24},tail:{type:'vtail',area:16},motor:{d:28,h:10,kv:1000},prop:{d:10,p:6,b:2},esc:{a:30,cells:4,bec:5},servo:{tq:2},rx:{ch:6},bat:{chem:'lipo',cells:3,mah:2200,c:30,pos:12}}},
-  sport:{name:'Sport akrobat 100 sm',desc:'Simmetrik profil, kuchli motor',p:{fuse:{len:95,w:9,mount:'tractor',mat:'balsa'},wing:{span:100,chord:24,foil:'sym',dih:0,pos:27},tail:{type:'conv',area:26},motor:{d:35,h:12,kv:900},prop:{d:11,p:5.5,b:2},esc:{a:50,cells:4,bec:6},servo:{tq:4},rx:{ch:8},bat:{chem:'lipo',cells:4,mah:2200,c:45,pos:13}}}},
+  trainer:{name:'Boshlovchi trener 120 sm',desc:'Yuqori qanot, sekin va barqaror',purpose:'trainer',p:{fuse:{len:90,w:8,mount:'tractor',mat:'foam'},wing:{span:120,chord:20,foil:'clarky',dih:4,pos:25},tail:{type:'conv',area:22},motor:{d:28,h:12,kv:1100},prop:{d:9,p:5,b:2},esc:{a:30,cells:4,bec:5},servo:{tq:2.5},rx:{ch:6},bat:{chem:'lipo',cells:3,mah:2200,c:30,pos:25}}},
+  glider:{name:'Motorli planer 200 sm',desc:'Termiklarda uzoq uchadi',purpose:'glider',p:{fuse:{len:115,w:6,mount:'tractor',mat:'foam'},wing:{span:200,chord:17,foil:'clarky',dih:6,pos:24},tail:{type:'vtail',area:16},motor:{d:28,h:10,kv:1000},prop:{d:10,p:6,b:2},esc:{a:30,cells:4,bec:5},servo:{tq:3},rx:{ch:6},bat:{chem:'lipo',cells:3,mah:2200,c:30,pos:24.5}}},
+  sport:{name:'Sport akrobat 100 sm',desc:'Simmetrik profil, kuchli motor',purpose:'sport',p:{fuse:{len:95,w:9,mount:'tractor',mat:'balsa'},wing:{span:100,chord:24,foil:'sym',dih:0,pos:27},tail:{type:'conv',area:26},motor:{d:35,h:12,kv:900},prop:{d:11,p:5.5,b:2},esc:{a:50,cells:4,bec:6},servo:{tq:4},rx:{ch:8},bat:{chem:'lipo',cells:4,mah:2200,c:45,pos:39}}}},
  steps:[
   {id:'airframe',t:'Fuzelyaj, qanot, dum',ic:'🛩️',cats:['fuse','wing','tail'],slots:()=>['fuse','wing','tail'],intro:"Avval tana, so'ng qanot va dum. Qanot maydoni — sekin uchish tezligining asosi; dum — barqarorlik."},
   {id:'power',t:'Motor va ESC',ic:'⚙️',cats:['motor','esc'],slots:()=>['mot1','esc'],intro:"Samolyot motoriga katta parrak va past KV — samarali tortish. ESC ichidagi BEC qabul qilgich va servolarni ta'minlaydi."},
@@ -60,14 +60,14 @@ T.derive=B=>{const p=B.p,fu=p.fuse,w=p.wing,m=p.motor,pr=p.prop,ba=p.bat;
  const Tst=Tf(rpm),Pw=Pf(rpm)/.82,Imot=Pw/V,Itot=Imot+.8,TWR=Tst/AUW;
  const mkg=AUW/1000,Vs=Math.sqrt(2*mkg*9.81/(rho*Sm*CL[w.foil])),WL=AUW/Sdm;
  const pitchSpd=rpm*pr.p*.0254/60,Vmax=pitchSpd*.8,LD=clamp(3+AR*.9,5,16)*LDF[w.foil],Vc=Math.min(Math.max(Vs*1.5,Vs+3),Vmax*.85||Vs*1.5);
- const Pc=mkg*9.81/LD*Vc/.5,Ic=Pc/V+.6,capAh=ba.mah/1000,tCruise=capAh*.8/Ic*60,tFull=capAh*.8/Itot*60;
+ const Pc=Math.max(mkg*9.81/LD*Vc/.35,Pf(rpm*.5)/.82),Ic=Pc/V+.6,capAh=ba.mah/1000,tCruise=capAh*.8/Ic*60,tFull=capAh*.8/Itot*60;
  const lt=(tailX-4)-(LE+w.chord*.25),Vh=St*lt/(S*w.chord);
  const servoNeed=.25*Math.pow(w.chord/10,2)*(w.span/100)*Math.pow(Math.max(Vmax,10)/15,2)+.4;
  const table=[10,20,30,40,50,60,70,80,90,100].map(t=>{const r=rpm*t/100,th=Tf(r),pw=Pf(r)/.82;return{t,thrust:th,watt:pw,amp:pw/V+.8,eff:pw>0?th/pw:0}});
  return{S,Sdm,AR,St,LE,AUW,CG,cgPct,batShift,items,wBat,wMot,wProp,wEsc,wServo,wWing,wFuse,wTail,Pm,overload,rpm,Tst,Imot,Itot,TWR,Vs,WL,pitchSpd,Vmax,Vc,LD,tCruise,tFull,Vh,servoNeed,V,Vn,cmax,batMaxA:capAh*cmax,table,
   parts:items.map(i=>[i[0],i[1]]),batDims:[clamp(Math.sqrt(wBat/2.05*1000/clamp(55+ba.mah/40,50,160))/10*1.2,2,9),clamp(Math.sqrt(wBat/2.05*1000/clamp(55+ba.mah/40,50,160))/10*.8,1.5,7),clamp(55+ba.mah/40,50,160)/10]}};
 
-T.metrics=(B,D)=>[{l:"Og'irlik",v:fmt(D.AUW)+' g'},{l:'Qanot yuklamasi',v:fmt(D.WL,1)+' g/dm²',lvl:D.WL>80?'bad':D.WL>50?'warn':'ok'},{l:'Sekin uchish',v:fmt(D.Vs*3.6)+' km/s',lvl:D.Vs>16?'warn':'ok'},
+T.metrics=(B,D)=>[{l:"Og'irlik",v:fmt(D.AUW)+' g'},{l:'Qanot yuklamasi',v:fmt(D.WL,1)+' g/dm²',lvl:D.WL>80?'bad':D.WL>50?'warn':'ok'},{l:'Sekin uchish',v:fmt(D.Vs*3.6)+' km/soat',lvl:D.Vs>16?'warn':'ok'},
  {l:"Tortish/og'irlik",v:fmt(D.TWR,2),lvl:D.TWR<.3?'bad':D.TWR<.5?'warn':'ok'},{l:"Og'irlik markazi",v:fmt(D.cgPct)+' %',lvl:D.cgPct>36||D.cgPct<15?'bad':D.cgPct>33||D.cgPct<22?'warn':'ok'},{l:'Parvoz vaqti',v:fmt(D.tCruise,1)+' daq'}];
 
 T.issues=(B,D)=>{const p=B.p,L=[],add=(lvl,t,why)=>L.push({lvl,t,why});
@@ -85,7 +85,7 @@ T.issues=(B,D)=>{const p=B.p,L=[],add=(lvl,t,why)=>L.push({lvl,t,why});
  if(D.Imot>p.esc.a*1.1)add('bad',`ESC toki yetmaydi (${fmt(D.Imot)} / ${p.esc.a} A)`,'Kamida 20% zaxira kerak.');else if(D.Imot>p.esc.a*.9)add('warn',`ESC chegarada (${fmt(D.Imot)} / ${p.esc.a} A)`,'');
  if(p.bat.cells>+p.esc.cells)add('bad',`Batareya ${p.bat.cells}S, ESC ${p.esc.cells}S gacha`,'ESC kuyadi.');
  if(D.Itot>D.batMaxA)add('warn',`Batareya toki yetmaydi (${fmt(D.batMaxA)} / ${fmt(D.Itot)} A)`,'Yuqori C reyting tanlang.');
- if(D.Vmax<D.Vs*1.8)add('warn',"Tezlik zaxirasi kam",`Maks. tezlik (${fmt(D.Vmax*3.6)} km/s) sekin uchish tezligiga yaqin. Qadami kattaroq parrak oling.`);
+ if(D.Vmax<D.Vs*1.8)add('warn',"Tezlik zaxirasi kam",`Maks. tezlik (${fmt(D.Vmax*3.6)} km/soat) sekin uchish tezligiga yaqin. Qadami kattaroq parrak oling.`);
  const pu=T.purposes[B.purpose];if(pu&&D.TWR<pu.twr[0])add('warn',`${pu.t} uchun tortish kam`,pu.note);
  add('info','Motor yo\'nalishini sinovda tekshiring',"3 ta motor simidan istalgan ikkitasini almashtirish aylanish yo'nalishini teskari qiladi.");
  return L};
@@ -106,7 +106,7 @@ T.wextra=(B)=>{const w=B.wires,ord=[w.ma,w.mb,w.mc];if(ord.some(x=>!x)||new Set(
 T.build=(B,D,ctx)=>{const p=B.p,fu=p.fuse,w=p.wing,c=B.col,X=!!window.XRAY;
  const shell=(col)=>X?MAT('xr'+col,()=>new THREE.MeshPhysicalMaterial({color:col,transparent:true,opacity:.22,roughness:.3,depthWrite:false})):mMat(fu.mat==='carbon'?'paint':fu.mat==='balsa'?'wood':'paint',col,fu.mat==='foam'?'matte':B.fin);
  const z0=-fu.len/2,zAt=x=>z0+x,fh=fu.w*1.15,baseY=fh/2+6;
- {const g=new THREE.Group();const front=fu.len*.62;g.add(rbox(fu.w,fh,front,fu.w*.35,shell(c.fuse),0,baseY-fh/2,zAt(front/2)));
+ {const g=new THREE.Group();const front=fu.len*.62;g.add(rbox(fu.w,fh,front,fu.w*.35,shell(c.fuse),0,baseY,zAt(front/2)));
   const boom=cyl(fu.w*.22,fu.w*.38,fu.len-front,shell(c.fuse),0,baseY+fh*.15,zAt(front+(fu.len-front)/2),16);boom.rotation.x=Math.PI/2;g.add(boom);
   const nose=sph(fu.w*.55,shell(c.fuse),0,baseY,zAt(1.5));nose.scale.set(1,1.05,.8);g.add(nose);
   const can=sph(fu.w*.48,mPaint(c.canopy,'gloss'),0,baseY+fh/2,zAt(fu.len*w.pos/100-fu.w*.6));can.scale.set(.9,.55,2.4);g.add(can);
@@ -115,7 +115,7 @@ T.build=(B,D,ctx)=>{const p=B.p,fu=p.fuse,w=p.wing,c=B.col,X=!!window.XRAY;
  const LEz=zAt(D.LE),wy=baseY+fh/2+.3;
  {const g=new THREE.Group(),half=w.span/2,thick=w.chord*({clarky:.12,semi:.12,sym:.12,flat:.035}[w.foil]);
   const shp=foilShape(w.chord,thick,w.foil),geo=GEO(`wing${w.chord},${thick},${half},${w.foil}`,()=>{const ge=new THREE.ExtrudeGeometry(shp,{depth:half,bevelEnabled:false,curveSegments:16});return ge});
-  for(const s of[-1,1]){const h=new THREE.Group();h.position.set(0,wy,LEz);h.rotation.z=s*w.dih*DEG;const m=mesh(geo,shell(c.wing));m.rotation.y=s>0?Math.PI/2:-Math.PI/2;if(s<0){m.scale.z=1}h.add(m);
+  for(const s of[-1,1]){const h=new THREE.Group();h.position.set(0,wy,LEz);h.rotation.z=s*w.dih*DEG;const mg=new THREE.Group();if(s>0)mg.scale.x=-1;const m=mesh(geo,shell(c.wing));m.rotation.y=-Math.PI/2;mg.add(m);h.add(mg);
    const ail=box(half*.42,thick*.35,w.chord*.22,mPaint(c.accent,B.fin),s*half*.72,thick*.15,w.chord*.89);h.add(ail);g.add(h)}
   ctx.add('wing',g,[0,10,0])}
  {const g=new THREE.Group(),St=D.St,cT=Math.sqrt(St/3.2),sT=St/cT,ty=baseY+fh*.15,tz=zAt(fu.len-cT*.6);

@@ -52,7 +52,7 @@ function preflight(B){const T=TYPES[B.type],D=T.derive(B),WC=wcheck(B),miss=[];
  for(const s of T.steps)if(s.slots&&s.kind!=='paint')for(const sl of s.slots(B))if(!B.inst[sl])miss.push(slotLabel(T,sl));
  const r={T,D,WC,miss,fatal:WC.fatal.slice(),notes:[],ok:true};
  if(miss.length){r.ok=false;r.block=`Yig'ish tugallanmagan: ${[...new Set(miss)].map(k=>GLOSS[k]?GLOSS[k].n:k).join(', ')} o'rnatilmagan.`;return r}
- if(!WC.works.xt60){r.ok=false;r.block="Batareya kabeli ESC ga ulanmagan — quvvat yo'q.";if(!r.fatal.length)return r}
+ if(!WC.works.xt60&&!r.fatal.length){r.ok=false;r.block="Batareya kabeli ESC ga to'g'ri ulanmagan — quvvat yo'q.";return r}
  return r}
 
 function simStart(B){const pf=preflight(B);simStop();
@@ -79,14 +79,15 @@ function simArm(){const S=SIM;if(!S)return;if(!S.pf.ok){S.status=S.pf.block;snd(
   if(!S.escLink){S.status="Kontroller ESC ga ulanmagan (8-pin kabel) — motorlar aylanmaydi.";snd('err');return}}
  else if(!S.link){S.status=S.B.type==='car'?"ESC signal kabeli CH2 ga ulanmagan — qabul qilgich quvvatsiz (BEC) va gaz ishlamaydi.":"ESC signal kabeli CH3 ga ulanmagan — qabul qilgich quvvatsiz (BEC), motor ishlamaydi.";snd('err');return}
  S.armed=true;S.status=S.B.type==='copter'?"ARM. W — gaz, A/D — burilish, strelkalar — egilish":S.B.type==='plane'?"W — gaz. Uchish yo'lagida tezlik oling, ↓ bilan burunni ko'taring":"W/S — gaz/tormoz, A/D — rul";snd('ok')}
-function puff(S,n,col){for(let i=0;i<n;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.7,depthWrite:false}));m.position.copy(S.obj.position).add(new V3(rnd(-.1,.1),rnd(0,.1),rnd(-.1,.1)));simScene.add(m);S.smoke.push({m,v:new V3(rnd(-.3,.3),rnd(.6,1.4),rnd(-.3,.3)),t:rnd(1.5,3)})}}
+const puffTex=ctex('puff',64,64,(g,w,h)=>{const r=g.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2);r.addColorStop(0,'rgba(255,255,255,.9)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,w,h)});
+function puff(S,n,col){for(let i=0;i<n;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:puffTex,color:col,transparent:true,opacity:.7,depthWrite:false}));m.scale.setScalar(.25);m.position.copy(S.obj.position).add(new V3(rnd(-.1,.1),rnd(0,.1),rnd(-.1,.1)));simScene.add(m);S.smoke.push({m,v:new V3(rnd(-.3,.3),rnd(.6,1.4),rnd(-.3,.3)),t:rnd(1.5,3)})}}
 function crash(S,why){if(S.fail)return;S.fail={t:'Halokat!',why};S.armed=false;snd('boom',.5);puff(S,10,'#555');humSet(false)}
 
 function inputs(){const k=KEYS;return{thrUp:k.KeyW||k.ShiftLeft,thrDn:k.KeyS||k.ControlLeft,yaw:(k.KeyA?1:0)-(k.KeyD?1:0)+(-STK.l.x),pitch:(k.ArrowUp?1:0)-(k.ArrowDown?1:0)+(-STK.r.y),roll:(k.ArrowRight?1:0)-(k.ArrowLeft?1:0)+STK.r.x,stickThr:STK.l.y}}
 
 function T_pitch(S){return Math.max(5,S.D.rpm*S.B.p.prop.p*.0254/60*Math.max(S.thr,.05))}
 function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D=S.D,I=inputs(),rho=airDensity(B.env.alt,B.env.temp);
- for(let i=S.smoke.length-1;i>=0;i--){const s=S.smoke[i];s.t-=dt;s.m.position.addScaledVector(s.v,dt);s.m.scale.multiplyScalar(1+dt*.8);s.m.material.opacity=Math.max(0,s.t/3*.7);if(s.t<=0){simScene.remove(s.m);S.smoke.splice(i,1)}}
+ for(let i=S.smoke.length-1;i>=0;i--){const s=S.smoke[i];s.t-=dt;s.m.position.addScaledVector(s.v,dt);s.m.scale.multiplyScalar(1+dt*.5);s.m.material.opacity=Math.max(0,s.t/3*.7);if(s.t<=0){simScene.remove(s.m);S.smoke.splice(i,1)}}
  if(S.fail&&S.burnT<3){S.burnT+=dt;if(Math.random()<.3)puff(S,1,'#333')}
  const g=9.81;
  if(B.type==='copter'){const m=D.AUW/1000,Tmax=D.n*D.Tm/1000*g,soc=1-S.used/B.p.bat.mah;
@@ -128,7 +129,7 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
    S.pos.y=0;S.vel.y=Math.max(0,S.vel.y);S.onGround=true;const f=S.thr>.05?.03:.25;S.vel.multiplyScalar(1-f*dt*3);
    const e=new THREE.Euler().setFromQuaternion(S.q,'YXZ');e.z*=.8;e.x=Math.max(e.x,-.05);S.q.setFromEuler(e);S.w.z*=.5}
   if(S.rev&&S.armed&&S.thr>.3&&!S.revMsg){S.revMsg=1;S.status="Samolyot oldinga yurmayapti: motor teskari aylanmoqda. Motorning istalgan ikki simini almashtiring."}
-  if(stall&&V>2&&!S.onGround&&!S.stallMsg){S.stallMsg=1;setTimeout(()=>{if(SIM)SIM.stallMsg=0},2500);S.status=`STALL! Tezlik ${fmt(V*3.6)} km/s — sekin uchish chegarasidan past (${fmt(D.Vs*3.6)}).`}
+  if(stall&&V>2&&!S.onGround&&!S.stallMsg){S.stallMsg=1;setTimeout(()=>{if(SIM)SIM.stallMsg=0},2500);S.status=`STALL! Tezlik ${fmt(V*3.6)} km/soat — sekin uchish chegarasidan past (${fmt(D.Vs*3.6)}).`}
   const I_A=S.armed?D.Imot*Math.pow(S.thr,3)+.8:.3;S.used+=I_A*dt/3.6*(window.SIM_FAST||1);S.amp=I_A;S.volt=D.V*sag;
   if(soc<=0&&S.armed){S.armed=false;S.status='Batareya tugadi — sirpanib qo\'nish kerak.'}
   humSet(S.armed,S.thr);for(const s of S.model.userData.spinners)s.o.rotation.z+=dt*(S.armed?S.thr*90:0);
@@ -143,12 +144,13 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
   if(Math.abs(thr)>.8&&D.load>1)S.heat+=dt*(D.load-.6);else S.heat=Math.max(0,S.heat-dt*.5);
   const crr=.04*g*m*Math.sign(S.spd),drag=.5*rho*.03*S.spd*Math.abs(S.spd);S.spd+=(F-crr-drag)/m*dt;if(Math.abs(S.spd)<.05&&thr===0)S.spd=0;S.spd=clamp(S.spd,-D.vTop*.5,D.vTop);
   const wb=p.chassis.wb/1000,yawRate=S.spd/wb*Math.tan(S.steer),latA=Math.abs(S.spd*yawRate);let slip=1;if(latA>grip*g){slip=grip*g/latA}
-  if(latA>D.stab*g*1.1&&!S.fail){S.roll=Math.sign(yawRate)*.4;crash(S,`Burilishda ag'darildi: yon tezlanish ${fmt(latA/g,1)}g, barqarorlik ${fmt(D.stab,2)}.`)}
+  const latEff=Math.min(latA,grip*g);if(latEff>D.stab*g*1.05&&!S.fail){S.roll=Math.sign(yawRate)*.4;crash(S,`Burilishda ag'darildi: yon tezlanish ${fmt(latEff/g,2)}g, barqarorlik ${fmt(D.stab,2)}. Shina yopishishi ag'darilish chegarasidan katta — koleyani kengaytiring yoki og'irlik markazini pasaytiring.`)}
+  if(latA>grip*g*1.05&&!S.slideMsg&&!S.fail){S.slideMsg=1;setTimeout(()=>{if(SIM)SIM.slideMsg=0},2500);S.status='Shinalar sirpanmoqda — tezlikni kamaytiring.'}
   S.yaw+=yawRate*slip*dt;const dir=new V3(-Math.sin(S.yaw),0,-Math.cos(S.yaw));S.vel.copy(dir).multiplyScalar(S.spd);
   if(!S.landed||S.pos.y>0){S.vel.y=(S.vy||0)}S.pos.addScaledVector(S.vel,dt);
   const rp=simScene.userData.ramp,rl=rp.position;if(Math.abs(S.pos.x-rl.x)<1.5&&S.pos.z>rl.z-2&&S.pos.z<rl.z+2&&S.pos.y<.5){S.pos.y=clamp((rl.z+2-S.pos.z)/4*.6,0,.6);S.vy=Math.max(S.vy||0,Math.abs(S.spd)*.16)}
   else{S.vy=(S.vy||0)-g*dt;S.pos.y+=S.vy*dt;if(S.pos.y<=0){if((S.vy||0)<-6)crash(S,'Juda baland sakrashdan qattiq qo\'ndi.');S.pos.y=0;S.vy=0}}
-  S.pitch=S.pos.y>0?clamp(-(S.vy||0)*.05,-.4,.4):0;if(!S.fail)S.roll=clamp(-latA*Math.sign(yawRate)*.004,-.15,.15);
+  S.pitch=S.pos.y>0?clamp(-(S.vy||0)*.05,-.4,.4):0;if(!S.fail)S.roll=clamp(-Math.min(latA,grip*g)*Math.sign(yawRate)*.004,-.15,.15);
   const I_A=S.armed?Math.abs(F*Math.abs(S.spd))/.75/D.V+.5:.2;S.used+=I_A*dt/3.6*(window.SIM_FAST||1);S.amp=I_A;S.volt=D.V*sag;
   if(soc<=0&&S.armed){S.armed=false;S.status='Batareya tugadi.'}
   if(S.rev&&thr!==0&&!S.revMsg&&S.armed){S.revMsg=1;S.status="Mashina teskari yurmoqda: motor yo'nalishi teskari. ESC'da yo'nalishni o'zgartiring yoki ikki simni almashtiring."}

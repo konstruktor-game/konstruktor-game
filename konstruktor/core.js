@@ -114,7 +114,7 @@ matTex.repeat.set(50,50);
 const orb={th:.7,ph:1.0,r:60,tr:60,tg:new V3(0,4,0),auto:true,idle:0};
 function camUpdate(dt){if(orb.auto&&orb.idle>6)orb.th+=dt*.1;orb.idle+=dt;orb.r+=(orb.tr-orb.r)*Math.min(1,dt*6);
  camera.position.set(orb.tg.x+orb.r*Math.sin(orb.ph)*Math.cos(orb.th),orb.tg.y+orb.r*Math.cos(orb.ph),orb.tg.z+orb.r*Math.sin(orb.ph)*Math.sin(orb.th));camera.lookAt(orb.tg)}
-function fitCamera(size){orb.tr=clamp(size*2.3+18,30,900);orb.tg.set(0,Math.min(size*.1,14),0)}
+function fitCamera(size){orb.tr=clamp(size*1.9+12,28,900);orb.tg.set(0,Math.min(size*.1,14),0)}
 const ptrs=new Map();let pinch0=0,downAt=null;
 function bindOrbit(el,onPick,onHover){
  el.addEventListener('pointerdown',e=>{el.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);downAt=[e.clientX,e.clientY,performance.now()];orb.idle=0;
@@ -220,7 +220,7 @@ function cloneB(b){return JSON.parse(JSON.stringify(b))}
 function pushUndo(){undoStack.push(JSON.stringify(B));if(undoStack.length>80)undoStack.shift();redoStack.length=0}
 function newProject(type,preset){const T=TYPES[type],pid=preset&&T.presets[preset]?preset:T.defPreset,pr=T.presets[pid];
  return{v:2,type,name:pr.name,preset:pid,p:cloneB(pr.p),inst:{},wires:{},dirs:{},rev:false,col:cloneB(T.colors),fin:'gloss',
-  env:{alt:0,temp:20},purpose:T.defPurpose,prices:{},notes:'',step:0,id:null,pub:false,savedAt:Date.now()}}
+  env:{alt:0,temp:20},purpose:pr.purpose||T.defPurpose,prices:{},notes:'',step:0,id:null,pub:false,savedAt:Date.now()}}
 function saveLocal(){try{B.savedAt=Date.now();localStorage.setItem(LS_KEY,JSON.stringify(B))}catch(e){}}
 function loadLocal(){try{const b=JSON.parse(localStorage.getItem(LS_KEY));if(b&&b.v===2&&TYPES[b.type])return migrate(b)}catch(e){}return null}
 // yangi parametrlar qo'shilganda eski loyihalar buzilmasligi uchun shablondan to'ldiramiz

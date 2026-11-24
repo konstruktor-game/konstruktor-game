@@ -7,7 +7,7 @@
 (()=>{
 const NOM={lipo:3.7,liion:3.6},DENS={lipo:.026,liion:.0145},CMAX={lipo:150,liion:15};
 const TIRE={slick:{n:'Silliq (asfalt)',road:.95,dirt:.35},pin:{n:"Mayda tishli (aralash)",road:.75,dirt:.75},terrain:{n:"Katta tishli (yo'ltanlamas)",road:.6,dirt:.9}};
-const KIND={buggy:{n:'Buggy',crr:.04},truck:{n:'Monster truck',crr:.045},crawler:{n:'Crawler (toshlarga chiqish)',crr:.07},onroad:{n:'Shosse (asfalt)',crr:.02}};
+const KIND={buggy:{n:'Buggy',crr:.04,stab:[1,1.3],use:.15},truck:{n:'Monster truck',crr:.045,stab:[.85,1.1],use:.18},crawler:{n:'Crawler (toshlarga chiqish)',crr:.07,stab:[.7,.9],use:.04},onroad:{n:'Shosse (asfalt)',crr:.02,stab:[1,1.3],use:.15}};
 const T={id:'car',name:'RC mashina',ic:'🏎️',desc:"Buggy, monster truck, crawler yoki shosse mashinasi.",defPreset:'buggy',defPurpose:'basher',
  purposes:{basher:{t:"Har qanday yo'lda o'ynash",note:'Chidamlilik va kuch'},race:{t:'Poyga',note:'Yengillik va tezlanish'},crawler:{t:'Toshlarga chiqish',note:"Past tezlik, katta moment, yuqori klirens"},speed:{t:'Tezlik rekordi',note:'Uzun uzatma, aerodinamika, yaxshi sovutish'}},
  colors:{body:'#e53935',body2:'#ffffff',chassis:'#2b2f36',rim:'#d0d4da',tire:'#1a1a1a',motor:'#1565c0',spring:'#ffc107',bat:'#2e7d32'},
@@ -25,10 +25,10 @@ const T={id:'car',name:'RC mashina',ic:'🏎️',desc:"Buggy, monster truck, cra
   rx:{t:'Qabul qilgich',ic:'📡',g:'rx',f:[{k:'ch',l:'Kanallar',type:'sel',o:{3:'3 kanal',4:'4 kanal'},g:'channel'}]},
   bat:{t:'Batareya',ic:'🔋',g:'battery',f:[{k:'chem',l:'Kimyo',type:'sel',o:{lipo:'LiPo',liion:'Li-ion'},g:'chem'},{k:'cells',l:'Yacheykalar',min:1,max:8,step:1,u:'S',g:'cells'},{k:'mah',l:"Sig'im",min:500,max:10000,step:100,u:'mAh',g:'mah'},{k:'c',l:'C reyting',min:5,max:150,step:5,u:'C',g:'crating'}]}},
  presets:{
-  buggy:{name:'1/10 buggy 4×4',desc:"Har qanday yo'l, tez va chidamli",p:{chassis:{kind:'buggy',wb:280,track:250,clear:30,drive:'4wd',mat:'plastic'},motor:{type:'bl',kv:3300,turns:27,d:36,len:50},gear:{pin:18,spur:46,int:2.6},wheel:{d:85,w:40,tire:'pin'},esc:{a:80,cells:3,bec:6},servo:{tq:9},rx:{ch:3},bat:{chem:'lipo',cells:2,mah:5000,c:50}}},
-  monster:{name:'1/10 monster truck',desc:"Katta g'ildirak, sakrash va o'yin",p:{chassis:{kind:'truck',wb:330,track:300,clear:65,drive:'4wd',mat:'plastic'},motor:{type:'bl',kv:2400,turns:27,d:40,len:60},gear:{pin:15,spur:52,int:2.6},wheel:{d:150,w:65,tire:'terrain'},esc:{a:100,cells:4,bec:6},servo:{tq:15},rx:{ch:3},bat:{chem:'lipo',cells:3,mah:5000,c:50}}},
-  crawler:{name:'1/10 crawler',desc:'Toshlarga sekin, ishonchli chiqadi',p:{chassis:{kind:'crawler',wb:313,track:240,clear:70,drive:'4wd',mat:'alu'},motor:{type:'br',kv:1000,turns:35,d:36,len:50},gear:{pin:11,spur:56,int:3.0},wheel:{d:115,w:45,tire:'terrain'},esc:{a:40,cells:3,bec:7.4},servo:{tq:25},rx:{ch:4},bat:{chem:'lipo',cells:3,mah:3200,c:30}}},
-  onroad:{name:'1/10 shosse (touring)',desc:'Asfaltda yuqori tezlik',p:{chassis:{kind:'onroad',wb:257,track:190,clear:6,drive:'4wd',mat:'carbon'},motor:{type:'bl',kv:4500,turns:27,d:36,len:50},gear:{pin:28,spur:80,int:1.9},wheel:{d:64,w:26,tire:'slick'},esc:{a:120,cells:2,bec:6},servo:{tq:10},rx:{ch:3},bat:{chem:'lipo',cells:2,mah:5000,c:100}}}},
+  buggy:{name:'1/10 buggy 4×4',desc:"Har qanday yo'l, tez va chidamli",purpose:'basher',p:{chassis:{kind:'buggy',wb:280,track:250,clear:30,drive:'4wd',mat:'plastic'},motor:{type:'bl',kv:3300,turns:27,d:36,len:50},gear:{pin:18,spur:46,int:2.6},wheel:{d:85,w:40,tire:'pin'},esc:{a:80,cells:3,bec:6},servo:{tq:9},rx:{ch:3},bat:{chem:'lipo',cells:2,mah:5000,c:50}}},
+  monster:{name:'1/10 monster truck',desc:"Katta g'ildirak, sakrash va to'siqlar",purpose:'basher',p:{chassis:{kind:'truck',wb:330,track:300,clear:65,drive:'4wd',mat:'plastic'},motor:{type:'bl',kv:2400,turns:27,d:40,len:60},gear:{pin:15,spur:52,int:2.6},wheel:{d:150,w:65,tire:'terrain'},esc:{a:100,cells:4,bec:6},servo:{tq:15},rx:{ch:3},bat:{chem:'lipo',cells:3,mah:5000,c:50}}},
+  crawler:{name:'1/10 crawler',desc:'Toshlarga sekin, ishonchli chiqadi',purpose:'crawler',p:{chassis:{kind:'crawler',wb:313,track:250,clear:70,drive:'4wd',mat:'alu'},motor:{type:'br',kv:1000,turns:35,d:36,len:50},gear:{pin:11,spur:56,int:9},wheel:{d:115,w:45,tire:'terrain'},esc:{a:40,cells:3,bec:7.4},servo:{tq:25},rx:{ch:4},bat:{chem:'lipo',cells:2,mah:3200,c:30}}},
+  onroad:{name:'1/10 shosse (touring)',desc:'Asfaltda yuqori tezlik',purpose:'race',p:{chassis:{kind:'onroad',wb:257,track:190,clear:6,drive:'4wd',mat:'carbon'},motor:{type:'bl',kv:4500,turns:27,d:36,len:50},gear:{pin:28,spur:80,int:1.9},wheel:{d:64,w:26,tire:'slick'},esc:{a:120,cells:2,bec:6},servo:{tq:10},rx:{ch:3},bat:{chem:'lipo',cells:2,mah:5000,c:100}}}},
  steps:[
   {id:'chassis',t:'Shassi va osma',ic:'🧱',cats:['chassis'],slots:()=>['chassis'],intro:"Shassi — mashinaning asosi. Koleya (eni) qanchalik keng va og'irlik markazi past bo'lsa, burilishda shunchalik kam ag'dariladi."},
   {id:'drive',t:'Motor va uzatma',ic:'⚙️',cats:['motor','gear'],slots:()=>['mot1','gear'],intro:"Uzatma soni (spur/pinion × ichki) — tezlik va kuch o'rtasidagi tanlov. Uzun uzatma motorni qizdiradi."},
@@ -45,7 +45,7 @@ T.derive=B=>{const p=B.p,ch=p.chassis,m=p.motor,g=p.gear,wh=p.wheel,ba=p.bat;
  const wCh=ch.wb*ch.track*.006*mf+60,wWheel=wh.d*wh.w*.012+8,wMot=.0029*m.d*m.d*m.len+(m.type==='br'?-10:0),Pm=(m.type==='bl'?.012:.0055)*m.d*m.d*m.len;
  const wEsc=40+p.esc.a*.3,wServo=30+p.servo.tq*1.5,wBody=60+ch.wb*.25,Vn=ba.cells*NOM[ba.chem],V=Vn*.93,wBat=ba.cells*ba.mah*DENS[ba.chem]+ba.cells*3+12;
  const AUW=wCh+4*wWheel+wMot+wEsc+wServo+12+wBody+wBat+25,mkg=AUW/1000,rho=airDensity(B.env.alt,B.env.temp);
- const kv=m.type==='bl'?m.kv:27000/m.turns,rpm=kv*V*.9,ratio=g.spur/g.pin*g.int,wrpm=rpm/ratio,vGear=wrpm*Math.PI*wh.d/1000/60*.92;
+ const kv=m.type==='bl'?m.kv:56000/m.turns,rpm=kv*V*.9,ratio=g.spur/g.pin*g.int,wrpm=rpm/ratio,vGear=wrpm*Math.PI*wh.d/1000/60*.92;
  const crr=KIND[ch.kind].crr,CdA=(ch.track/1000)*((ch.clear+wh.d*.6)/1000+.06)*.8;
  const Pneed=v=>(crr*mkg*9.81+.5*rho*CdA*v*v)*v/.75;
  let vPow=vGear;if(Pneed(vGear)>Pm){let lo=0,hi=vGear;for(let i=0;i<40;i++){const mid=(lo+hi)/2;if(Pneed(mid)>Pm)hi=mid;else lo=mid}vPow=lo}
@@ -53,30 +53,30 @@ T.derive=B=>{const p=B.p,ch=p.chassis,m=p.motor,g=p.gear,wh=p.wheel,ba=p.bat;
  const grip=Math.max(TIRE[wh.tire].road,TIRE[wh.tire].dirt*.9),driveF=ch.drive==='4wd'?1:.55,Fgrip=grip*mkg*9.81*driveF,Fpow=Pm*.75/4;
  const torqueWheel=Pm*.75/Math.max(1,rpm*2*Math.PI/60)*ratio*.9,Fmot=torqueWheel/(wh.d/2000);
  const F=Math.min(Fgrip,Fmot,Fpow*3),acc=Math.max(.1,F/mkg-crr*9.81),t30=8.33/acc+(vTop<8.33?99:0);
- const Ipk=Math.min(Pm,Math.max(Pneed(vTop),Fmot*2))/V,Iavg=.35*Math.min(Pm,Pneed(vTop)*1.3)/V+.5,capAh=ba.mah/1000,tRun=capAh*.8/Iavg*60;
+ const Ipk=Pm*.6/V,Iavg=KIND[ch.kind].use*Pm/V+.5,capAh=ba.mah/1000,tRun=capAh*.8/Iavg*60;
  const cgH=ch.clear+wh.d*.35+15,stab=ch.track/(2*cgH),servoNeed=mkg*(wh.d/100)*1.6+2,cmax=Math.min(ba.c,CMAX[ba.chem]);
  return{AUW,wCh,wWheel,wMot,Pm,wEsc,wServo,wBody,wBat,V,Vn,kv,rpm,ratio,vGear,vPow,vTop,load,acc,t30,Ipk,Iavg,tRun,cgH,stab,servoNeed,cmax,batMaxA:capAh*cmax,grip,
   parts:[['Shassi va osma',wCh],["G'ildiraklar",4*wWheel],['Motor',wMot],['ESC',wEsc],['Servo',wServo],['Kuzov',wBody],['Batareya',wBat],["Simlar va boshqalar",37]],
   table:[10,20,30,40,50,60,70,80,90,100].map(t=>{const v=vTop*t/100,pw=Math.min(Pm,Pneed(v));return{t,thrust:v*3.6,watt:pw,amp:pw/V+.5,eff:pw>0?v*3.6/pw*100:0}}),
   batDims:[clamp(4.5+ba.cells*.4,4,9),clamp(2+ba.cells*.6,2,6),clamp(9+ba.mah/500,9,19)]}};
 
-T.metrics=(B,D)=>[{l:"Og'irlik",v:fmt(D.AUW/1000,2)+' kg'},{l:'Maks. tezlik',v:fmt(D.vTop*3.6)+' km/s'},{l:'0→30 km/s',v:D.t30>50?'—':fmt(D.t30,1)+' s'},
- {l:'Motor yuklamasi',v:fmt(D.load*100)+' %',lvl:D.load>1.4?'bad':D.load>1?'warn':'ok'},{l:'Barqarorlik',v:fmt(D.stab,2),lvl:D.stab<1?'bad':D.stab<1.3?'warn':'ok'},{l:'Haydash vaqti',v:fmt(D.tRun)+' daq'}];
+T.metrics=(B,D)=>[{l:"Og'irlik",v:fmt(D.AUW/1000,2)+' kg'},{l:'Maks. tezlik',v:fmt(D.vTop*3.6)+' km/soat'},{l:'0→30 km/soat',v:D.t30>50?'—':fmt(D.t30,1)+' s'},
+ {l:'Motor yuklamasi',v:fmt(D.load*100)+' %',lvl:D.load>1.4?'bad':D.load>1?'warn':'ok'},{l:'Barqarorlik',v:fmt(D.stab,2),lvl:D.stab<KIND[B.p.chassis.kind].stab[0]?'bad':D.stab<KIND[B.p.chassis.kind].stab[1]?'warn':'ok'},{l:'Haydash vaqti',v:fmt(D.tRun)+' daq'}];
 
 T.issues=(B,D)=>{const p=B.p,L=[],add=(lvl,t,why)=>L.push({lvl,t,why});
- if(D.load>1.4)add('bad',`Uzatma juda uzun — motor kuyadi (${fmt(D.load*100)}%)`,`Motor ${fmt(D.vGear*3.6)} km/s ga yetishga harakat qiladi, lekin quvvat faqat ${fmt(D.vPow*3.6)} km/s ga yetadi. Pinionni ${Math.max(8,Math.round(p.gear.pin/D.load))}T gacha kichraytiring.`);
+ if(D.load>1.4)add('bad',`Uzatma juda uzun — motor kuyadi (${fmt(D.load*100)}%)`,`Motor ${fmt(D.vGear*3.6)} km/soat ga yetishga harakat qiladi, lekin quvvat faqat ${fmt(D.vPow*3.6)} km/soat ga yetadi. Pinionni ${Math.max(8,Math.round(p.gear.pin/D.load))}T gacha kichraytiring.`);
  else if(D.load>1)add('warn',`Motor qiziydi (${fmt(D.load*100)}%)`,"Pinionni 1–3 tishga kichraytiring yoki sovutgich qo'ying. Motor harorati 70 °C dan oshmasin.");
  if(p.motor.type==='br'&&D.V>8.6)add('warn',"Cho'tkali motor uchun kuchlanish yuqori",`Ko'pchilik cho'tkali motorlar 2S (7.4 V) uchun; ${p.bat.cells}S da cho'tkalar tez yeyiladi.`);
  if(p.bat.cells>+p.esc.cells)add('bad',`Batareya ${p.bat.cells}S, ESC ${p.esc.cells}S gacha`,'ESC birinchi ulashdayoq kuyadi.');
  if(D.Ipk>p.esc.a*1.2)add('bad',`ESC toki yetmaydi (${fmt(D.Ipk)} / ${p.esc.a} A)`,'Kuchliroq ESC oling.');else if(D.Ipk>p.esc.a*.9)add('warn',`ESC chegarada (${fmt(D.Ipk)} / ${p.esc.a} A)`,'');
  if(D.Ipk>D.batMaxA)add('warn',`Batareya toki yetmaydi (${fmt(D.batMaxA)} / ${fmt(D.Ipk)} A)`,'Yuqori C reyting kerak.');
  if(p.servo.tq<D.servoNeed)add('bad',`Rul servosi kuchsiz (${p.servo.tq} < ${fmt(D.servoNeed,1)} kg·sm)`,"G'ildiraklar to'liq burilmaydi, servo tishlari sinadi.");
- if(D.stab<1)add('bad',`Burilishda ag'dariladi (barqarorlik ${fmt(D.stab,2)})`,"Koleyani kengaytiring, klirensni yoki g'ildirak diametrini kamaytiring.");else if(D.stab<1.3)add('warn',`Ag'darilishga moyil (${fmt(D.stab,2)})`,'');
+ const sb=KIND[p.chassis.kind].stab;if(D.stab<sb[0])add('bad',`Burilishda ag'dariladi (barqarorlik ${fmt(D.stab,2)})`,"Koleyani kengaytiring, klirensni yoki g'ildirak diametrini kamaytiring.");else if(D.stab<sb[1])add('warn',`Ag'darilishga moyil (${fmt(D.stab,2)})`,'Keskin burilishlarda tezlikni kamaytiring.');
  if(p.chassis.kind==='crawler'&&p.chassis.clear<40)add('warn',"Crawler uchun klirens past","Toshlarga ilinib qoladi; 50 mm+ tavsiya.");
  if(p.chassis.kind==='crawler'&&D.ratio<20)add('warn','Crawler uchun uzatma kam',"Sekin va aniq harakat uchun 30:1 dan katta umumiy uzatma kerak.");
  if(p.chassis.kind==='onroad'&&p.wheel.tire!=='slick')add('info','Asfalt uchun silliq shina yaxshiroq',"Silliq shina asfaltda eng yaxshi yopishadi.");
  if(p.wheel.d>p.chassis.wb*.6)add('warn',"G'ildirak shassiga nisbatan juda katta",'Burilishda kuzovga tegishi mumkin.');
- if(D.vTop*3.6>80)add('info',`Maks. tezlik ${fmt(D.vTop*3.6)} km/s`,"Yuqori tezlikda yaxshi sovutish va metall tishli g'ildiraklar kerak.");
+ if(D.vTop*3.6>80)add('info',`Maks. tezlik ${fmt(D.vTop*3.6)} km/soat`,"Yuqori tezlikda yaxshi sovutish va metall tishli g'ildiraklar kerak.");
  return L};
 
 T.wiring=B=>{const p=B.p,bl=p.motor.type==='bl',boards=[],comps=[];

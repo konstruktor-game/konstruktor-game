@@ -15,7 +15,9 @@ button{cursor:pointer;border:0;background:none}
 a{color:var(--ac2)}
 .hidden{display:none!important}
 #app{display:grid;grid-template-rows:56px 1fr;height:100vh;height:100dvh}
-header{display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--p1);border-bottom:1px solid var(--ln);min-width:0}
+header{display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--p1);border-bottom:1px solid var(--ln);min-width:0;overflow-x:auto;scrollbar-width:none}header::-webkit-scrollbar{display:none}
+html,body{overflow-x:hidden}
+#metrics,#panel,#steps{scrollbar-width:thin;scrollbar-color:#2a3850 transparent}
 .logo{font-weight:900;font-size:18px;white-space:nowrap;display:flex;gap:8px;align-items:center}
 .logo small{font-weight:600;color:var(--mu);font-size:12px}
 .typeSw{display:flex;background:var(--p2);border-radius:10px;padding:3px;gap:2px}
@@ -116,7 +118,8 @@ textarea{width:100%;min-height:120px;background:var(--bg);border:1px solid var(-
 .toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:var(--ac);color:#1a1200;padding:10px 18px;border-radius:10px;font-weight:800;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.4)}
 .pop{position:fixed;z-index:55;background:var(--p1);border:1px solid var(--ac2);border-radius:12px;padding:12px 14px;max-width:320px;font-size:13px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
 .pop b{color:var(--ac);font-size:14px}.pop p{margin-top:5px;color:#c4cee0}
-@media (max-width:1100px){main{grid-template-columns:62px 1fr 360px}.st span,.st .pg,.stHead{display:none}.st{justify-content:center;padding:9px 0}}
+@media (max-width:1300px){.hide-s,.logo small{display:none}.typeSw button span{display:none}}
+@media (max-width:1100px){main{grid-template-columns:62px 1fr 340px}.st span,.st .pg,.stHead{display:none}.st{justify-content:center;padding:9px 0}}
 @media (max-width:760px){
  #app{grid-template-rows:auto 1fr;height:auto;min-height:100dvh}
  header{flex-wrap:wrap;padding:8px 10px;gap:6px}.logo small,.hide-s{display:none}#pName{order:5;max-width:none;flex-basis:100%}
