@@ -1,0 +1,7 @@
+*.backup-*.html
+*.pre-features.html
+backend/.venv/
+backend/db.sqlite3
+__pycache__/
+*.pyc
+.env
