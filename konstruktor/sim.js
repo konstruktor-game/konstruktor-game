@@ -8,6 +8,8 @@
 const simScene=new THREE.Scene();
 simCam=new THREE.PerspectiveCamera(70,1,.03,3000);
 let SIM=null;
+// kater uchun ko'l va robot uchun fanera maydon (sahnadagi joyi)
+const LAKE={x:-62,z:72,r:38},ARENA={x:40,z:-30,s:5,line:1.6,obs:[]};
 (()=>{ // ochiq maydon
  simScene.fog=new THREE.Fog('#c9d9e6',120,900);
  const sky=new THREE.Mesh(new THREE.SphereGeometry(1500,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
@@ -44,9 +46,27 @@ let SIM=null;
  const dirt=ctex('dirt',256,256,(g,w,h)=>{g.fillStyle='#7a6248';g.fillRect(0,0,w,h);for(let i=0;i<5000;i++){g.fillStyle=`rgba(${Math.random()<.5?40:150},${Math.random()<.5?30:120},${Math.random()<.5?20:90},${rnd(.05,.25)})`;g.fillRect(rnd(0,w),rnd(0,h),rnd(1,3),rnd(1,3))}
   g.fillStyle='rgba(50,38,28,.25)';for(const x of[80,100,156,176])g.fillRect(x,0,8,h)},[1,30]);
  {const tr=new THREE.Mesh(new THREE.RingGeometry(9.5,14.5,96,1),new THREE.MeshStandardMaterial({map:dirt,roughness:.95,polygonOffset:true,polygonOffsetFactor:-2}));tr.rotation.x=-Math.PI/2;tr.scale.set(1,.62,1);tr.position.set(28,.012,18);tr.receiveShadow=true;simScene.add(tr)}
+ // ko'l: qumli qirg'oq, chuqurlik bo'yicha rang o'zgaradigan suv, mayda to'lqin teksturasi
+ {const wt=ctex('water',256,256,(g,w,h)=>{g.fillStyle='#808080';g.fillRect(0,0,w,h);for(let i=0;i<1400;i++){const x=rnd(0,w),y=rnd(0,h),l=rnd(6,22);g.strokeStyle=`rgba(${Math.random()<.5?255:0},${Math.random()<.5?255:0},${Math.random()<.5?255:0},${rnd(.05,.18)})`;g.lineWidth=rnd(1,2.5);g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+l/2,y-rnd(1,4),x+l,y);g.stroke()}},[18,18]);wt.colorSpace=THREE.NoColorSpace;
+  const sand=new THREE.Mesh(new THREE.RingGeometry(LAKE.r-1.5,LAKE.r+4,96,1),new THREE.MeshStandardMaterial({color:'#b9a57a',roughness:.95,polygonOffset:true,polygonOffsetFactor:-2}));sand.rotation.x=-Math.PI/2;sand.position.set(LAKE.x,.012,LAKE.z);sand.receiveShadow=true;simScene.add(sand);
+  const wg=new THREE.CircleGeometry(LAKE.r,96),col=[],P=wg.attributes.position,c1=new THREE.Color('#3d7f8c'),c2=new THREE.Color('#123d4f'),tc=new THREE.Color();for(let i=0;i<P.count;i++){const d=Math.hypot(P.getX(i),P.getY(i))/LAKE.r;tc.copy(c2).lerp(c1,Math.pow(d,3));col.push(tc.r,tc.g,tc.b)}wg.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const wm=new THREE.MeshPhysicalMaterial({vertexColors:true,roughness:.07,metalness:.05,clearcoat:1,clearcoatRoughness:.05,normalMap:wt,normalScale:new THREE.Vector2(.35,.35),polygonOffset:true,polygonOffsetFactor:-4});
+  const water=new THREE.Mesh(wg,wm);water.rotation.x=-Math.PI/2;water.position.set(LAKE.x,.03,LAKE.z);water.receiveShadow=true;simScene.add(water);simScene.userData.water=water;
+  // kichik pirs (qayiqni suvga tushirish joyi)
+  const pier=new THREE.Group(),wood=new THREE.MeshStandardMaterial({color:'#8a6a48',roughness:.85});pier.position.set(LAKE.x,0,LAKE.z+LAKE.r-2.5);
+  for(let k=0;k<10;k++){const b=new THREE.Mesh(new THREE.BoxGeometry(2.2,.08,.28),wood);b.position.set(0,.35,-k*.32+1.4);b.castShadow=b.receiveShadow=true;pier.add(b)}
+  for(const sx of[-1,1])for(const z of[1.4,-1.4]){const p2=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.8,10),wood);p2.position.set(sx*1,.2,z);pier.add(p2)}simScene.add(pier)}
+ // robot maydoni: 5×5 m fanera pol, 30 sm devorlar, to'siq qutilar va qora chiziq (aylana)
+ {const g=new THREE.Group();g.position.set(ARENA.x,0,ARENA.z);const s=ARENA.s,ply=ctex('ply',256,256,(c,w,h)=>{c.fillStyle='#d8b98c';c.fillRect(0,0,w,h);for(let i=0;i<120;i++){c.strokeStyle=`rgba(120,80,40,${rnd(.05,.15)})`;c.lineWidth=rnd(1,3);c.beginPath();const y=rnd(0,h);c.moveTo(0,y);c.bezierCurveTo(w/3,y+rnd(-8,8),w*2/3,y+rnd(-8,8),w,y+rnd(-4,4));c.stroke()}},[2,2]);
+  const fl=new THREE.Mesh(new THREE.BoxGeometry(s,.02,s),new THREE.MeshStandardMaterial({map:ply,roughness:.8}));fl.position.y=.01;fl.receiveShadow=true;g.add(fl);
+  const ln=new THREE.Mesh(new THREE.RingGeometry(ARENA.line-.0125,ARENA.line+.0125,160),new THREE.MeshStandardMaterial({color:'#0c0c0c',roughness:.6,polygonOffset:true,polygonOffsetFactor:-3}));ln.rotation.x=-Math.PI/2;ln.position.y=.021;g.add(ln);
+  const wm=new THREE.MeshStandardMaterial({color:'#c9a874',roughness:.8});for(const[w,d,x,z]of[[s,.03,0,-s/2],[s,.03,0,s/2],[.03,s,-s/2,0],[.03,s,s/2,0]]){const m=new THREE.Mesh(new THREE.BoxGeometry(w,.3,d),wm);m.position.set(x,.15,z);m.castShadow=m.receiveShadow=true;g.add(m)}
+  const bm=new THREE.MeshStandardMaterial({color:'#a77b4f',roughness:.85});for(const[x,z,w,d]of[[-.4,-.9,.3,.3],[.9,.6,.25,.4],[-1.75,1.6,.4,.2],[.2,-2,.5,.2]]){const m=new THREE.Mesh(new THREE.BoxGeometry(w,.2,d),bm);m.position.set(x,.11,z);m.castShadow=m.receiveShadow=true;g.add(m);ARENA.obs.push({x:ARENA.x+x,z:ARENA.z+z,hw:w/2,hd:d/2})}
+  for(const[w,d,x,z]of[[s,.03,0,-s/2],[s,.03,0,s/2],[.03,s,-s/2,0],[.03,s,s/2,0]])ARENA.obs.push({x:ARENA.x+x,z:ARENA.z+z,hw:w/2,hd:d/2});
+  simScene.add(g)}
  // daraxtlar
  const N=220,tm=new THREE.MeshStandardMaterial({color:'#2a4227',roughness:.92}),tiers=[[2.6,3.6,3.4],[2.1,3.2,5.3],[1.4,2.8,7.1]].map(([r,h,y])=>new THREE.InstancedMesh(new THREE.ConeGeometry(r,h,12).translate(0,y,0),tm,N)),iK=new THREE.InstancedMesh(new THREE.CylinderGeometry(.22,.32,2.2,8).translate(0,1.1,0),new THREE.MeshStandardMaterial({color:'#4a3a2c',roughness:.9}),N),mx=new THREE.Matrix4(),tc=new THREE.Color();
- for(let i=0;i<N;i++){const a=Math.random()*Math.PI*2,r=rnd(90,420),s=rnd(.8,1.9);mx.makeScale(s,s*rnd(.9,1.3),s).setPosition(Math.cos(a)*r,0,Math.sin(a)*r);iK.setMatrixAt(i,mx);tc.setHSL(rnd(.27,.33),rnd(.25,.4),rnd(.16,.24));for(const t of tiers){t.setMatrixAt(i,mx);t.setColorAt(i,tc)}}
+ for(let i=0;i<N;i++){const a=Math.random()*Math.PI*2,s=rnd(.8,1.9);let r=rnd(90,420);if(Math.hypot(Math.cos(a)*r-LAKE.x,Math.sin(a)*r-LAKE.z)<LAKE.r+8)r+=LAKE.r*2+20;mx.makeScale(s,s*rnd(.9,1.3),s).setPosition(Math.cos(a)*r,0,Math.sin(a)*r);iK.setMatrixAt(i,mx);tc.setHSL(rnd(.27,.33),rnd(.25,.4),rnd(.16,.24));for(const t of tiers){t.setMatrixAt(i,mx);t.setColorAt(i,tc)}}
  for(const t of tiers){t.castShadow=true;simScene.add(t)}simScene.add(iK);
 })();
 
@@ -87,6 +107,7 @@ function simStart(B){const pf=preflight(B);simStop();
  else{S.link=WC.works.escsig&&WC.works.xt60;S.rev=!!ex.motorReversed;
   if(B.type==='plane'){const ch=id=>B.wires['w'+id];S.ctl={ail:[ch('svA1'),ch('svA2')],elev:B.p.tail.type==='vtail'?[ch('svV1'),ch('svV2')]:[ch('svE')],rud:B.p.tail.type==='vtail'?[ch('svV1'),ch('svV2')]:[ch('svR')]}}
   else S.ctl={steer:B.wires.wservo}}
+ if(pf.T.simInit){pf.T.simInit(S,B,WC,ex);placeObj(S)}
  S.status=!pf.ok?pf.block:pf.fatal.length?pf.fatal[0].t:'Tayyor. "Ishga tushirish" ni bosing.';
  placeObj(S);return S}
 function simStop(){if(SIM){simScene.remove(SIM.obj);for(const s of SIM.smoke)simScene.remove(s.m);SIM=null;humSet(false)}}
@@ -95,8 +116,8 @@ function simArm(){const S=SIM;if(!S)return;if(!S.pf.ok){S.status=S.pf.block;snd(
  if(S.pf.fatal.length){const f=S.pf.fatal[0];S.fail={t:f.t,why:f.why};puff(S,6,'#222');snd('boom',.6);humSet(false);return}
  if(S.B.type==='copter'){if(!S.link){S.status="Pult bilan aloqa yo'q — qabul qilgich ulanmagan yoki TX/RX almashgan. Dron ARM bo'lmaydi.";snd('err');return}
   if(!S.escLink){S.status="Kontroller ESC ga ulanmagan (8-pin kabel) — motorlar aylanmaydi.";snd('err');return}}
- else if(!S.link){S.status=S.B.type==='car'?"ESC signal kabeli CH2 ga ulanmagan — qabul qilgich quvvatsiz (BEC) va gaz ishlamaydi.":"ESC signal kabeli CH3 ga ulanmagan — qabul qilgich quvvatsiz (BEC), motor ishlamaydi.";snd('err');return}
- S.armed=true;S.status=S.B.type==='copter'?"ARM. W — gaz, A/D — burilish, strelkalar — egilish":S.B.type==='plane'?"W — gaz. Uchish yo'lagida tezlik oling, ↓ bilan burunni ko'taring":"W/S — gaz/tormoz, A/D — rul";snd('ok')}
+ else if(!S.link){S.status=S.T.linkMsg?S.T.linkMsg(S):S.B.type==='car'?"ESC signal kabeli CH2 ga ulanmagan — qabul qilgich quvvatsiz (BEC) va gaz ishlamaydi.":"ESC signal kabeli CH3 ga ulanmagan — qabul qilgich quvvatsiz (BEC), motor ishlamaydi.";snd('err');return}
+ S.armed=true;S.status=S.T.armMsg?S.T.armMsg(S):S.B.type==='copter'?"ARM. W — gaz, A/D — burilish, strelkalar — egilish":S.B.type==='plane'?"W — gaz. Uchish yo'lagida tezlik oling, ↓ bilan burunni ko'taring":"W/S — gaz/tormoz, A/D — rul";snd('ok')}
 const puffTex=ctex('puff',64,64,(g,w,h)=>{const r=g.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2);r.addColorStop(0,'rgba(255,255,255,.9)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,w,h)});
 function puff(S,n,col){for(let i=0;i<n;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:puffTex,color:col,transparent:true,opacity:.7,depthWrite:false}));m.scale.setScalar(.25);m.position.copy(S.obj.position).add(new V3(rnd(-.1,.1),rnd(0,.1),rnd(-.1,.1)));simScene.add(m);S.smoke.push({m,v:new V3(rnd(-.3,.3),rnd(.6,1.4),rnd(-.3,.3)),t:rnd(1.5,3)})}}
 function crash(S,why){if(S.fail)return;S.fail={t:'Halokat!',why};S.armed=false;snd('boom',.5);puff(S,10,'#555');humSet(false)}
@@ -161,6 +182,7 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
   if(soc<=0&&S.armed){S.armed=false;S.status='Batareya tugadi — sirpanib qo\'nish kerak.'}
   humSet(S.armed,S.thr);for(const s of S.model.userData.spinners)s.o.rotation.y+=dt*(S.armed?S.thr*90:0);
   const e=new THREE.Euler().setFromQuaternion(S.q,'YXZ');S.yaw=e.y;S.pitch=e.x;S.roll=e.z}
+ else if(S.T.simTick)S.T.simTick(S,dt,I,{g,rho,soc:clamp(1-S.used/B.p.bat.mah,0,1)})
  else{const p=B.p,m=D.AUW/1000,soc=1-S.used/p.bat.mah,sag=.85+.15*clamp(soc,0,1);
   let thr=0;if(S.armed&&soc>0)thr=(I.thrUp||KEYS.ArrowUp?1:0)-(I.thrDn||KEYS.ArrowDown?1:0)+(-STK.l.y);thr=clamp(thr,-1,1);if(S.rev)thr=-thr;
   const steerIn=clamp((KEYS.KeyA||KEYS.ArrowLeft?1:0)-(KEYS.KeyD||KEYS.ArrowRight?1:0)+(-STK.r.x),-1,1);
@@ -192,10 +214,10 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
  if(S.blob){S.blob.position.set(S.obj.position.x,.015,S.obj.position.z);const hh=S.pos.y;S.blob.material.opacity=.7*clamp(1-hh/(S.size*4),0,1);S.blob.visible=hh<S.size*4}
  // kamera
  const sun=simScene.userData.sun;sun.position.copy(S.obj.position).add(new V3(40,80,30));sun.target.position.copy(S.obj.position);
- const fwd=new V3(0,0,-1).applyQuaternion(S.obj.quaternion),dist=Math.max(1.2,S.size*3.2);
+ const fwd=new V3(0,0,-1).applyQuaternion(S.obj.quaternion),dist=Math.max(S.T.camMin||1.2,S.size*3.2);
  if(S.cam==='fpv'&&B.type==='copter'){if(S.video===false){simCam.position.set(0,-50,0);simCam.lookAt(0,-60,0)}else{const tilt=B.p.vid.tilt*DEG;simCam.position.copy(S.obj.position).addScaledVector(fwd,S.size*.25);
   simCam.quaternion.copy(S.obj.quaternion).multiply(new THREE.Quaternion().setFromAxisAngle(new V3(1,0,0),tilt));if(simCam.fov!==B.p.vid.fov*.6){simCam.fov=clamp(B.p.vid.fov*.6,60,110);simCam.updateProjectionMatrix()}}}
- else if(S.cam==='pilot'){simCam.position.set(B.type==='car'?20:3,1.7,B.type==='car'?2:14);simCam.lookAt(S.obj.position);if(simCam.fov!==55){simCam.fov=55;simCam.updateProjectionMatrix()}}
+ else if(S.cam==='pilot'){const pc=S.T.pilotCam||(B.type==='car'?[20,1.7,2]:[3,1.7,14]);simCam.position.set(pc[0],pc[1],pc[2]);simCam.lookAt(S.obj.position);if(simCam.fov!==55){simCam.fov=55;simCam.updateProjectionMatrix()}}
  else{const flat=new V3(fwd.x,0,fwd.z);if(flat.lengthSq()<1e-4)flat.set(0,0,-1);flat.normalize();const want=S.obj.position.clone().addScaledVector(flat,-dist).add(new V3(0,dist*.42,0));
-  want.y=Math.max(want.y,.35);simCam.position.lerp(want,Math.min(1,dt*3.5));if(simCam.position.y<.3)simCam.position.y=.3;simCam.lookAt(S.obj.position.clone().add(new V3(0,S.size*.15,0)));if(simCam.fov!==62){simCam.fov=62;simCam.updateProjectionMatrix()}}
+  want.y=Math.max(want.y,S.T.camMinY||.35);simCam.position.lerp(want,Math.min(1,dt*3.5));if(simCam.position.y<.3)simCam.position.y=.3;simCam.lookAt(S.obj.position.clone().add(new V3(0,S.size*.15,0)));if(simCam.fov!==62){simCam.fov=62;simCam.updateProjectionMatrix()}}
  const sky=simScene.children.find(o=>o.userData.sky);sky.position.copy(simCam.position)}

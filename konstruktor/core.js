@@ -177,6 +177,8 @@ function buildModel(B,activeSlots,step){
   spin(obj,dir){spinners.push({o:obj,d:dir});return obj}};
  T.build(B,D,ctx);
  scene.add(model);
+ // detal yer ostiga tushib qolmasin (masalan, kater parragi korpusdan pastda)
+ {const b0=new THREE.Box3().setFromObject(model);model.position.y=b0.isEmpty()?0:Math.max(0,-b0.min.y)}
  const bb=new THREE.Box3().setFromObject(model),sz=bb.isEmpty()?new V3(20,10,20):bb.getSize(new V3());model.userData.size=Math.max(sz.x,sz.z,sz.y*1.5,12);
  contact.scale.set(Math.max(sz.x,8)*1.35,Math.max(sz.z,8)*1.35,1);if(!contact.parent)scene.add(contact);if(Math.abs((model.userData.lastFit||0)-model.userData.size)>2){model.userData.lastFit=model.userData.size;fitLights(model.userData.size)}
  return{model,D}}
@@ -223,7 +225,7 @@ function wcheck(B){const T=TYPES[B.type],W=T.wiring(B),pads={};
   const n=ns[0];if(portOwner[n]){for(const x of L)st[x.w.id]='bad';add('bad',`UART${n} ikki qurilmada band`,"Har bir qurilmaga alohida UART kerak.");continue}portOwner[n]=dev;uart[dev]=n}
  // bir guruhdagi simlar turli kontaktlarda bo'lishi kerak (motor fazalari, V-dum)
  const grp={};for(const c of comps)for(const w of c.wires)if(w.grp&&B.wires[w.id])(grp[w.grp]=grp[w.grp]||[]).push(w);
- for(const g in grp){const seen={};for(const w of grp[g]){const p=B.wires[w.id];if(seen[p]){st[w.id]='bad';st[seen[p].id]='bad';add('bad',g==='mot'?"Ikkita motor simi bitta kontaktda":"Ikkita servo bitta kanalda","Har bir sim o'z kontaktiga ulanadi.")}else seen[p]=w}}
+ for(const g in grp){const seen={};for(const w of grp[g]){const p=B.wires[w.id];if(seen[p]){st[w.id]='bad';st[seen[p].id]='bad';add('bad',g==='pin'?"Ikkita signal simi bitta pinda":/^m/.test(g)?"Ikkita motor simi bitta kontaktda":"Ikkita servo bitta kanalda","Har bir sim o'z kontaktiga ulanadi.")}else seen[p]=w}}
  for(const c of comps){const ok=c.wires.every(w=>st[w.id]==='ok'||st[w.id]==='warn'||st[w.id]==='opt');works[c.id]=ok&&!burned.has(c.id);
   for(const w of c.wires)if(st[w.id]==='ok'||st[w.id]==='warn')correct++}
  const complete=comps.every(c=>c.opt||c.wires.every(w=>B.wires[w.id]));

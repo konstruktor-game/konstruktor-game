@@ -105,11 +105,11 @@ T.wextra=(B)=>{const w=B.wires,ord=[w.ma,w.mb,w.mc];if(ord.some(x=>!x)||new Set(
 
 T.build=(B,D,ctx)=>{const p=B.p,fu=p.fuse,w=p.wing,c=B.col,X=!!window.XRAY;
  const shell=(col)=>X?MAT('xr'+col,()=>new THREE.MeshPhysicalMaterial({color:col,transparent:true,opacity:.22,roughness:.3,depthWrite:false})):mMat(fu.mat==='carbon'?'paint':fu.mat==='balsa'?'wood':'paint',col,fu.mat==='foam'?'matte':B.fin);
- const z0=-fu.len/2,zAt=x=>z0+x,fh=fu.w*1.15,baseY=fh/2+6,acc=mPaint(c.accent,B.fin),white=mPlastic('#f5f5f5',.45);
+ const z0=-fu.len/2,zAt=x=>z0+x,fh=fu.w*1.15,baseY=fh/2+6,mR=(p.motor.d+6)/20,n0=Math.min(.8,Math.max(.42,mR*2.3/fu.w)),acc=mPaint(c.accent,B.fin),white=mPlastic('#f5f5f5',.45);
  // fuzelyaj, kabina, 3 mm po'lat simli shassi va ko'pik g'ildiraklar
  {const g=new THREE.Group();
   // fuzelyaj: burundan dumgacha silliq kesimlar (burun yumaloq, eng keng joyi qanot oldida, dum tomon ingichkalashadi)
-  g.add(loft([[0,.25,.28,0],[.015,.6,.62,0],[.05,.88,.9,0],[.13,1,1,0],[.34,1,1,0],[.52,.78,.74,.07],[.72,.46,.46,.15],[.9,.28,.3,.19],[1,.16,.2,.2]].map(([t,ww,hh,yo])=>[zAt(t*fu.len),fu.w*ww,fh*hh,baseY+yo*fh]),shell(c.fuse),2.7));
+  g.add(loft([[0,n0,n0*.95,-.02],[.012,n0+.1,n0+.08,-.015],[.04,Math.max(.82,n0+.2),.84,-.005],[.1,.97,.97,0],[.18,1,1,0],[.48,.97,.95,.02],[.66,.7,.66,.08],[.84,.46,.46,.14],[.97,.32,.34,.17],[1,.26,.28,.17]].map(([t,ww,hh,yo])=>[zAt(t*fu.len),fu.w*ww,fh*hh,baseY+yo*fh]),shell(c.fuse),3.1,48));
   // kabina: shaffof qopqoq, fuzelyaj ustida qanot oldida
   const LEc=fu.len*w.pos/100,cz=t=>zAt(LEc-fu.len*.17+t*fu.len*.19);
   g.add(loft([[cz(0),fu.w*.3,fh*.06,baseY+fh*.47],[cz(.25),fu.w*.74,fh*.5,baseY+fh*.52],[cz(.65),fu.w*.8,fh*.56,baseY+fh*.52],[cz(1),fu.w*.6,fh*.1,baseY+fh*.48]],MAT('canopy'+c.canopy,()=>new THREE.MeshPhysicalMaterial({color:c.canopy,roughness:.04,metalness:.2,clearcoat:1,transparent:true,opacity:.62,depthWrite:false})),2.2));
@@ -135,10 +135,10 @@ T.build=(B,D,ctx)=>{const p=B.p,fu=p.fuse,w=p.wing,c=B.col,X=!!window.XRAY;
   ctx.add('tail',g,[0,6,8])}
  // motor: fanera firewall'ga X-mount bilan; parrak haqiqiy buralishli
  const tr=fu.mount==='tractor',mot=mkMotor(p.motor.d,p.motor.h,c.motor),mTop=mot.userData.top,my=tr?baseY:wy+mot.userData.R+1.4,mz=tr?zAt(-.2):zAt(D.LE+w.chord+2.5);
- {const g=new THREE.Group();g.position.set(0,my,mz);g.rotation.x=tr?-Math.PI/2:Math.PI/2;g.add(box(fu.w*.9,.4,fu.w*.9,mPlastic('#b08a5a',.8),0,-.25,0));for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;g.add(box(.35,.15,mot.userData.R*1.3,mMetal('#30343a'),Math.cos(a)*mot.userData.R*.55,-.02,Math.sin(a)*mot.userData.R*.55).rotateY(-a))}
+ {const g=new THREE.Group();g.position.set(0,my,mz);g.rotation.x=tr?-Math.PI/2:Math.PI/2;if(tr){const rc=fu.w*n0/2;g.add(cyl(rc*.97,rc,.6,shell(c.fuse),0,-.3,0,40));g.add(cyl(rc*.8,rc*.8,.08,mPlastic('#1a1a1a',.7),0,.02,0,40))}else g.add(cyl(mR*1.15,mR*1.15,.4,mPlastic('#b08a5a',.8),0,-.25,0,32));for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;g.add(box(.35,.15,mot.userData.R*1.3,mMetal('#30343a'),Math.cos(a)*mot.userData.R*.55,-.02,Math.sin(a)*mot.userData.R*.55).rotateY(-a))}
   g.add(mot);if(!tr)g.add(box(.6,mot.userData.R+1.4,1.2,mPlastic('#333'),0,-.8,-mot.userData.R-.7));ctx.add('mot1',g,[0,0,tr?-6:6])}
  {const g=new THREE.Group();g.position.set(0,my,mz+(tr?-1:1)*(mTop+.2));g.rotation.x=tr?-Math.PI/2:Math.PI/2;const pr=mkProp(p.prop.d,p.prop.p,+p.prop.b,'pc',c.prop,'CCW');g.add(pr);
-  const sp=new THREE.Mesh(GEO('spin',()=>new THREE.ConeGeometry(1.1,2.4,28)),mPaint(c.accent,'gloss'));sp.position.y=1.3;g.add(sp);
+  const spR=mR*.82,spH=mR*2.1,sp=new THREE.Mesh(GEO('spin'+spR.toFixed(2),()=>new THREE.LatheGeometry(Array.from({length:13},(_,i)=>{const t=i/12;return new THREE.Vector2(spR*Math.sqrt(Math.max(0,1-t*t)),t*spH)}),40)),mPaint(c.accent,'gloss'));sp.position.y=.1;sp.castShadow=true;g.add(sp);g.add(cyl(spR,spR,.25,mMetal('#9aa3ad',.3),0,.0,0,40));
   const o=ctx.add('prop1',g,[0,0,tr?-10:10]);if(o&&ctx.inst('prop1'))ctx.spin(pr,1)}
  // ESC (termo-qobiqli), qabul qilgich (antenna simi bilan)
  {const g=new THREE.Group(),ez=tr?zAt(8):zAt(D.LE+w.chord-2);g.add(rbox(2.5,.9,4.5,.35,MAT('escshr',()=>new THREE.MeshPhysicalMaterial({color:'#1e40af',roughness:.35,clearcoat:.5})),0,baseY-.3,ez));
