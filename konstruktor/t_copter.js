@@ -62,22 +62,23 @@ const T={id:'copter',name:'Multikopter (dron)',ic:'drone',desc:"4, 6 yoki 8 moto
    {k:'tilt',l:'Kamera burchagi',min:0,max:60,step:1,u:'°',g:'tilt'},{k:'fov',l:"Ko'rish burchagi (FOV)",min:90,max:170,step:5,u:'°'},{k:'mw',l:'Uzatish quvvati',min:25,max:1000,step:25,u:'mW',g:'mw'}]},
   rx:{t:'Radio qabul qilgich',ic:'antenna',g:'rx',f:[{k:'band',l:'Chastota',type:'sel',o:{'2.4':'2.4 GHz — tez, kichik antenna','915':"915 MHz — uzoq, to'siqdan o'tadi"},g:'band'}]},
   extra:{t:"Qo'shimcha",ic:'plus',f:[{k:'gps',l:'GPS (uyga qaytish, joylashuv)',type:'bool',g:'gps'},{k:'led',l:'LED chiroqlar',type:'bool',g:'led'},{k:'buz',l:'Buzzer (yo\'qolsa topish)',type:'bool',g:'buzzer'},{k:'pay',l:"Qo'shimcha yuk (kamera, sensor)",min:0,max:5000,step:10,u:'g',g:'payload'}]},
+  mount:{t:'Mahkamlash detallari',ic:'wrench',g:'softmount',f:[{k:'grom',l:'Amortizator qattiqligi (Shore A)',type:'sel',o:{'40':'40A — yumshoq',"50":'50A — o\'rtacha','70':'70A — qattiq'},g:'softmount'},{k:'tp',l:'Yuqori plastina qalinligi',min:1.5,max:4,step:.5,u:'mm',g:'plate'},{k:'sw',l:'Batareya tasmasi eni',type:'sel',o:{'15':'15 mm','20':'20 mm','25':'25 mm'},g:'strap'},{k:'pad',l:'Sirpanmas rezina qoplama',type:'bool'}]},
   bat:{t:'Batareya',ic:'battery',g:'battery',f:[
    {k:'chem',l:'Kimyo',type:'sel',o:{lipo:'LiPo — yuqori tok',lihv:'LiHV — yuqori kuchlanish',liion:'Li-ion — yengil, uzoq, past tok',life:'LiFePO4 — xavfsiz, og\'ir'},g:'chem'},
    {k:'cells',l:'Yacheykalar (S)',min:1,max:12,step:1,u:'S',g:'cells'},{k:'mah',l:"Sig'im",min:150,max:22000,step:50,u:'mAh',g:'mah'},{k:'c',l:'Razryad reytingi',min:5,max:150,step:5,u:'C',g:'crating'}]}},
  presets:{
   mini3:{name:'3" yengil cinewhoop-lite',desc:"Xona va yaqin masofa, 250 g dan yengil",purpose:'cinematic',p:{frame:{arms:4,shape:'X',wb:130,aw:10,at:3.5,bl:64,bw:32,sh:20,mat:'carbon',stack:'20'},motor:{d:14,h:4,kv:3800},prop:{d:3,p:1.8,b:3,mat:'pc'},
-   esc:{a:30,cells:4,size:'20',proto:'dshot600'},fc:{mcu:'F4',size:'20',baro:false,bb:false},vid:{type:'analog',tilt:15,fov:150,mw:200},rx:{band:'2.4'},extra:{gps:false,led:true,buz:true,pay:0},bat:{chem:'lipo',cells:4,mah:650,c:80}}},
+   esc:{a:30,cells:4,size:'20',proto:'dshot600'},fc:{mcu:'F4',size:'20',baro:false,bb:false},vid:{type:'analog',tilt:15,fov:150,mw:200},rx:{band:'2.4'},extra:{gps:false,led:true,buz:true,pay:0},mount:{grom:'50',tp:2,sw:'20',pad:true},bat:{chem:'lipo',cells:4,mah:650,c:80}}},
   free5:{name:'5" freestyle',desc:'Eng ommabop FPV o\'lcham',purpose:'freestyle',p:{frame:{arms:4,shape:'X',wb:225,aw:13,at:5,bl:96,bw:44,sh:30,mat:'carbon',stack:'30.5'},motor:{d:22,h:7,kv:1950},prop:{d:5.1,p:3.6,b:3,mat:'pc'},
-   esc:{a:55,cells:6,size:'30.5',proto:'dshot600'},fc:{mcu:'F7',size:'30.5',baro:false,bb:true},vid:{type:'digital',tilt:30,fov:150,mw:500},rx:{band:'2.4'},extra:{gps:false,led:false,buz:true,pay:0},bat:{chem:'lipo',cells:6,mah:1300,c:120}}},
+   esc:{a:55,cells:6,size:'30.5',proto:'dshot600'},fc:{mcu:'F7',size:'30.5',baro:false,bb:true},vid:{type:'digital',tilt:30,fov:150,mw:500},rx:{band:'2.4'},extra:{gps:false,led:false,buz:true,pay:0},mount:{grom:'50',tp:2,sw:'20',pad:true},bat:{chem:'lipo',cells:6,mah:1300,c:120}}},
   lr7:{name:'7" uzoq masofa',desc:'Li-ion bilan 15+ daqiqa',purpose:'longrange',p:{frame:{arms:4,shape:'X',wb:300,aw:15,at:5.5,bl:115,bw:48,sh:32,mat:'carbon',stack:'30.5'},motor:{d:28,h:6.5,kv:1300},prop:{d:7,p:4,b:3,mat:'pc'},
-   esc:{a:45,cells:6,size:'30.5',proto:'dshot300'},fc:{mcu:'H7',size:'30.5',baro:true,bb:true},vid:{type:'digital',tilt:20,fov:140,mw:1000},rx:{band:'915'},extra:{gps:true,led:false,buz:true,pay:0},bat:{chem:'liion',cells:6,mah:4000,c:15}}},
+   esc:{a:45,cells:6,size:'30.5',proto:'dshot300'},fc:{mcu:'H7',size:'30.5',baro:true,bb:true},vid:{type:'digital',tilt:20,fov:140,mw:1000},rx:{band:'915'},extra:{gps:true,led:false,buz:true,pay:0},mount:{grom:'50',tp:2,sw:'20',pad:true},bat:{chem:'liion',cells:6,mah:4000,c:15}}},
   cine10:{name:'12" kino / yuk geksakopter',desc:"6 motor, katta kamera ko'taradi",purpose:'cinematic',p:{frame:{arms:6,shape:'X',wb:700,aw:22,at:6,bl:160,bw:110,sh:40,mat:'carbon',stack:'30.5'},motor:{d:35,h:12,kv:720},prop:{d:12,p:5.5,b:2,mat:'cf'},
-   esc:{a:50,cells:6,size:'30.5',proto:'dshot300'},fc:{mcu:'H7',size:'30.5',baro:true,bb:true},vid:{type:'digital',tilt:10,fov:120,mw:700},rx:{band:'915'},extra:{gps:true,led:true,buz:true,pay:900},bat:{chem:'lipo',cells:6,mah:8000,c:25}}}},
+   esc:{a:50,cells:6,size:'30.5',proto:'dshot300'},fc:{mcu:'H7',size:'30.5',baro:true,bb:true},vid:{type:'digital',tilt:10,fov:120,mw:700},rx:{band:'915'},extra:{gps:true,led:true,buz:true,pay:900},mount:{grom:'50',tp:2,sw:'20',pad:true},bat:{chem:'lipo',cells:6,mah:8000,c:25}}}},
  steps:[
   {id:'frame',t:'Ramka',ic:'frame',cats:['frame'],slots:B=>['frame'],intro:"Ramka — dronning skeleti. Avval o'lcham va shaklni loyihalang: motorlar orasidagi masofa qaysi parrak sig'ishini belgilaydi."},
   {id:'motors',t:'Motorlar',ic:'motor',cats:['motor'],slots:B=>arr(+B.p.frame.arms,i=>'mot'+i),intro:"Motorlarni qo'llarning uchiga o'rnating. Stator kattaligi — kuch, KV — tezlik. Katta parrakka past KV, kichigiga yuqori KV kerak."},
-  {id:'stack',t:'Elektronika steki',ic:'cpu',cats:['esc','fc'],slots:B=>['soft','esc','fc'],intro:"Stek ikki qavat: pastda ESC (motorlarga quvvat beradi), tepada parvoz kontrolleri (dronning miyasi). Tebranishni kamaytirish uchun rezina amortizatorlarga qo'yiladi."},
+  {id:'stack',t:'Elektronika steki',ic:'cpu',cats:['mount','esc','fc'],slots:B=>['soft','esc','fc'],intro:"Stek ikki qavat: pastda ESC (motorlarga quvvat beradi), tepada parvoz kontrolleri (dronning miyasi). Tebranishni kamaytirish uchun rezina amortizatorlarga qo'yiladi."},
   {id:'avionics',t:'Kamera va aloqa',ic:'antenna',cats:['vid','rx','extra'],slots:B=>[...(B.p.vid.type!=='none'?['cam','vtx']:[]),'rx',...(B.p.extra.gps?['gps']:[]),...(B.p.extra.led?['led']:[]),...(B.p.extra.buz?['buz']:[])],intro:"Kamera — uchuvchining ko'zi, VTX — tasvirni ko'zoynakka uzatadi, qabul qilgich — pultdan buyruq oladi. GPS ramka orqasidagi ustunchaga, elektronikadan uzoqroq o'rnatiladi (shovqin kamroq)."},
   {id:'wiring',kind:'wiring',t:'Kavsharlash (simlar)',ic:'plug',intro:"Har bir simni to'g'ri kontaktga ulang. Xato ulangan sim sinovda muammo chiqaradi — xuddi haqiqiy hayotdagidek."},
   {id:'power',t:'Yopish va batareya',ic:'battery',cats:['bat'],slots:B=>['top','strap','bat'],intro:"Yuqori plastina stekni yopadi. Batareya tasma bilan mahkamlanadi — parvozda uchib ketmasligi kerak."},
@@ -212,7 +213,7 @@ T.build=(B,D,ctx)=>{const p=B.p,f=p.frame,c=B.col,u=v=>v/10;
  for(const q of D.mot){const dir=B.dirs[q.i]||q.dir,g=mkProp(p.prop.d,p.prop.p,+p.prop.b,p.prop.mat,c.prop,dir);g.position.set(u(q.x),pY,u(q.z));g.userData.dir=dir;
   const o=ctx.add('prop'+q.i,g,[0,7,0]);if(o&&ctx.inst('prop'+q.i))ctx.spin(g,dir==='CW'?-1:1)}
  // stek: rezina amortizatorlar, ESC, parvoz kontrolleri
- {const g=new THREE.Group();for(const[x,z]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const gr=new THREE.Mesh(GEO('grom',()=>new THREE.TorusGeometry(.22,.12,8,20)),mRubber('#6a1b9a'));gr.rotation.x=Math.PI/2;gr.position.set(x*hp,at+.14,z*hp);g.add(gr);
+ {const g=new THREE.Group();for(const[x,z]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const gr=new THREE.Mesh(GEO('grom',()=>new THREE.TorusGeometry(.22,.12,8,20)),mRubber({'40':'#7b1fa2','50':'#c62828','70':'#212121'}[B.p.mount&&B.p.mount.grom]||'#6a1b9a'));gr.rotation.x=Math.PI/2;gr.position.set(x*hp,at+.14,z*hp);g.add(gr);
   g.add(cyl(.13,.13,2.2,mPlastic('#202020',.5),x*hp,at+1.1,z*hp,10));const n=cyl(.28,.28,.22,mPlastic('#202020',.5),x*hp,at+2.25,z*hp,6);g.add(n)}ctx.add('soft',g,[0,1,0])}
  {const b=mkBoard(stk,'#121212',`ESC ${p.esc.a}A ${p.esc.cells}S`,'esc',{angles:D.mot.map(q=>q.a)});b.position.y=at+.5;ctx.add('esc',b,[0,2,0])}
  {const b=mkBoard(stk,'#0d2a4a',`FC ${p.fc.mcu}`,'fc',{baro:p.fc.baro});b.position.y=at+1.5;ctx.add('fc',b,[0,4,0])}
@@ -229,11 +230,11 @@ T.build=(B,D,ctx)=>{const p=B.p,f=p.frame,c=B.col,u=v=>v/10;
  if(p.extra.led){const g=new THREE.Group();for(const q of D.mot){if(q.z<=0)continue;const L=u(Math.hypot(q.x,q.z)),a=Math.atan2(q.x,q.z),st=new THREE.Group();st.position.set(0,-.02,0);st.rotation.y=a;
    st.add(box(.8,.06,L*.55,mPlastic('#f5f5f5',.6),0,0,L*.45));for(let k=0;k<Math.floor(L*.55);k++)st.add(box(.5,.12,.5,mGlow(c.led),0,-.08,L*.2+k+.4));g.add(st)}ctx.add('led',g,[0,-2,0])}
  if(p.extra.buz){const g=new THREE.Group();g.add(cyl(.6,.6,.95,mPlastic('#111',.4),0,0,0,24));g.add(cyl(.12,.12,.02,mPlastic('#333'),0,.48,0,10));g.position.set(-stk/2-.9,at+.5,stk/2);ctx.add('buz',g,[-2,3,2])}
- {const g=new THREE.Group();g.add(rbox(u(f.bw)*.85,.2,u(f.bl)*.85,.4,fm,0,topY+.1,0));for(const[x,z]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const sc=mkScrew(3);sc.position.set(x*(u(f.bw)/2-.55),topY+.2,z*(u(f.bl)/2-.65));g.add(sc)}ctx.add('top',g,[0,9,0])}
+ {const g=new THREE.Group();{const tpv=(B.p.mount?B.p.mount.tp:2)/10;g.add(rbox(u(f.bw)*.85,tpv,u(f.bl)*.85,.4,fm,0,topY+tpv/2,0))}for(const[x,z]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const sc=mkScrew(3);sc.position.set(x*(u(f.bw)/2-.55),topY+.2,z*(u(f.bl)/2-.65));g.add(sc)}ctx.add('top',g,[0,9,0])}
  if(p.extra.gps){const g=new THREE.Group(),gz=u(f.bl)/2+.9,mh=u(f.sh)+5;g.add(box(1.4,.5,1.4,mPlastic('#333',.6),0,at+.25,gz-.3));g.add(cyl(.18,.18,mh,mPlastic('#2b2b2b',.5),0,at+mh/2,gz,10));
   g.add(rbox(2.5,.75,2.5,.4,mPlastic('#1c1c1c',.4),0,at+mh+.4,gz));g.add(box(1.8,.4,1.8,mPlastic('#d7c9a7',.6),0,at+mh+.85,gz));g.add(box(1.1,.06,1.1,mMetal('#c0a050',.3),0,at+mh+1.06,gz));ctx.add('gps',g,[0,10,2])}
  const bd=realBat(p.bat.cells,p.bat.mah,p.bat.chem),bh=bd.kind==='cyl'?bd.h:bd.h,bw=bd.w,bl=bd.kind==='cyl'?7.2:bd.l;
- {const g=new THREE.Group();g.add(box(bw*.9,.12,bl*.9,mRubber('#202020'),0,topY+.26,0));for(const z of[-bl*.22,bl*.22]){g.add(box(bw+.3,.1,2,mPlastic('#1d1d1d',.7),0,topY+.24,z));g.add(box(.35,.4,2.1,mMetal('#9aa',.4),bw/2+.35,topY+.3,z))}ctx.add('strap',g,[0,10,0])}
+ {const g=new THREE.Group(),mt=B.p.mount||{sw:'20',pad:true},swc=(+mt.sw)/10;if(mt.pad)g.add(box(bw*.9,.12,bl*.9,mRubber('#202020'),0,topY+.26,0));for(const z of[-bl*.22,bl*.22]){g.add(box(bw+.3,.1,swc,mPlastic('#1d1d1d',.7),0,topY+.24,z));g.add(box(.35,.4,swc+.1,mMetal('#9aa',.4),bw/2+.35,topY+.3,z))}ctx.add('strap',g,[0,10,0])}
  {const g=mkBattery(p.bat.cells,p.bat.mah,p.bat.chem,c.bat,[`${p.bat.cells}S ${p.bat.mah}mAh`,`${p.bat.c}C · ${CHEM[p.bat.chem]}`,`${fmt(D.Vn,1)} V nominal`],{awg:p.frame.wb>=200?12:14});g.position.y=topY+.32;
   for(const z of[-bl*.22,bl*.22])g.add(box(bw+.12,.1,2,mPlastic('#1d1d1d',.7),0,bh+.05,z));ctx.add('bat',g,[0,14,0])}
  // ulangan simlar (3D)
@@ -281,5 +282,12 @@ T.cli=(B,W)=>{const p=B.p,L=['# Namunaviy Betaflight CLI — simlaringizga qarab
  if(B.rev)L.push('set yaw_motors_reversed = ON');if(p.extra.gps)L.push('feature GPS');if(p.extra.led)L.push('feature LED_STRIP');
  if(p.vid.type==='digital')L.push('set osd_displayport_device = MSP','set displayport_msp_serial = '+(W.uart.vtx?W.uart.vtx-1:'?'));
  L.push(`set vbat_max_cell_voltage = ${Math.round(FULL[p.bat.chem]*100)}`,`set vbat_min_cell_voltage = ${p.bat.chem==='liion'?280:330}`,'save');return L.join('\n')};
+{const iss0=T.issues;T.issues=(B,D)=>{const L=iss0(B,D),m=B.p.mount;if(!m)return L;
+ if(m.grom==='70')L.push({lvl:'warn',t:'Amortizatorlar qattiq (70A)',why:"Motor tebranishi giroskopga o'tadi: videoda «jele» effekti va filtrlash qiyinlashadi. 40–50A tavsiya etiladi."});
+ if(+m.sw<20&&B.p.bat.mah*B.p.bat.cells>4*1300)add2(L,'warn',`Tasma ${m.sw} mm — og'ir batareya uchun ingichka`,"Qattiq qo'nishda batareya sirpanib chiqadi. 20–25 mm kevlar tasma oling.");
+ if(!m.pad)add2(L,'info',"Sirpanmas qoplama yo'q","Batareya tasma ostida siljiydi va og'irlik markazi o'zgaradi.");
+ if(m.tp<2&&B.p.frame.wb>300)add2(L,'info','Yuqori plastina yupqa',"Katta ramkada 2–3 mm plastina burilishga chidamliroq.");
+ return L};const add2=(L,lvl,t,why)=>L.push({lvl,t,why});
+ const bom0=T.bom;T.bom=(B,D)=>{const L=bom0(B,D),m=B.p.mount;if(m){L.push(['softmount',`Rezina amortizatorlar ${m.grom}A (M3)`,'4 dona',4,.5]);for(const row of L)if(row[0]==='strap'){row[1]=`Batareya tasmasi ${m.sw} mm (kevlar) ×2${m.pad?' + sirpanmas qoplama':''}`}}return L}}
 regType(T);
 })();

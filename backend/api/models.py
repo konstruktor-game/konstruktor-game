@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
-PROJECT_TYPES = [('copter', 'Multikopter'), ('plane', 'Samolyot'), ('car', 'RC mashina')]
+PROJECT_TYPES = [('copter', 'Multikopter'), ('plane', 'Samolyot'), ('car', 'RC mashina'), ('boat', 'RC kater'), ('robot', 'Arduino robot')]
 
 
 class AuthToken(models.Model):

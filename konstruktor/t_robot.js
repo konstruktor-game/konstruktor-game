@@ -173,7 +173,7 @@ T.startNote="Robot 5×5 m fanera maydonda, qora chiziq va to'siqlar bor. Rejimni
 T.linkMsg=()=>"Drayver boshqaruv simlari ulanmagan — Arduino motorlarni boshqara olmaydi.";
 T.armMsg=S=>({manual:"W/S — oldinga/orqaga, A/D — burilish",avoid:"Avtonom: robot to'siqlarni o'zi aylanib o'tadi",line:"Avtonom: robot qora chiziq bo'ylab yuradi"}[S.mode]||'');
 T.camMin=.55;T.camMinY=.18;T.pilotCam=[0,0,0];
-T.simInit=(S,B,WC,ex)=>{S.pos.set(ARENA.x,0,ARENA.z+ARENA.line);S.yaw=Math.PI/2;T.pilotCam=[ARENA.x+2.2,1.5,ARENA.z+2.6];
+T.simInit=(S,B,WC,ex)=>{if(!['manual','avoid','line'].includes(S.mode))S.mode='manual';S.pos.set(ARENA.x,0,ARENA.z+ARENA.line);S.yaw=Math.PI/2;T.pilotCam=[ARENA.x+2.2,1.5,ARENA.z+2.6];
  const w=WC.works,iss=T.issues(B,S.D);S.link=w.drvsig&&w.xt60;S.mcuOk=w.mcupwr&&!iss.some(i=>/kuyadi/.test(i.t)&&i.lvl==='bad');S.gndOk=!!B.wires.mcuG;S.usOk=B.p.sens.us&&w.us;S.lineOk=B.p.sens.line&&w.line;
  S.revL=!!ex.revL;S.revR=!!ex.revR;S.vL=0;S.vR=0;S.ai={st:'fwd',t:0,dir:1,last:0};S.wh={};S.model.traverse(o=>{if(o.userData.slot==='wL')S.wh.L=o;if(o.userData.slot==='wR')S.wh.R=o})};
 function rayDist(x,z,dx,dz,max){let best=max;for(const o of ARENA.obs){let t0=-1e9,t1=1e9;for(const[p,d,lo,hi]of[[x,dx,o.x-o.hw,o.x+o.hw],[z,dz,o.z-o.hd,o.z+o.hd]]){if(Math.abs(d)<1e-9){if(p<lo||p>hi){t0=1e9;break}}else{let a=(lo-p)/d,b=(hi-p)/d;if(a>b)[a,b]=[b,a];t0=Math.max(t0,a);t1=Math.min(t1,b)}}if(t0<=t1&&t0>0&&t0<best)best=t0}return best}

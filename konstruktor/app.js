@@ -130,6 +130,7 @@ function bindPanel(){const P=$('panel');
  if(g('bPrev'))g('bPrev').onclick=()=>{snd('click');goStep(stepIdx-1)};if(g('bNext'))g('bNext').onclick=()=>{snd('click');goStep(stepIdx+1)};
  if(g('bAuto'))g('bAuto').onclick=()=>autoInstall();if(g('bRemove'))g('bRemove').onclick=()=>removeStep();
  if(g('bBack360'))g('bBack360').onclick=()=>exitInspect();
+ if(g('bStl'))g('bStl').onclick=()=>{if(insp&&insp.turn&&window.STLX)STLX.exportSTL(insp.turn.children[0],(GLOSS[insp.label]||{n:insp.label}).n)};
  if(!insp)bindKind(P)}
 // parametr o'zgarganda keraksiz bo'lib qolgan o'rnatish/simlarni tozalash
 function cleanup(){const all=new Set();for(const s of T.steps)if(s.slots)for(const x of s.slots(B))all.add(x);for(const k in B.inst)if(!all.has(k))delete B.inst[k];
@@ -188,7 +189,7 @@ function inspectHTML(){const g=GLOSS[insp.label]||{n:insp.label,en:'',w:'',y:'',
  return`<h2><i class=i-orbit></i> ${esc(g.n)}</h2><p class="intro">${esc(g.en)} — sichqoncha bilan aylantiring, g'ildirak bilan yaqinlashtiring, Shift + sudrash bilan suring.</p>
  <div class="card"><p><i class=i-pin></i> ${esc(g.w)}</p><p style="margin-top:6px"><i class=i-help></i> <b>Nima uchun:</b> ${esc(g.y)}</p><p style="margin:6px 0 8px"><i class=i-ok></i> <b>Qanday tanlash:</b> ${esc(g.h)}</p></div>
  ${cat?`<div class="card"><h3><i class=i-ruler></i> Hozirgi parametrlar</h3><div class="info" style="border:0">${T.spec[cat].f.map(f=>`<span>${esc(f.l)}</span><b>${f.type==='sel'?esc(f.o[B.p[cat][f.k]]):f.type==='bool'?(B.p[cat][f.k]?'ha':"yo'q"):fmt(B.p[cat][f.k],f.step<1?1:0)+' '+esc(f.u||'')}</b>`).join('')}${catInfo(cat)}</div></div>`:''}
- <div class="row"><button class="btn pri" id="bBack360"><i class=i-back></i> Yig'ishga qaytish</button></div>`}
+ <div class="row"><button class="btn pri" id="bBack360"><i class=i-back></i> Yig'ishga qaytish</button><button class="btn" id="bStl" title="3D printer uchun: millimetrda, Z — yuqori"><i class=i-printer></i> STL (3D bosma)</button></div>`}
 
 // ---------------- parraklar bosqichi ----------------
 function propsTools(){return`<div class="card"><h3><i class=i-prop></i> Parrak yo'nalishi <button class="q" data-g="cwccw">?</button></h3>
@@ -278,10 +279,11 @@ function checkPanel(){const W=wcheck(B),I=T.issues(B,D),bad=I.filter(i=>i.lvl===
  <div class="card"><h3><i class=i-globe></i> Muhit sharoiti <button class="q" data-g="twr">?</button></h3><div class="grid2"><div class="fld"><div class="fl"><span>Balandlik (dengizdan), m</span></div><input class="inp" type="number" id="envAlt" min="0" max="5000" step="50" value="${B.env.alt}"></div>
  <div class="fld"><div class="fl"><span>Harorat, °C</span></div><input class="inp" type="number" id="envTemp" min="-30" max="50" step="1" value="${B.env.temp}"></div></div>
  <p style="font-size:12px;color:var(--mu);margin-bottom:8px">Havo zichligi: ${fmt(airDensity(B.env.alt,B.env.temp),3)} kg/m³ (dengiz sathida 1.225). Tog'da va issiqda havo siyrak — tortish kamayadi.</p></div>
+ ${window.ADV?ADV.html():''}
  <h3 style="font-size:13px;font-weight:600;margin:6px 0 6px"><i class=i-search></i> Batafsil tekshiruv</h3>
  ${W.fatal.map(f=>`<div class="iss bad"><b><i class=i-bolt></i> ${esc(f.t)}</b><span>${esc(f.why)}</span></div>`).join('')}${W.complete?'':`<div class="iss warn"><b><i class=i-plug></i> Simlar to'liq ulanmagan (${W.connected}/${W.total})</b><span>Kavsharlash bosqichiga qayting.</span></div>`}
  ${issuesHTML(false)}<p style="font-size:11.5px;color:var(--mu);margin-top:10px"><i class=i-info></i> Hisob-kitoblar taxminiy (±15–25%): ommabop detallarning sinov natijalariga moslangan formulalar asosida. Haqiqiy detal sotib olishdan oldin ishlab chiqaruvchining sinov jadvallarini tekshiring.</p>`}
-function bindCheck(P){const a=P.querySelector('#envAlt'),t=P.querySelector('#envTemp');const ch=()=>{pushUndo();B.env.alt=clamp(+a.value||0,0,5000);B.env.temp=clamp(+t.value||20,-30,50);commit()};a.onchange=ch;t.onchange=ch;drawChart()}
+function bindCheck(P){const a=P.querySelector('#envAlt'),t=P.querySelector('#envTemp');const ch=()=>{pushUndo();B.env.alt=clamp(+a.value||0,0,5000);B.env.temp=clamp(+t.value||20,-30,50);commit()};a.onchange=ch;t.onchange=ch;drawChart();if(window.ADV)ADV.bind(P)}
 function drawChart(){const c=$('chart');if(!c)return;const g=c.getContext('2d'),W=c.width,H=c.height,L=50,R=W-50,Tp=20,Bt=H-40,rows=D.table,mx=Math.max(...rows.map(r=>r.thrust))*1.1||1,ma=Math.max(...rows.map(r=>r.amp))*1.1||1;
  g.clearRect(0,0,W,H);g.font='13px Segoe UI';g.strokeStyle='rgba(255,255,255,.08)';g.fillStyle='#8e9bb3';
  for(let i=0;i<=5;i++){const y=Bt-(Bt-Tp)*i/5;g.beginPath();g.moveTo(L,y);g.lineTo(R,y);g.stroke();g.textAlign='right';g.fillText(fmt(mx*i/5),L-6,y+4);g.textAlign='left';g.fillText(fmt(ma*i/5),R+6,y+4)}

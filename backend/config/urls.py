@@ -17,4 +17,5 @@ urlpatterns = [
     path('api/builds', views.builds),
     path('api/builds/<str:slug>', views.build_detail),
     path('api/gallery', views.gallery),
+    path('api/chat', views.chat),
 ]

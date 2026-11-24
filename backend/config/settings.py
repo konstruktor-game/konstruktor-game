@@ -89,3 +89,10 @@ KONS_MAX_THUMB_CHARS = 120 * 1024
 # Token amal qilish muddati (kun)
 KONS_TOKEN_DAYS = 90
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024
+
+# Chat yordamchisi: KONS_AI_CHAT=1 bo'lsa va `anthropic` paketi o'rnatilgan, API kaliti
+# (ANTHROPIC_API_KEY yoki `ant auth login`) sozlangan bo'lsa — savollarga Claude javob beradi.
+# Aks holda brauzer o'zidagi lug'at va hisob-kitoblar asosida javob beradi (pul sarflanmaydi).
+KONS_AI_CHAT = os.environ.get('KONS_AI_CHAT', '0') == '1'
+KONS_AI_MODEL = os.environ.get('KONS_AI_MODEL', 'claude-opus-5-5')
+KONS_AI_PER_HOUR = int(os.environ.get('KONS_AI_PER_HOUR', '30'))

@@ -227,7 +227,7 @@ function wcheck(B){const T=TYPES[B.type],W=T.wiring(B),pads={};
  const grp={};for(const c of comps)for(const w of c.wires)if(w.grp&&B.wires[w.id])(grp[w.grp]=grp[w.grp]||[]).push(w);
  for(const g in grp){const seen={};for(const w of grp[g]){const p=B.wires[w.id];if(seen[p]){st[w.id]='bad';st[seen[p].id]='bad';add('bad',g==='pin'?"Ikkita signal simi bitta pinda":/^m/.test(g)?"Ikkita motor simi bitta kontaktda":"Ikkita servo bitta kanalda","Har bir sim o'z kontaktiga ulanadi.")}else seen[p]=w}}
  for(const c of comps){const ok=c.wires.every(w=>st[w.id]==='ok'||st[w.id]==='warn'||st[w.id]==='opt');works[c.id]=ok&&!burned.has(c.id);
-  for(const w of c.wires)if(st[w.id]==='ok'||st[w.id]==='warn')correct++}
+  if(!c.opt)for(const w of c.wires)if(st[w.id]==='ok'||st[w.id]==='warn')correct++}
  const complete=comps.every(c=>c.opt||c.wires.every(w=>B.wires[w.id]));
  const capOk=works.cap&&B.wires['cap+'];
  const extra=T.wextra?T.wextra(B):{};

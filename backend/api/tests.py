@@ -100,3 +100,16 @@ class ApiTests(TestCase):
         r = self.client.options('/api/ping', HTTP_ORIGIN='http://127.0.0.1:8765')
         self.assertEqual(r['Access-Control-Allow-Origin'], 'http://127.0.0.1:8765')
         self.assertNotIn('Access-Control-Allow-Origin', self.client.get('/api/ping', HTTP_ORIGIN='https://begona.example'))
+
+    def test_new_types_and_chat(self):
+        tok = self.register()
+        for t in ('boat', 'robot'):
+            r = self.call('post', '/api/builds', {'type': t, 'data': project(t)}, tok)
+            self.assertEqual(r.status_code, 201, t)
+        # AI o'chirilgan: chat "offline" qaytaradi, brauzer o'zi javob beradi
+        self.assertEqual(self.client.get('/api/chat').json(), {'ok': True, 'ai': False})
+        r = self.call('post', '/api/chat', {'q': 'KV nima?', 'ctx': {'tur': 'Dron'}})
+        self.assertEqual(r.json(), {'ok': False, 'offline': True})
+        self.assertEqual(self.call('post', '/api/chat', {'q': '  '}).status_code, 400)
+        self.assertEqual(self.client.get('/konstruktor/t_robot.js').status_code, 200)
+        self.assertEqual(self.client.get('/konstruktor/chat.js').status_code, 200)
