@@ -21,7 +21,7 @@ const glossName=k=>GLOSS[k]?GLOSS[k].n:k;
 function beginEdit(){const n=performance.now();if(n-lastEdit>900)pushUndo();lastEdit=n}
 
 // ---------------- loyiha ----------------
-function setProject(b,keepCam){B=migrate(b);T=TYPES[B.type];stepIdx=B.step||0;undoStack.length=0;redoStack.length=0;insp=null;simStop();window.XRAY=false;$('tXray').classList.remove('on');
+function setProject(b,keepCam){if((window.FORGE&&FORGE.active))FORGE.cancel(true);B=migrate(b);T=TYPES[B.type];stepIdx=B.step||0;undoStack.length=0;redoStack.length=0;insp=null;simStop();window.XRAY=false;$('tXray').classList.remove('on');
  renderHeader();goStep(stepIdx,true);if(!keepCam)setTimeout(()=>fitCamera(model.userData.size),30)}
 function activeSlots(){const s=step();return s.slots?s.slots(B):[]}
 function rebuild(){const r=buildModel(B,activeSlots(),step().id);D=r.D;if(insp)model.visible=false;labelsCache=null;for(const id in lblPool)lblPool[id].style.display='none';renderMetrics();renderSteps()}
@@ -48,17 +48,18 @@ function stepStatus(s){if(s.kind==='wiring'){const W=wcheck(B);return{done:W.tot
 function renderSteps(){const sts=T.steps.map(stepStatus),dn=sts.filter(x=>x.done).length;$('steps').innerHTML=`<div class="stHead">${esc(T.name)}</div><div class="stProg" title="${dn} / ${T.steps.length} bosqich"><i style="width:${dn/T.steps.length*100}%"></i></div>`+T.steps.map((s,i)=>{const st=sts[i];
  return `<button class="st ${i===stepIdx?'on':''} ${st.done?'done':''}" data-i="${i}" title="${esc(s.t)}"><span class="n">${st.done?IC('check'):i+1}</span><span>${IC(s.ic)} ${esc(s.t)}</span><span class="pg">${st.pg}</span></button>`}).join('');
  $('steps').querySelectorAll('.st').forEach(b=>b.onclick=()=>{snd('click');goStep(+b.dataset.i)})}
-function goStep(i,first){if(insp)exitInspect(true);stepIdx=clamp(i,0,T.steps.length-1);B.step=stepIdx;saveLocal();const s=step();
+function goStep(i,first){if(insp)exitInspect(true);if((window.FORGE&&FORGE.active))FORGE.cancel(true);stepIdx=clamp(i,0,T.steps.length-1);B.step=stepIdx;saveLocal();const s=step();
  if(s.kind!=='test')simStop();showWireStatus=false;
  $('wires').classList.toggle('hidden',s.kind!=='wiring');$('hud').classList.toggle('hidden',s.kind!=='test');$('vtools').classList.toggle('hidden',s.kind==='wiring');
  rebuild();renderPanel();if(s.kind==='wiring')renderWires();if(s.kind==='test')startSim();else $('simStart').classList.add('hidden');
  setHint();$('panel').scrollTop=0}
 function setHint(t){const s=step(),h=$('hint');if(t){h.innerHTML=esc(t);h.classList.remove('hidden');return}
+ if((window.FORGE&&FORGE.active)){h.innerHTML=FORGE.hint();h.classList.remove('hidden');return}
  if(insp){h.innerHTML=`<i class=i-orbit></i> 360° ko'rish: ${glossName(insp.label)} — sichqoncha bilan aylantiring, g'ildirak bilan yaqinlashtiring`;return}
  if(s.kind==='wiring'){h.innerHTML="<i class=i-plug></i> Sim uchini (doiracha) sudrab kerakli kontaktga olib boring";return}
  if(s.kind==='test'){h.classList.add('hidden');return}h.classList.remove('hidden');
  const L=activeSlots(),next=L.filter(x=>!B.inst[x]&&slotAvailable(B,T,x));
- h.innerHTML=next.length?`<i class=i-pointer></i> Yonib turgan joyni bosing — o'rnatish: ${[...new Set(next.map(x=>glossName(slotLabel(T,x))))].join(', ')}`:L.length?"<i class=i-ok></i> Bu bosqich yig'ildi. Parametrlarni o'zgartirsangiz model darhol yangilanadi.":"<i class=i-mouse></i> Sichqoncha bilan aylantiring, g'ildirak bilan yaqinlashtiring. Detalni bosing — ma'lumot va 360° ko'rish."}
+ h.innerHTML=next.length?`<i class=i-pointer></i> Yonib turgan joyni bosing — detalni qismlardan yasash: ${[...new Set(next.map(x=>glossName(slotLabel(T,x))))].join(', ')}`:L.length?"<i class=i-ok></i> Bu bosqich yig'ildi. Parametrlarni o'zgartirsangiz model darhol yangilanadi.":"<i class=i-mouse></i> Sichqoncha bilan aylantiring, g'ildirak bilan yaqinlashtiring. Detalni bosing — ma'lumot va 360° ko'rish."}
 
 // ---------------- ko'rsatkichlar paneli ----------------
 function renderMetrics(){$('metrics').innerHTML=T.metrics(B,D).map(m=>`<div class="mt ${m.lvl||''}"><small>${esc(m.l)}</small><b>${esc(m.v)}</b></div>`).join('')}
@@ -104,11 +105,12 @@ function slotsHTML(){const L=activeSlots();if(!L.length)return'';const ins=L.fil
  return`<div class="card"><h3><i class=i-wrench></i> O'rnatish <span class="sp"></span><small style="color:var(--mu)">${ins}/${L.length}</small></h3>
  <div class="slots">${L.map(x=>{const ok=B.inst[x],nx=!ok&&slotAvailable(B,T,x),k=slotLabel(T,x),num=(x.match(/\d+$/)||[''])[0];return`<span class="sl ${ok?'ok':nx?'next':''}">${ok?'<i class=i-check></i>':nx?'○':'<i class=i-lock></i>'} ${esc(glossName(k))}${num&&L.length>1?' '+num:''}</span>`}).join('')}</div>
  <p style="font-size:12.5px;color:var(--mu);margin-bottom:8px">3D ko'rinishda yonib turgan (ko'k) detalni bosing. <i class=i-lock></i> — avval boshqa detal o'rnatilishi kerak.</p>
- <div class="row" style="margin-bottom:8px"><button class="btn" id="bAuto"><i class=i-bolt></i> Hammasini o'rnatish</button><button class="btn" id="bRemove"><i class=i-back></i> Olib tashlash</button></div></div>`}
+ <div class="row" style="margin-bottom:8px"><button class="btn" id="bRemove"><i class=i-back></i> Olib tashlash</button></div></div>`}
 function navHTML(){return`<div class="nav noprint"><button class="btn" id="bPrev" ${stepIdx?'':'disabled'}><i class=i-left></i> Oldingi</button><button class="btn pri" id="bNext" ${stepIdx<T.steps.length-1?'':'disabled'}>Keyingi <i class=i-right></i></button></div>`}
 
 function renderPanel(){const s=step(),P=$('panel');closePop();
  if(insp){P.innerHTML=inspectHTML();bindPanel();return}
+ if((window.FORGE&&FORGE.active)){P.innerHTML=FORGE.panel();FORGE.bind(P);return}
  let h=`<h2>${IC(s.ic)} ${esc(s.t)}</h2>${s.intro?`<p class="intro">${esc(s.intro)}</p>`:''}`;
  if(s.kind==='wiring')h+=wiringPanel();
  else if(s.kind==='paint')h+=paintPanel()+slotsHTML();
@@ -128,7 +130,7 @@ function bindPanel(){const P=$('panel');
  P.querySelectorAll('[data-i360]').forEach(b=>b.onclick=()=>{const L=(step().slots?step().slots(B):[]),cat=b.dataset.i360,want={frame:'frame',motor:'mot1',prop:'prop1',esc:'esc',fc:'fc',vid:'cam',rx:'rx',bat:'bat',extra:'gps',fuse:'fuse',wing:'wing',tail:'tail',servo:'svA1',chassis:'chassis',gear:'gear',wheel:'wheel1'}[cat];enterInspect(want||L[0])});
  const g=id=>P.querySelector('#'+id);
  if(g('bPrev'))g('bPrev').onclick=()=>{snd('click');goStep(stepIdx-1)};if(g('bNext'))g('bNext').onclick=()=>{snd('click');goStep(stepIdx+1)};
- if(g('bAuto'))g('bAuto').onclick=()=>autoInstall();if(g('bRemove'))g('bRemove').onclick=()=>removeStep();
+ if(g('bRemove'))g('bRemove').onclick=()=>removeStep();
  if(g('bBack360'))g('bBack360').onclick=()=>exitInspect();
  if(g('bStl'))g('bStl').onclick=()=>{if(insp&&insp.turn&&window.STLX)STLX.exportSTL(insp.turn.children[0],(GLOSS[insp.label]||{n:insp.label}).n)};
  if(!insp)bindKind(P)}
@@ -148,16 +150,21 @@ function autoInstall(){pushUndo();const L=activeSlots();for(let k=0;k<L.length+1
 function removeStep(){pushUndo();for(const x of activeSlots())delete B.inst[x];cleanup();snd('place');commit();setHint()}
 
 // ---------------- 3D: bosish va sichqoncha ostidagi ma'lumot ----------------
-function onPick(e){if(step().kind==='wiring'||step().kind==='test')return;closePop();
+function onPick(e){if(step().kind==='wiring'||step().kind==='test')return;closePop();if((window.FORGE&&FORGE.active)){FORGE.pick(e);return}
  if(insp)return;const o=pickAt(e,model);if(!o)return;const slot=o.userData.slot;
- if(o.userData.ghost){install(slot);return}
+ if(o.userData.ghost){if(window.FORGE)FORGE.start(slot);else install(slot);return}
+ if(o.userData.burnt||(B.burnt&&B.burnt[slot])){showBurntCard(e,slot);return}
  if(step().kind==='props'&&slot&&/^prop\d+$/.test(slot)){pushUndo();const i=slot.slice(4);B.dirs[i]=(B.dirs[i]||correctDir(i))==='CW'?'CCW':'CW';snd('flip');commit();return}
  const key=o.userData.label;if(key){const g=GLOSS[key];showPartCard(e,key,slot)}}
+function replacePart(slot){pushUndo();if(B.burnt)delete B.burnt[slot];delete B.inst[slot];for(const k in B.wires){}const i=T.steps.findIndex(s=>s.slots&&s.slots(B).includes(slot));saveLocal();if(i>=0)goStep(i);else commit();toast(`<i class=i-wrench></i> Kuygan detal olib tashlandi — yangisini yasab o'rnating`,2600)}
+function showBurntCard(e,slot){closePop();const nm=glossName(slotLabel(T,slot));popEl=document.createElement('div');popEl.className='pop';
+ popEl.innerHTML=`<b><i class=i-flame></i> ${esc(nm)} kuygan</b><p>Qisqa tutashuv yoki noto'g'ri kuchlanish detalni ishdan chiqardi. Simlarni to'g'rilash yetmaydi — detalni yangidan yasab o'rnatish kerak.</p><div class="row" style="margin-top:8px"><button class="btn pri" id="pRepl"><i class=i-wrench></i> Yangisini yasash</button></div>`;
+ document.body.appendChild(popEl);popEl.style.left=clamp(e.clientX+10,8,innerWidth-330)+'px';popEl.style.top=clamp(e.clientY+10,8,innerHeight-popEl.offsetHeight-8)+'px';popEl.querySelector('#pRepl').onclick=()=>{closePop();replacePart(slot)}}
 function showPartCard(e,key,slot){closePop();const g=GLOSS[key]||{n:key,w:'',y:'',h:''};popEl=document.createElement('div');popEl.className='pop';
  popEl.innerHTML=`<b>${esc(g.n)}</b><p>${esc(g.w)}</p><p><b style="font-size:12px;color:var(--tx)">Nima uchun:</b> ${esc(g.y)}</p>${slot?`<div class="row" style="margin-top:8px"><button class="btn pri" id="p360"><i class=i-orbit></i> 360° ko'rish</button></div>`:''}`;
  document.body.appendChild(popEl);popEl.style.left=clamp(e.clientX+10,8,innerWidth-330)+'px';popEl.style.top=clamp(e.clientY+10,8,innerHeight-popEl.offsetHeight-8)+'px';
  const b=popEl.querySelector('#p360');if(b)b.onclick=()=>{closePop();enterInspect(slot)}}
-let hoverT=0;function onHover(e){const tip=$('tip');if(!e||insp||step().kind==='wiring'||step().kind==='test'){tip.classList.add('hidden');return}
+let hoverT=0;function onHover(e){const tip=$('tip');if((window.FORGE&&FORGE.active)){tip.classList.add('hidden');if(e)FORGE.hover(e);return}if(!e||insp||step().kind==='wiring'||step().kind==='test'){tip.classList.add('hidden');return}
  const n=performance.now();if(n-hoverT<60)return;hoverT=n;const o=pickAt(e,model);if(!o){tip.classList.add('hidden');renderer.domElement.style.cursor='';return}
  const key=o.userData.label,g=GLOSS[key]||{n:key,w:''},r=$('view').getBoundingClientRect();
  tip.innerHTML=o.userData.ghost?`<b><i class=i-pointer></i> O'rnatish: ${esc(g.n)}</b>${esc(g.w)}`:step().kind==='props'&&/^prop/.test(o.userData.slot||'')?`<b>${esc(g.n)} — ${esc(B.dirs[o.userData.slot.slice(4)]||'')}</b>Bosing — yo'nalishini almashtirish`:`<b>${esc(g.n)}</b>${esc(g.w)}<br><small style="color:var(--mu)">Bosing — batafsil va 360°</small>`;
@@ -165,7 +172,7 @@ let hoverT=0;function onHover(e){const tip=$('tip');if(!e||insp||step().kind==='
 
 // ---------------- detal nomlari (yorliqlar) ----------------
 let labelsCache=null,labelTick=0;const lblPool={};
-function updateLabels(){const box=$('labels');if(!showLabels||insp||step().kind==='wiring'||step().kind==='test'||!model){box.style.display='none';return}box.style.display='';
+function updateLabels(){const box=$('labels');if(!showLabels||insp||(window.FORGE&&FORGE.active)||step().kind==='wiring'||step().kind==='test'||!model){box.style.display='none';return}box.style.display='';
  if(!labelsCache){labelsCache=[];const seen=new Set();const add=(o,key,id)=>{if(seen.has(key))return;seen.add(key);const bb=new THREE.Box3().setFromObject(o);if(bb.isEmpty())return;labelsCache.push({o,key,id,top:new V3((bb.min.x+bb.max.x)/2,bb.max.y,(bb.min.z+bb.max.z)/2)})};
   for(const s in modelObjs)add(modelObjs[s],modelObjs[s].userData.label,s);model.children.forEach((o,i)=>{if(o.userData.label&&!o.userData.slot)add(o,o.userData.label,'d'+i)})}
  const r=$('view').getBoundingClientRect(),used=new Set(),v=new V3(),placed=[];
@@ -177,7 +184,7 @@ function updateLabels(){const box=$('labels');if(!showLabels||insp||step().kind=
 
 // ---------------- 360° ko'rish ----------------
 let inspGroup=null;
-function enterInspect(slot){if(!slot)return;const D0=T.derive(B);let obj=null;
+function enterInspect(slot){if(!slot)return;if((window.FORGE&&FORGE.active))FORGE.cancel(true);const D0=T.derive(B);let obj=null;
  const ctx={B,D:D0,step:'inspect',inst:()=>true,add(s,o){if(s===slot&&!obj)obj=o;return o},deco(){},spin(){}};T.build(B,D0,ctx);if(!obj){toast("Bu detal hozirgi sozlamada yo'q");return}
  if(inspGroup)scene.remove(inspGroup);inspGroup=new THREE.Group();const bb=new THREE.Box3().setFromObject(obj),c=bb.getCenter(new V3()),sz=bb.getSize(new V3());
  obj.position.sub(c);const w=new THREE.Group();w.add(obj);w.position.y=sz.y/2+Math.max(.5,sz.y*.2);inspGroup.add(w);
@@ -206,9 +213,17 @@ function wiringPanel(){const W=wcheck(B);const legend=[['#e53935','Quvvat (+, 5V
  return`<div class="card"><h3><i class=i-clipboard></i> Holat</h3><div class="grid2"><div class="kv"><small>Ulangan</small><b>${W.connected} / ${W.total}</b></div><div class="kv"><small>To'g'ri</small><b>${showWireStatus?W.correct+' / '+W.total:'?'}</b></div></div>
  <p style="font-size:12.5px;color:#c4cee0;margin:10px 0">${esc(W.W.hint)}</p>
  <div class="leg" style="margin-bottom:10px">${legend.map(([c,l])=>`<span><i style="background:${c};border:1px solid #666"></i>${l}</span>`).join('')}</div>
- <div class="row" style="margin-bottom:8px"><button class="btn pri" id="bWCheck"><i class=i-search></i> Tekshirish</button><button class="btn" id="bWSolve"><i class=i-bulb></i> Yechimni ko'rsatish</button></div>
+ <div class="row" style="margin-bottom:8px"><button class="btn pri" id="bWCheck"><i class=i-search></i> Tekshirish</button><button class="btn" id="bWSolve"><i class=i-bulb></i> Maslahat (1 ta sim)</button></div>
  <div class="row" style="margin-bottom:8px"><button class="btn" id="bWClear"><i class=i-scissors></i> Hammasini uzish</button><button class="btn" data-g2="solder"><i class=i-flame></i> Kavsharlash qoidalari</button></div></div>
- <div id="wRes">${showWireStatus?wireResults(W):''}</div>`}
+ ${burntHTML()}<div id="wRes">${showWireStatus?wireResults(W):''}</div>`}
+function burntHTML(){const L=Object.keys(B.burnt||{}).filter(k=>B.burnt[k]&&B.inst[k]);if(!L.length)return'';
+ return`<div class="card" style="border-color:rgba(255,93,93,.45)"><h3><i class=i-flame></i> Kuygan detallar</h3>${L.map(k=>`<div class="iss bad"><b>${esc(glossName(slotLabel(T,k)))}</b><span>Tutashuvdan kuydi — simni to'g'rilash yetmaydi, detalni almashtiring.</span><button class="btn" data-replace="${esc(k)}" style="margin-top:6px"><i class=i-wrench></i> Yangisini yasash</button></div>`).join('')}</div>`}
+// bitta noto'g'ri yoki ulanmagan sim uchun to'g'ri kontaktni ko'rsatish (o'zi ulamaydi)
+function wireHint(){const W=wcheck(B);for(const c of W.comps)for(const w of c.wires){const st=W.st[w.id];if(st==='ok'||st==='warn'||st==='opt'||w.uart)continue;const pid=(w.ok||[])[0];if(!pid)continue;
+  const pad=W.W.boards.flatMap(b=>b.pads.map(p=>Object.assign({bl:b.label},p))).find(p=>p.id===pid);snd('click');
+  toast(`<i class=i-bulb></i> ${esc(c.label)}: «${esc(w.l)}» simi → ${esc(pad?pad.bl+', '+pad.l:pid)} kontakti`,3500);const el=document.querySelector(`#wires [data-pad="${CSS.escape(pid)}"] circle`);if(el){el.setAttribute('filter','url(#gl)');el.classList.add('hintPad');setTimeout(()=>el.classList.remove('hintPad'),3500)}return}
+ const uw=W.comps.flatMap(c=>c.wires.filter(w=>w.uart&&W.st[w.id]!=='ok').map(w=>[c,w]))[0];if(uw){toast(`<i class=i-bulb></i> ${esc(uw[0].label)}: TX simi kontrollerning RX iga, RX simi TX iga (bir xil raqamli UART)`,3500);return}
+ toast("<i class=i-ok></i> Barcha simlar to'g'ri ulangan")}
 function wireResults(W){const L=[...W.fatal.map(f=>({lvl:'bad',t:f.t,why:f.why,ic:'bolt'})),...W.issues];const miss=[];
  for(const c of W.comps)for(const w of c.wires)if(W.st[w.id]==='miss')miss.push(`${c.label}: ${w.l}`);else if(W.st[w.id]==='bad'&&!L.some(i=>i.t.includes(c.label)))L.push({lvl:'bad',t:`${c.label}: «${w.l}» simi noto'g'ri kontaktda (${B.wires[w.id]})`,why:W.why[w.id]||''});
  if(miss.length)L.push({lvl:'warn',t:`Ulanmagan: ${miss.length} ta sim`,why:miss.join(' · ')});
@@ -217,15 +232,17 @@ function wireResults(W){const L=[...W.fatal.map(f=>({lvl:'bad',t:f.t,why:f.why,i
  return L.map(i=>`<div class="iss ${i.lvl}"><b>${IC(i.ic||{bad:'bad',warn:'warn',ok:'ok',info:'info'}[i.lvl])} ${esc(i.t)}</b>${i.why?`<span>${esc(i.why)}</span>`:''}</div>`).join('')}
 function bindWiringPanel(P){const g=id=>P.querySelector('#'+id);
  g('bWCheck').onclick=()=>{showWireStatus=true;const W=wcheck(B);snd(W.fatal.length||Object.values(W.st).includes('bad')?'err':'ok');renderPanel();renderWires()};
- g('bWSolve').onclick=()=>{pushUndo();const W=wcheck(B),used={};for(const c of W.comps)for(const w of c.wires){if(w.uart){continue}const ok=w.ok||[];let pad=ok.find(p=>!(w.grp&&used[w.grp+p]))||ok[0];if(pad){B.wires[w.id]=pad;if(w.grp)used[w.grp+pad]=1}}
+ g('bWSolve').onclick=()=>wireHint(P);
+ const _solveAll=()=>{pushUndo();const W=wcheck(B),used={};for(const c of W.comps)for(const w of c.wires){if(w.uart){continue}const ok=w.ok||[];let pad=ok.find(p=>!(w.grp&&used[w.grp+p]))||ok[0];if(pad){B.wires[w.id]=pad;if(w.grp)used[w.grp+pad]=1}}
   let u=1;const dev={};for(const c of W.comps)for(const w of c.wires)if(w.uart){if(!dev[w.uart])dev[w.uart]=u++;B.wires[w.id]=(w.kind==='tx'?'RX':'TX')+dev[w.uart]}
-  showWireStatus=true;snd('solder');commit();renderWires();toast("<i class=i-bulb></i> To'g'ri sxema ko'rsatildi — har bir simni o'rganib chiqing")};
+  showWireStatus=true;snd('solder');commit();renderWires()};window.__solveAll=_solveAll;
+ P.querySelectorAll('[data-replace]').forEach(b=>b.onclick=()=>replacePart(b.dataset.replace));
  g('bWClear').onclick=()=>{pushUndo();B.wires={};snd('place');commit();renderWires()};
  P.querySelector('[data-g2]').onclick=e=>pop(e.target,'solder')}
 function renderWires(){const box=$('wires');if(step().kind!=='wiring'){box.innerHTML='';return}const W=wcheck(B),pads={};
  let s=`<svg viewBox="0 0 1000 660" preserveAspectRatio="xMidYMid meet" xmlns="${SVGNS}"><defs><linearGradient id="pcb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16261c"/><stop offset="1" stop-color="#0c1610"/></linearGradient>
  <filter id="gl"><feGaussianBlur stdDeviation="2.5"/></filter></defs>`;
- for(const b of W.W.boards){const on=!!B.inst[b.need];s+=`<g opacity="${on?1:.35}"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="14" fill="url(#pcb)" stroke="${on?'#3d6b4c':'#444'}" stroke-width="2"/>
+ for(const b of W.W.boards){const on=!!B.inst[b.need],bu=on&&B.burnt&&B.burnt[b.need];s+=`<g opacity="${on?1:.35}"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="14" fill="${bu?'#2a120c':'url(#pcb)'}" stroke="${bu?'#ff5d5d':on?'#3d6b4c':'#444'}" stroke-width="2"/>${bu?`<text x="${b.x+b.w/2}" y="${b.y+b.h/2+26}" text-anchor="middle" fill="#ff8a80" font-size="12" font-weight="700">KUYDI — almashtiring</text>`:''}
   <text x="${b.x+b.w/2}" y="${b.y+b.h/2+5}" text-anchor="middle" fill="#cfe8d6" font-size="15" font-weight="700">${esc(b.label)}</text>${on?'':`<text x="${b.x+b.w/2}" y="${b.y+b.h/2+26}" text-anchor="middle" fill="#ff9b9b" font-size="12">o'rnatilmagan</text>`}`;
   for(const p of b.pads){if(on)pads[p.id]=p;const col={vbat:'#e53935',gnd:'#666',['5v']:'#ef5350',['9v']:'#ff7043',tx:'#43a047',rx:'#e0e0e0',motor:'#c58a3a',ch:'#ff9800',esc:'#90caf9',sig:'#fdd835'}[p.t]||'#e0b050';
    const lx=p.x<=b.x+1?p.x-12:p.x>=b.x+b.w-1?p.x+12:p.x,ly=p.y<=b.y+1?p.y-14:p.y>=b.y+b.h-1?p.y+22:p.y+4,an=p.x<=b.x+1?'end':p.x>=b.x+b.w-1?'start':'middle';
@@ -234,7 +251,7 @@ function renderWires(){const box=$('wires');if(step().kind!=='wiring'){box.inner
  let wiresSvg='',ends='';
  for(const c of W.W.comps){const on=!!B.inst[c.need];const tb=W.W.boards.find(b=>c.wires.some(w=>(w.ok||[]).some(x=>b.pads.some(p=>p.id===x))))||W.W.boards[W.W.boards.length-1],cx=tb.x+tb.w/2,cy=tb.y+tb.h/2;
   let dx=cx-c.x,dy=cy-c.y;const L=Math.hypot(dx,dy)||1;dx/=L;dy/=L;const bw=136,bh=34,ax=c.x+dx*(Math.abs(dx)>Math.abs(dy)?bw/2:bh/2/Math.max(.3,Math.abs(dy))*Math.abs(dy)),ay=c.y+dy*(Math.abs(dy)>=Math.abs(dx)?bh/2:bh/2*Math.abs(dy));
-  s+=`<g opacity="${on?1:.3}"><rect x="${c.x-bw/2}" y="${c.y-bh/2}" width="${bw}" height="${bh}" rx="9" fill="#1d2a40" stroke="#3a4f73"/><text x="${c.x}" y="${c.y+5}" text-anchor="middle" fill="#e7edf7" font-size="12" font-weight="700">${esc(c.label.length>20?c.label.slice(0,19)+'…':c.label)}</text><title>${esc(c.label)}</title></g>`;
+  s+=`<g opacity="${on?1:.3}"><rect x="${c.x-bw/2}" y="${c.y-bh/2}" width="${bw}" height="${bh}" rx="9" fill="${on&&B.burnt&&B.burnt[c.need]?'#2a120c':'#1d2a40'}" stroke="${on&&B.burnt&&B.burnt[c.need]?'#ff5d5d':'#3a4f73'}"/><text x="${c.x}" y="${c.y+5}" text-anchor="middle" fill="#e7edf7" font-size="12" font-weight="700">${esc(c.label.length>20?c.label.slice(0,19)+'…':c.label)}</text><title>${esc(c.label)}</title></g>`;
   if(!on)continue;const n=c.wires.length;
   c.wires.forEach((w,k)=>{const off=(k-(n-1)/2)*15,px=-dy*off,py=dx*off,a=[ax+px,ay+py],pid=B.wires[w.id],pad=pid&&pads[pid],rest=[ax+px+dx*46,ay+py+dy*46],e=pad?[pad.x,pad.y]:rest;
    const st=W.st[w.id],col=showWireStatus&&st==='bad'?'#ff3b3b':w.col;
@@ -247,9 +264,17 @@ function bindWireDrag(svg,pads){let drag=null;const toSvg=ev=>{const pt=svg.crea
  svg.addEventListener('pointerdown',ev=>{const g=ev.target.closest('.wend');if(!g)return;ev.preventDefault();svg.setPointerCapture(ev.pointerId);drag={g,id:g.dataset.w,a:[+g.dataset.ax,+g.dataset.ay],path:svg.querySelector(`[data-wp="${CSS.escape(g.dataset.w)}"]`)};audioInit()});
  svg.addEventListener('pointermove',ev=>{if(!drag)return;const p=toSvg(ev);const c=drag.g.querySelector('circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);const t=drag.g.querySelector('text');if(t){t.setAttribute('x',p.x);t.setAttribute('y',p.y-13)}
   if(drag.path)drag.path.setAttribute('d',wpath(drag.a,[p.x,p.y]));svg.querySelectorAll('.pad circle:first-child').forEach(o=>o.removeAttribute('filter'));const near=nearPad(p,pads);if(near){const el=svg.querySelector(`[data-pad="${CSS.escape(near.id)}"] circle`);if(el)el.setAttribute('filter','url(#gl)')}});
- const end=ev=>{if(!drag)return;const p=toSvg(ev),near=nearPad(p,pads),id=drag.id;drag=null;pushUndo();if(near){B.wires[id]=near.id;snd('solder')}else{delete B.wires[id];snd('place')}
-  saveLocal();renderWires();scheduleRebuild(true)};
+ const end=ev=>{if(!drag)return;const p=toSvg(ev),near=nearPad(p,pads),id=drag.id;drag=null;pushUndo();const before=new Set(wcheck(B).fatal.map(f=>f.k+'|'+f.w));if(near){B.wires[id]=near.id;snd('solder')}else{delete B.wires[id];snd('place')}
+  const nf=near?wcheck(B).fatal.filter(f=>!before.has(f.k+'|'+f.w)&&f.w===id):[];
+  if(nf.length){B.burnt=B.burnt||{};for(const f of nf)if(f.slot&&B.inst[f.slot])B.burnt[f.slot]=true;showWireStatus=true}
+  saveLocal();renderWires();scheduleRebuild(true);
+  if(nf.length){const f=nf[0],nm=f.slot?glossName(slotLabel(T,f.slot)):'';sparkAt(near.x,near.y);snd('boom',.45);setTimeout(()=>snd('err'),250);toast(`<i class=i-flame></i> ${esc(f.t)}${nm?' — '+esc(nm)+' kuydi':''}`,3800)}};
  svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end)}
+// uchqun va tutun (SVG animatsiya) — qisqa tutashuv joyida
+function sparkAt(x,y){const svg=document.querySelector('#wires svg');if(!svg)return;const g=document.createElementNS(SVGNS,'g');g.setAttribute('class','spark');
+ let h='';for(let i=0;i<14;i++){const a=i/14*Math.PI*2+Math.random()*.3,l=18+Math.random()*26;h+=`<line x1="${x}" y1="${y}" x2="${x+Math.cos(a)*l}" y2="${y+Math.sin(a)*l}" stroke="${i%3?'#ffd54f':'#fff'}" stroke-width="${1.5+Math.random()*2}" stroke-linecap="round"/>`}
+ h+=`<circle cx="${x}" cy="${y}" r="16" fill="#fff59d" class="flash"/>`;for(let i=0;i<5;i++)h+=`<circle cx="${x+(Math.random()-.5)*18}" cy="${y}" r="${7+Math.random()*7}" fill="#555" class="smoke" style="animation-delay:${i*.12}s"/>`;
+ g.innerHTML=h;svg.appendChild(g);setTimeout(()=>g.remove(),2200)}
 function nearPad(p,pads){let best=null,bd=26;for(const id in pads){const q=pads[id],d=Math.hypot(q.x-p.x,q.y-p.y);if(d<bd){bd=d;best=q}}return best}
 
 // ---------------- dizayn ----------------

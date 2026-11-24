@@ -65,7 +65,7 @@ function wrapTex(col,lines){return ctex('wrap'+col+lines.join('|'),256,128,(g,w,
 
 // ---------------- materiallar ----------------
 const matCache={};
-const MAT=(k,f)=>matCache[k]||(matCache[k]=f());
+const MAT=(k,f)=>matCache[k]||(matCache[k]=(()=>{const m=f();m.userData.k=k;return m})());
 // sirt turi: yaltiroq / mat / metall / atlas — rang tanlashda ishlatiladi
 const FIN={gloss:{r:.38,m:.12,cc:1},matte:{r:.78,m:0,cc:0},metal:{r:.32,m:.75,cc:.35},satin:{r:.55,m:.08,cc:.3}};
 function mPaint(col,fin='gloss'){const f=FIN[fin]||FIN.gloss;return MAT('p'+col+fin,()=>new THREE.MeshPhysicalMaterial({color:col,roughness:f.r,metalness:f.m,clearcoat:f.cc,clearcoatRoughness:.25}))}
@@ -86,7 +86,7 @@ const mGlass=()=>MAT('glass',()=>new THREE.MeshPhysicalMaterial({color:'#0a1220'
 function mMat(kind,col,fin){if(kind==='carbon')return mCarbon(col);if(kind==='alu')return mMetal(col,.35);if(kind==='plastic')return mPlastic(col,.6);if(kind==='wood')return mPlastic(col,.8);return mPaint(col,fin)}
 
 // ---------------- geometriya yordamchilari ----------------
-const geoCache={};const GEO=(k,f)=>geoCache[k]||(geoCache[k]=f());
+const geoCache={};const GEO=(k,f)=>geoCache[k]||(geoCache[k]=(()=>{const g=f();g.userData.k=k;return g})());
 function mesh(geo,mat,x=0,y=0,z=0){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;return m}
 // Yumaloq qirrali quti: qirralar atrofida qo'shimcha nuqtalar to'planadi va r radiusli chorak aylanaga
 // "o'raladi"; normallar analitik hisoblanadi (yorug'lik qirralarda yumshoq akslanadi).
@@ -168,7 +168,7 @@ function buildModel(B,activeSlots,step){
  const ctx={B,D,step,
   inst:s=>!!B.inst[s],
   add(slot,obj,ex=[0,0,0]){obj.userData.slot=slot;obj.userData.label=slotLabel(T,slot);obj.userData.base=obj.position.clone();obj.userData.ex=new V3(...ex);
-   if(B.inst[slot]){model.add(obj);modelObjs[slot]=obj;return obj}
+   if(B.inst[slot]){if(B.burnt&&B.burnt[slot]){obj.userData.burnt=true;obj.traverse(o=>{if(o.isMesh)o.material=MAT('burnt',()=>new THREE.MeshStandardMaterial({color:'#1b1512',roughness:1,metalness:0,emissive:'#3a0d00',emissiveIntensity:.35}))})}model.add(obj);modelObjs[slot]=obj;return obj}
    if(activeSlots&&activeSlots.includes(slot)&&slotAvailable(B,T,slot)){obj.userData.ghost=true;
     obj.traverse(o=>{if(o.isMesh){o.material=ghostMat;o.castShadow=false;o.receiveShadow=false;const eg=new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry,30),ghostEdge);eg.userData.dispose=true;o.add(eg)}});
     model.add(obj);modelGhosts.push(obj);return obj}
@@ -204,13 +204,13 @@ function wcheck(B){const T=TYPES[B.type],W=T.wiring(B),pads={};
  for(const c of comps){for(const w of c.wires){total+=c.opt?0:1;const pid=B.wires[w.id],pad=pid&&pads[pid];
   if(!pad){st[w.id]=c.opt?'opt':'miss';continue}connected++;
   const t=pad.t,k=w.kind;let s='ok',msg='';
-  if(PWR.includes(k)&&t==='gnd'){s='bad';if(k==='bat+'){fatal.push({k:'polarity',t:'Batareya qutblari teskari!',why:"Plus simi minus kontaktga ulangan — ulash bilan ESC kuyadi. Qizil sim doim + ga."})}
-   else if(k==='cap+')fatal.push({k:'cap',t:'Kondensator teskari ulangan',why:"Elektrolitik kondensatorning uzun oyog'i (+) plusga ulanadi. Teskari ulansa qizib portlaydi."});
-   else fatal.push({k:'short',t:`Qisqa tutashuv: ${c.label} quvvat simi GND ga ulangan`,why:"Plus va minus to'g'ridan-to'g'ri tutashadi — kontroller kuyadi."})}
-  else if(GNDK.includes(k)&&PWRPAD.includes(t)){s='bad';if(k==='bat-')fatal.push({k:'polarity',t:'Batareya qutblari teskari!',why:"Minus simi plus kontaktga ulangan."});
-   else if(k==='cap-')fatal.push({k:'cap',t:'Kondensator teskari ulangan',why:"Chiziqli (−) oyoq minusga ulanadi."});
-   else fatal.push({k:'short',t:`Qisqa tutashuv: ${c.label} GND simi quvvat kontaktiga ulangan`,why:"GND faqat GND (G) kontaktlariga ulanadi."})}
-  else if(k==='p5'&&(t==='9v'||t==='vbat')){s='bad';burned.add(c.id);add('bad',`${c.label} kuyadi: 5V qurilma ${pid} ga ulangan`,"Bu qurilma faqat 5 V ga mo'ljallangan.")}
+  if(PWR.includes(k)&&t==='gnd'){s='bad';if(k==='bat+'){fatal.push({slot:pad.board&&(W.boards.find(b=>b.id===pad.board)||{}).need,w:w.id,k:'polarity',t:'Batareya qutblari teskari!',why:"Plus simi minus kontaktga ulangan — ulash bilan ESC kuyadi. Qizil sim doim + ga."})}
+   else if(k==='cap+')fatal.push({slot:c.need,w:w.id,k:'cap',t:'Kondensator teskari ulangan',why:"Elektrolitik kondensatorning uzun oyog'i (+) plusga ulanadi. Teskari ulansa qizib portlaydi."});
+   else fatal.push({slot:c.need,w:w.id,k:'short',t:`Qisqa tutashuv: ${c.label} quvvat simi GND ga ulangan`,why:"Plus va minus to'g'ridan-to'g'ri tutashadi — kontroller kuyadi."})}
+  else if(GNDK.includes(k)&&PWRPAD.includes(t)){s='bad';if(k==='bat-')fatal.push({slot:pad.board&&(W.boards.find(b=>b.id===pad.board)||{}).need,w:w.id,k:'polarity',t:'Batareya qutblari teskari!',why:"Minus simi plus kontaktga ulangan."});
+   else if(k==='cap-')fatal.push({slot:c.need,w:w.id,k:'cap',t:'Kondensator teskari ulangan',why:"Chiziqli (−) oyoq minusga ulanadi."});
+   else fatal.push({slot:c.need,w:w.id,k:'short',t:`Qisqa tutashuv: ${c.label} GND simi quvvat kontaktiga ulangan`,why:"GND faqat GND (G) kontaktlariga ulanadi."})}
+  else if(k==='p5'&&(t==='9v'||t==='vbat')){s='bad';burned.add(c.id);fatal.push({slot:c.need,w:w.id,k:'overvolt',t:`${c.label} kuydi: 5 V qurilma ${pid} ga ulangan`,why:"Bu qurilma faqat 5 V ga mo'ljallangan — yuqori kuchlanish uni darhol kuydiradi."});add('bad',`${c.label} kuyadi: 5V qurilma ${pid} ga ulangan`,"Bu qurilma faqat 5 V ga mo'ljallangan.")}
   else if(k==='p5t'){if(!(t==='5v'||t==='9v')){s='bad';msg='5–9 V kontakt kerak'}}
   else if(k==='p9'&&t==='5v'){s='warn';add('warn',`${c.label} 5V dan quvvatlanmoqda`,"9V kerak: past kuchlanishda VTX qayta yuklanadi yoki kuchsiz ishlaydi.")}
   else if(k==='tx'||k==='rx'||k==='sa'){const want=k==='tx'?'rx':'tx';if(t!==want){s='bad';msg=t===k?'TX/RX almashib ketgan':'UART kontakt emas';
@@ -226,6 +226,7 @@ function wcheck(B){const T=TYPES[B.type],W=T.wiring(B),pads={};
  // bir guruhdagi simlar turli kontaktlarda bo'lishi kerak (motor fazalari, V-dum)
  const grp={};for(const c of comps)for(const w of c.wires)if(w.grp&&B.wires[w.id])(grp[w.grp]=grp[w.grp]||[]).push(w);
  for(const g in grp){const seen={};for(const w of grp[g]){const p=B.wires[w.id];if(seen[p]){st[w.id]='bad';st[seen[p].id]='bad';add('bad',g==='pin'?"Ikkita signal simi bitta pinda":/^m/.test(g)?"Ikkita motor simi bitta kontaktda":"Ikkita servo bitta kanalda","Har bir sim o'z kontaktiga ulanadi.")}else seen[p]=w}}
+ if(B.burnt)for(const c of comps)if(B.burnt[c.need]||B.burnt[c.id])burned.add(c.id);
  for(const c of comps){const ok=c.wires.every(w=>st[w.id]==='ok'||st[w.id]==='warn'||st[w.id]==='opt');works[c.id]=ok&&!burned.has(c.id);
   if(!c.opt)for(const w of c.wires)if(st[w.id]==='ok'||st[w.id]==='warn')correct++}
  const complete=comps.every(c=>c.opt||c.wires.every(w=>B.wires[w.id]));

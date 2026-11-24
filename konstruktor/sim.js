@@ -83,6 +83,7 @@ const STK={l:{x:0,y:0},r:{x:0,y:0}};
 function preflight(B){const T=TYPES[B.type],D=T.derive(B),WC=wcheck(B),miss=[];
  for(const s of T.steps)if(s.slots&&s.kind!=='paint')for(const sl of s.slots(B))if(!B.inst[sl])miss.push(slotLabel(T,sl));
  const r={T,D,WC,miss,fatal:WC.fatal.slice(),notes:[],ok:true};
+ {const bu=Object.keys(B.burnt||{}).filter(k=>B.burnt[k]&&B.inst[k]);if(bu.length){r.ok=false;r.burnt=bu;r.block=`Kuygan detal: ${bu.map(k=>GLOSS[slotLabel(T,k)]?GLOSS[slotLabel(T,k)].n:k).join(', ')}. Qisqa tutashuvdan keyin u ishlamaydi — yangisini yasab o'rnating.`;return r}}
  if(miss.length){r.ok=false;r.block=`Yig'ish tugallanmagan: ${[...new Set(miss)].map(k=>GLOSS[k]?GLOSS[k].n:k).join(', ')} o'rnatilmagan.`;return r}
  if(!WC.works.xt60&&!r.fatal.length){r.ok=false;r.block="Batareya kabeli ESC ga to'g'ri ulanmagan — quvvat yo'q.";return r}
  return r}
