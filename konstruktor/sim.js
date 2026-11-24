@@ -183,7 +183,7 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
   if(soc<=0&&S.armed){S.armed=false;S.status='Batareya tugadi — sirpanib qo\'nish kerak.'}
   humSet(S.armed,S.thr);for(const s of S.model.userData.spinners)s.o.rotation.y+=dt*(S.armed?S.thr*90:0);
   const e=new THREE.Euler().setFromQuaternion(S.q,'YXZ');S.yaw=e.y;S.pitch=e.x;S.roll=e.z}
- else if(S.T.simTick)S.T.simTick(S,dt,I,{g,rho,soc:clamp(1-S.used/B.p.bat.mah,0,1)})
+ else if(S.T.simTick)S.T.simTick(S,dt,I,{g,rho,soc:B.p.bat?clamp(1-S.used/B.p.bat.mah,0,1):1})
  else{const p=B.p,m=D.AUW/1000,soc=1-S.used/p.bat.mah,sag=.85+.15*clamp(soc,0,1);
   let thr=0;if(S.armed&&soc>0)thr=(I.thrUp||KEYS.ArrowUp?1:0)-(I.thrDn||KEYS.ArrowDown?1:0)+(-STK.l.y);thr=clamp(thr,-1,1);if(S.rev)thr=-thr;
   const steerIn=clamp((KEYS.KeyA||KEYS.ArrowLeft?1:0)-(KEYS.KeyD||KEYS.ArrowRight?1:0)+(-STK.r.x),-1,1);

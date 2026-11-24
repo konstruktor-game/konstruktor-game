@@ -74,7 +74,7 @@ function catCard(cat){const S=T.spec[cat],presets=Object.entries(T.presets);
  <div class="chips">${presets.map(([id,p])=>`<button class="chip" data-pre="${id}" data-c="${cat}" title="${esc(p.desc)}">${esc(p.name)}</button>`).join('')}</div>
  ${S.f.map(f=>fieldHTML(cat,f)).join('')}<div class="info" data-info="${cat}">${catInfo(cat)}</div></div>`}
 // har bir detal uchun hisoblangan qiymatlar (o'rganish uchun)
-const GND=t=>t!=='copter'&&t!=='plane';
+const GND=t=>!['copter','plane','heli','rocket'].includes(t);
 function catInfo(cat){const d=D,p=B.p,R=[];const a=(l,v)=>R.push(`<span>${esc(l)}</span><b>${v}</b>`);
  if(T.catInfo){T.catInfo(cat,d,p,a);return R.join('')}
  if(B.type==='copter'){
@@ -298,8 +298,8 @@ function checkPanel(){const W=wcheck(B),I=T.issues(B,D),bad=I.filter(i=>i.lvl===
  <div class="card"><h3><i class=i-chart></i> Asosiy ko'rsatkichlar</h3><div class="grid2" style="margin-bottom:8px">${[...T.metrics(B,D).map(m=>[m.l,m.v]),...ext].map(([l,v])=>`<div class="kv"><small>${esc(l)}</small><b>${esc(v)}</b></div>`).join('')}</div></div>
  <div class="card"><h3><i class=i-scale></i> Og'irlik taqsimoti</h3><div class="bar">${D.parts.filter(p=>p[1]>0).map((p,i)=>`<i style="width:${p[1]/tot*100}%;background:${cols[i%10]}" title="${esc(p[0])}: ${fmt(p[1])} g"></i>`).join('')}</div>
  <div class="leg" style="margin-bottom:8px">${D.parts.filter(p=>p[1]>0).map((p,i)=>`<span><i style="background:${cols[i%10]}"></i>${esc(p[0])} ${fmt(p[1])} g</span>`).join('')}</div></div>
- <div class="card"><h3><i class=i-chart></i> ${GND(B.type)?'Tezlik va tok':'Tortish va tok'} — gaz bo'yicha</h3><canvas id="chart" width="720" height="380" style="width:100%;height:auto;background:var(--bg);border-radius:8px"></canvas>
- <table style="margin:8px 0"><tr><th>Gaz</th><th class="n">${GND(B.type)?'Tezlik, km/soat':'Tortish, g'}</th><th class="n">Tok, A</th><th class="n">Quvvat, W</th><th class="n">${GND(B.type)?'km/soat / 100W':'g/W'}</th></tr>
+ <div class="card"><h3><i class=i-chart></i> ${T.chart?esc(T.chart.title):(GND(B.type)?'Tezlik va tok':'Tortish va tok')+" — gaz bo'yicha"}</h3><canvas id="chart" width="720" height="380" style="width:100%;height:auto;background:var(--bg);border-radius:8px"></canvas>
+ <table style="margin:8px 0"><tr>${(T.chart?T.chart.cols:['Gaz',GND(B.type)?'Tezlik, km/soat':'Tortish, g','Tok, A','Quvvat, W',GND(B.type)?'km/soat / 100W':'g/W']).map((h,i)=>`<th${i?' class="n"':''}>${esc(h)}</th>`).join('')}</tr>
  ${D.table.map(r=>`<tr><td>${r.t}%</td><td class="n">${fmt(r.thrust)}</td><td class="n">${fmt(r.amp,1)}</td><td class="n">${fmt(r.watt)}</td><td class="n">${fmt(r.eff,1)}</td></tr>`).join('')}</table></div>
  <div class="card"><h3><i class=i-globe></i> Muhit sharoiti <button class="q" data-g="twr">?</button></h3><div class="grid2"><div class="fld"><div class="fl"><span>Balandlik (dengizdan), m</span></div><input class="inp" type="number" id="envAlt" min="0" max="5000" step="50" value="${B.env.alt}"></div>
  <div class="fld"><div class="fl"><span>Harorat, °C</span></div><input class="inp" type="number" id="envTemp" min="-30" max="50" step="1" value="${B.env.temp}"></div></div>
@@ -312,9 +312,9 @@ function bindCheck(P){const a=P.querySelector('#envAlt'),t=P.querySelector('#env
 function drawChart(){const c=$('chart');if(!c)return;const g=c.getContext('2d'),W=c.width,H=c.height,L=50,R=W-50,Tp=20,Bt=H-40,rows=D.table,mx=Math.max(...rows.map(r=>r.thrust))*1.1||1,ma=Math.max(...rows.map(r=>r.amp))*1.1||1;
  g.clearRect(0,0,W,H);g.font='13px Segoe UI';g.strokeStyle='rgba(255,255,255,.08)';g.fillStyle='#8e9bb3';
  for(let i=0;i<=5;i++){const y=Bt-(Bt-Tp)*i/5;g.beginPath();g.moveTo(L,y);g.lineTo(R,y);g.stroke();g.textAlign='right';g.fillText(fmt(mx*i/5),L-6,y+4);g.textAlign='left';g.fillText(fmt(ma*i/5),R+6,y+4)}
- g.textAlign='center';for(const r of rows)g.fillText(r.t+'%',L+(R-L)*r.t/100,Bt+18);
+ g.textAlign='center';for(const r of rows)g.fillText(T.chart&&T.chart.xf?T.chart.xf(r):r.t+'%',L+(R-L)*r.t/100,Bt+18);
  const line=(k,m,col)=>{g.strokeStyle=col;g.lineWidth=3;g.beginPath();g.moveTo(L,Bt);rows.forEach(r=>g.lineTo(L+(R-L)*r.t/100,Bt-(Bt-Tp)*r[k]/m));g.stroke()};
- line('thrust',mx,'#4aa3ff');line('amp',ma,'#ffb020');g.fillStyle='#4aa3ff';g.textAlign='left';g.fillText(GND(B.type)?'■ Tezlik (km/soat)':'■ Tortish (g)',L,14);g.fillStyle='#ffb020';g.fillText('■ Tok (A)',L+150,14)}
+ line('thrust',mx,'#4aa3ff');line('amp',ma,'#ffb020');g.fillStyle='#4aa3ff';g.textAlign='left';g.fillText(T.chart?T.chart.l1:GND(B.type)?'■ Tezlik (km/soat)':'■ Tortish (g)',L,14);g.fillStyle='#ffb020';g.fillText(T.chart?T.chart.l2:'■ Tok (A)',L+170,14)}
 
 // ---------------- sinov ----------------
 // boshqaruv tugmalari — turiga va rejimga qarab
@@ -323,8 +323,12 @@ const CTRL={copter:{easy:[['W','Yuqoriga ko\'tarilish'],['S','Pastga tushish'],[
  plane:{easy:[['W S','Gazni oshirish / kamaytirish'],['↑','Burun tepaga (ko\'tarilish)'],['↓','Burun pastga'],['← →','Yonboshlab burilish (eleronlar)'],['A D','Yo\'nalish ruli']]},
  car:{easy:[['W ↑','Gaz'],['S ↓','Tormoz, so\'ng orqaga'],['A D ← →','Rul']]},
  boat:{easy:[['W ↑','Gaz (oldinga)'],['S ↓','Orqaga / sekinlash'],['A D ← →','Rul — faqat harakatda buradi']]},
+ heli:{easy:[['W','Ko\'tarilish (collective)'],['S','Pasayish'],['↑ ↓ ← →','Egilish (cyclic) — uchish yo\'nalishi'],['A D','Dum — burilish']],manual:[['W S','Collective — qo\'yib yuborilsa saqlanadi'],['↑ ↓ ← →','Cyclic'],['A D','Dum']]},
+ rocket:{easy:[['W / bo\'sh joy','Uchirish (3 s ortga sanash)']]},
+ tank:{easy:[['W ↑','Oldinga'],['S ↓','Orqaga'],['A D','Burilish (joyida ham)'],['Q E','Minorani burish']]},
  robot:{manual:[['W ↑','Oldinga'],['S ↓','Orqaga'],['A D ← →','Joyida burilish (g\'ildiraklar qarama-qarshi)']],avoid:[['—','Robot o\'zi yuradi: HC-SR04 to\'siqni ko\'rsa, orqaga chekinib buriladi']],line:[['—','Robot o\'zi yuradi: ikki IQ sensor qora chiziqni kuzatadi']]}};
-const MODES={copter:[['easy','Oson','Balandlik va joyni o\'zi ushlaydi — boshlovchilar uchun'],['manual','Qo\'lda','Gaz to\'liq sizda — haqiqiy FPV dron kabi']],plane:[['easy','Barqaror','Qo\'yib yuborilsa o\'zi tekislanadi'],['manual','Qo\'lda','Hech qanday yordamsiz']],
+const MODES={copter:[['easy','Oson','Balandlik va joyni o\'zi ushlaydi — boshlovchilar uchun'],['manual','Qo\'lda','Gaz to\'liq sizda — haqiqiy FPV dron kabi']],heli:[['easy','Oson','Balandlikni o\'zi ushlaydi'],['manual','Qo\'lda','Collective to\'liq sizda']],
+ plane:[['easy','Barqaror','Qo\'yib yuborilsa o\'zi tekislanadi'],['manual','Qo\'lda','Hech qanday yordamsiz']],
  robot:[['manual','Qo\'lda','Klaviatura bilan boshqarasiz'],['avoid','To\'siqdan qochish','Arduino dasturi: HC-SR04 bilan avtonom yurish'],['line','Chiziq bo\'ylab','Arduino dasturi: ikki IQ sensor bilan qora chiziqni kuzatish']]};
 const simMode=()=>{const M=MODES[B.type],m=window.SIM_MODE;return M?(M.some(x=>x[0]===m)?m:M[0][0]):'easy'};
 function ctrlHTML(){const C=CTRL[B.type]||{},L=C[simMode()]||C.easy||C.manual||[];return`<div class="keys">${L.map(([k,t])=>`<div><span>${k.split(' ').map(x=>`<kbd>${esc(x)}</kbd>`).join(' ')}</span><em>${esc(t)}</em></div>`).join('')}${isTouch?'<div><span>Joystiklar</span><em>Chap — gaz va burilish, o\'ng — yo\'nalish</em></div>':''}</div>`}
@@ -351,7 +355,7 @@ function renderStartCard(){const el=$('simStart'),S=SIM;if(!S||S.armed||S.fail||
  el.classList.remove('hidden');el.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{window.SIM_MODE=b.dataset.mode;S.mode=window.SIM_MODE;snd('click');renderStartCard();renderPanel()});
  $('ovStart').onclick=()=>{audioInit();simArm();el.classList.add('hidden');updateHud(true)}}
 function startSim(){simStart(B);$('hudFail').classList.add('hidden');resize();$('stL').classList.toggle('hidden',!isTouch);$('stR').classList.toggle('hidden',!isTouch);renderStartCard();updateHud(true)}
-let hudT=0;function updateHud(force){const S=SIM;if(!S)return;const n=performance.now();if(!force&&n-hudT<150)return;hudT=n;const soc=clamp(1-S.used/S.B.p.bat.mah,0,1),sp=S.vel.length()*3.6;
+let hudT=0;function updateHud(force){const S=SIM;if(!S)return;const n=performance.now();if(!force&&n-hudT<150)return;hudT=n;const soc=S.B.p.bat?clamp(1-S.used/S.B.p.bat.mah,0,1):1,sp=S.vel.length()*3.6;
  const MM=(MODES[S.B.type]||[]).find(x=>x[0]===S.mode),mode=MM?`<div class="hm">${esc(MM[1])} rejim</div>`:'';
  $('hudL').innerHTML=`<div class="hs ${S.armed?'on':''}"><i></i>${S.armed?'Ishlayapti':"To'xtagan"}</div>${mode}<div>Tezlik <b>${fmt(sp)}</b> km/soat</div>${!GND(S.B.type)?`<div>Balandlik <b>${fmt(S.pos.y,1)}</b> m</div>`:''}
   <div>Batareya <b>${fmt(soc*100)}%</b> · ${fmt(S.volt||S.D.V,1)} V</div><div class="batbar"><i style="width:${soc*100}%;background:${soc<.2?'#ff5a5a':soc<.4?'#ffb020':'#2ecc71'}"></i></div><div>Vaqt <b>${mmss(S.t)}</b> · ${fmt(S.amp||0,1)} A</div>`;

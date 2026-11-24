@@ -38,7 +38,7 @@ header::-webkit-scrollbar{display:none}
 .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;letter-spacing:-.01em;white-space:nowrap;margin-right:6px}
 .logo img{display:block;width:28px;height:28px;filter:drop-shadow(0 0 8px rgba(255,176,32,.35))}
 .logo small{font-weight:500;color:var(--mu);font-size:11.5px;letter-spacing:0}
-.typeSw{display:flex;background:var(--p2);border:1px solid var(--ln);border-radius:11px;padding:3px;gap:2px}
+.typeSw{display:flex;background:var(--p2);border:1px solid var(--ln);border-radius:11px;padding:3px;gap:2px;min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none}.typeSw::-webkit-scrollbar{display:none}.typeSw button{flex:none}
 .typeSw button{display:flex;align-items:center;gap:6px;padding:5px 11px;border-radius:8px;font-weight:500;font-size:12.5px;color:var(--mu);transition:.15s}
 .typeSw button:hover{color:var(--tx)}
 .typeSw button.on{background:var(--ac);color:#1a1200;font-weight:600;box-shadow:0 4px 14px rgba(255,176,32,.25)}
@@ -257,6 +257,9 @@ kbd{display:inline-block;min-width:22px;padding:1px 6px;border:1px solid #39465c
 <script src="/konstruktor/t_car.js"></script>
 <script src="/konstruktor/t_boat.js"></script>
 <script src="/konstruktor/t_robot.js"></script>
+<script src="/konstruktor/t_heli.js"></script>
+<script src="/konstruktor/t_rocket.js"></script>
+<script src="/konstruktor/t_tank.js"></script>
 <script src="/konstruktor/sim.js"></script>
 <script src="/konstruktor/app.js"></script>
 <script src="/konstruktor/forge.js"></script>

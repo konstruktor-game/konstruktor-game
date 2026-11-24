@@ -8,6 +8,8 @@ const ICONS={
  boat:'<path d="M2 15h20l-3 4H5z"/><path d="M6 15V9h7l3 6"/><path d="M9 9V5"/><path d="M2 21c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1 2-1 4-1"/>',
  robot:'<rect x="5" y="8" width="14" height="10" rx="2"/><circle cx="9.5" cy="13" r="1.3"/><circle cx="14.5" cy="13" r="1.3"/><path d="M12 8V5"/><circle cx="12" cy="4" r="1"/><path d="M3 12v3M21 12v3"/><path d="M8 18v2M16 18v2"/>',
  chip:'<rect x="6" y="6" width="12" height="12" rx="1.5"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+ heli:'<path d="M3 5h18"/><path d="M12 5v3"/><path d="M7 11a5 4 0 0 1 10 0v2a3 3 0 0 1-3 3H9a2 2 0 0 1-2-2z"/><path d="M17 12h5l1-2"/><path d="M8 19h9"/><path d="M10 16v3M15 16v3"/>',
+ tank:'<rect x="3" y="13" width="18" height="6" rx="3"/><circle cx="7" cy="16" r="1"/><circle cx="12" cy="16" r="1"/><circle cx="17" cy="16" r="1"/><path d="M6 13l1-3h8l1 3"/><path d="M15 11h7"/>',
  car:'<path d="M3 16v-3l2-5h14l2 5v3"/><path d="M3 16h18"/><circle cx="7" cy="17" r="2.2"/><circle cx="17" cy="17" r="2.2"/><path d="M6.5 8l1-2h9l1 2"/>',
  frame:'<path d="M4 4l16 16M20 4L4 20"/><rect x="8.5" y="8.5" width="7" height="7" rx="1.5"/><circle cx="4" cy="4" r="1.5"/><circle cx="20" cy="4" r="1.5"/><circle cx="4" cy="20" r="1.5"/><circle cx="20" cy="20" r="1.5"/>',
  motor:'<rect x="5" y="7" width="14" height="12" rx="2"/><path d="M5 11h14M9 7V5h6v2M12 5V2"/><path d="M8 15h.01M12 15h.01M16 15h.01"/>',
