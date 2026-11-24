@@ -117,7 +117,7 @@ T.build=(B,D,ctx)=>{const p=B.p,ch=p.chassis,wh=p.wheel,c=B.col,u=v=>v/10,X=!!wi
  {const g=new THREE.Group();g.add(rbox(3.4,2,4.2,.4,mPlastic('#1e1e1e',.4),u(ch.track)*.14,plateY+1.2,u(ch.wb)*.12));g.add(cyl(1.1,1.1,.4,mPlastic('#455a64'),u(ch.track)*.14,plateY+2.4,u(ch.wb)*.12,20));ctx.add('esc',g,[3,5,0])}
  ctx.add('servo',rbox(2,1.8,4,.2,mPlastic('#1565c0',.35),u(ch.track)*.1,plateY+1.1,-hz*.62),[0,4,-2]);
  ctx.add('rx',rbox(2,1,2.6,.3,mPlastic('#222',.4),-u(ch.track)*.12,plateY+.7,-hz*.35),[-2,5,0]);
- const[bw,bh,bl]=D.batDims;ctx.add('bat',rbox(bw,bh,bl,.3,new THREE.MeshStandardMaterial({map:wrapTex(c.bat,[`${p.bat.cells}S ${p.bat.mah}`,`${p.bat.c}C`,'']),roughness:.4}),u(ch.track)*.02,plateY+.2+bh/2,-hz*.05),[0,8,0]);
+ const[bw,bh,bl]=D.batDims;ctx.add('bat',box(bw,bh,bl,new THREE.MeshStandardMaterial({map:wrapTex(c.bat,[`${p.bat.cells}S ${p.bat.mah}`,`${p.bat.c}C`,'']),roughness:.4}),u(ch.track)*.02,plateY+.2+bh/2,-hz*.05),[0,8,0]);
  {const g=new THREE.Group(),bm=X?MAT('xrb'+c.body,()=>new THREE.MeshPhysicalMaterial({color:c.body,transparent:true,opacity:.2,depthWrite:false})):mPaint(c.body,B.fin),bm2=mPaint(c.body2,B.fin),by=plateY+.5,bwid=u(ch.track)*.82,blen=u(ch.wb)*1.25;
   if(ch.kind==='truck'||ch.kind==='crawler'){g.add(rbox(bwid,3.5,blen*.45,1,bm,0,by+4,-blen*.22));g.add(rbox(bwid*.92,3.2,blen*.35,1,bm,0,by+7,blen*.02));g.add(rbox(bwid,2.8,blen*.4,.8,bm2,0,by+4.2,blen*.3));
    for(const s of[-1,1]){const gl=box(.1,2,blen*.2,mGlass(),s*bwid*.46,by+7.2,blen*.02);g.add(gl)}if(ch.kind==='crawler'){for(const s of[-1,1])g.add(cyl(.2,.2,blen*.8,mMetal('#222'),s*bwid*.45,by+9,0).rotateX(Math.PI/2))}}

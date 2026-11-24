@@ -136,7 +136,7 @@ T.build=(B,D,ctx)=>{const p=B.p,fu=p.fuse,w=p.wing,c=B.col,X=!!window.XRAY;
  svs.forEach((id,k)=>{const sv=new THREE.Group();let x,y,z;if(k<2){x=(k?1:-1)*w.span*.3;y=wy+Math.tan(w.dih*DEG)*w.span*.3+.6;z=LEz+w.chord*.6}else{x=(k%2?1:-1)*1.2;y=baseY-.2;z=zAt(D.LE+w.chord*.95)}
   sv.add(rbox(1.2,1.1,2.2,.15,mPlastic('#1565c0',.35),x,y,z));sv.add(cyl(.12,.12,.6,mMetal('#eee'),x,y+.75,z-.5,8));ctx.add(id,sv,[0,4,0])});
  const[bw,bh,bl]=D.batDims;{const g=new THREE.Group(),wm=new THREE.MeshStandardMaterial({map:wrapTex(c.bat,[`${p.bat.cells}S ${p.bat.mah}`,`${p.bat.c}C ${CHEM[p.bat.chem]}`,'']),roughness:.4});
-  g.add(rbox(Math.min(bw,fu.w*.8),Math.min(bh,fh*.7),bl,.3,wm,0,baseY-fh*.3,zAt(p.bat.pos)));ctx.add('bat',g,[0,9,0])}
+  g.add(box(Math.min(bw,fu.w*.8),Math.min(bh,fh*.7),bl,wm,0,baseY-fh*.3,zAt(p.bat.pos)));ctx.add('bat',g,[0,9,0])}
  // og'irlik markazi ko'rsatkichi
  if(ctx.inst('wing')){const cgz=zAt(D.CG),okA=zAt(D.LE+w.chord*.25),okB=zAt(D.LE+w.chord*.33);
   const band=box(w.span*.16,.05,okB-okA,mGlow('#2ecc71'),0,wy+w.chord*.13,(okA+okB)/2);band.material=MAT('cgband',()=>new THREE.MeshBasicMaterial({color:'#2ecc71',transparent:true,opacity:.45,depthWrite:false}));band.userData.label='cg';ctx.deco(band);

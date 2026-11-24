@@ -69,7 +69,7 @@ const T={id:'copter',name:'Multikopter (dron)',ic:'🚁',desc:"4, 6 yoki 8 motor
   mini3:{name:'3" yengil cinewhoop-lite',desc:"Xona va yaqin masofa, 250 g dan yengil",p:{frame:{arms:4,shape:'X',wb:130,aw:9,at:3,bl:64,bw:32,sh:20,mat:'carbon',stack:'20'},motor:{d:14,h:4,kv:3800},prop:{d:3,p:1.8,b:3,mat:'pc'},
    esc:{a:30,cells:4,size:'20',proto:'dshot600'},fc:{mcu:'F4',size:'20',baro:false,bb:false},vid:{type:'analog',tilt:15,fov:150,mw:200},rx:{band:'2.4'},extra:{gps:false,led:true,buz:true,pay:0},bat:{chem:'lipo',cells:4,mah:650,c:75}}},
   free5:{name:'5" freestyle',desc:'Eng ommabop FPV o\'lcham',p:{frame:{arms:4,shape:'X',wb:225,aw:13,at:5,bl:96,bw:44,sh:30,mat:'carbon',stack:'30.5'},motor:{d:22,h:7,kv:1950},prop:{d:5.1,p:3.6,b:3,mat:'pc'},
-   esc:{a:45,cells:6,size:'30.5',proto:'dshot600'},fc:{mcu:'F7',size:'30.5',baro:false,bb:true},vid:{type:'digital',tilt:30,fov:150,mw:500},rx:{band:'2.4'},extra:{gps:false,led:false,buz:true,pay:0},bat:{chem:'lipo',cells:6,mah:1100,c:120}}},
+   esc:{a:55,cells:6,size:'30.5',proto:'dshot600'},fc:{mcu:'F7',size:'30.5',baro:false,bb:true},vid:{type:'digital',tilt:30,fov:150,mw:500},rx:{band:'2.4'},extra:{gps:false,led:false,buz:true,pay:0},bat:{chem:'lipo',cells:6,mah:1100,c:120}}},
   lr7:{name:'7" uzoq masofa',desc:'Li-ion bilan 15+ daqiqa',p:{frame:{arms:4,shape:'X',wb:300,aw:15,at:5.5,bl:115,bw:48,sh:32,mat:'carbon',stack:'30.5'},motor:{d:28,h:6.5,kv:1300},prop:{d:7,p:4,b:3,mat:'pc'},
    esc:{a:45,cells:6,size:'30.5',proto:'dshot300'},fc:{mcu:'H7',size:'30.5',baro:true,bb:true},vid:{type:'digital',tilt:20,fov:140,mw:1000},rx:{band:'915'},extra:{gps:true,led:false,buz:true,pay:0},bat:{chem:'liion',cells:6,mah:4000,c:10}}},
   cine10:{name:'10" kino / yuk geksakopter',desc:"6 motor, katta kamera ko'taradi",p:{frame:{arms:6,shape:'X',wb:620,aw:22,at:6,bl:160,bw:110,sh:40,mat:'carbon',stack:'30.5'},motor:{d:35,h:12,kv:600},prop:{d:13,p:5.5,b:2,mat:'cf'},
@@ -122,16 +122,17 @@ T.derive=B=>{const p=B.p,f=p.frame,n=+f.arms,m=p.motor,pr=p.prop,ba=p.bat,e=p.es
  const parts=[['Ramka',wFrame+wTop],['Motorlar',n*wMot],['Parraklar',n*wProp],['ESC',wEsc],['Parvoz kontrolleri',wFc],['Video',wVid],['Qabul qilgich',wRx],["Simlar, vintlar, qo'shimcha",wExt],['Batareya',wBat],["Foydali yuk",+p.extra.pay||0]];
  return{n,mot,maxProp,minAdj,armL,strength,wFrame,wTop,wMot,Pm,wProp,wBat,wEsc,wFc,uarts,wVid,AUW,rf,rpmMax,rpm,overload,Tm,Pmot,Imot,Itot,TWR,canHover,hoverThr,IH,PH,
   tHover,tMix,tAgg,tip,vTop,batMaxA,cmax,V,Vn,Vfull:ba.cells*FULL[ba.chem],kvOpt,table,parts,
-  payload:Math.max(0,n*Tm/2-AUW),gw:canHover?AUW/PH:0,batDims:batDims(wBat,ba)}};
+  pitchIn:pr.p,payload:Math.max(0,n*Tm/2-AUW),gw:canHover?AUW/PH:0,batDims:batDims(wBat,ba)}};
 function batDims(w,ba){const vol=w/2.05*1000,l=clamp(45+ba.mah/45,40,190),wd=clamp(26+ba.mah/250,24,90),h=clamp(vol/(l*wd),6,90);return[wd/10,h/10,l/10]}
 
+T.pitchV=D=>D.rpm*D.pitchIn*.0254/60;
 T.metrics=(B,D)=>[
  {l:"Umumiy og'irlik",v:fmt(D.AUW)+' g',lvl:D.AUW<250?'ok':''},
  {l:'Tortish kuchi',v:fmt(D.Tm*D.n)+' g'},
  {l:"Tortish/og'irlik",v:fmt(D.TWR,1)+' : 1',lvl:D.TWR<1.6?'bad':D.TWR<2.5?'warn':'ok'},
  {l:'Muallaq gaz',v:D.canHover?fmt(D.hoverThr*100)+' %':'—',lvl:!D.canHover||D.hoverThr>.6?'bad':D.hoverThr>.5?'warn':'ok'},
  {l:'Parvoz vaqti',v:D.canHover?fmt(D.tMix,1)+' daq':'—'},
- {l:'Maks. tok',v:fmt(D.Itot)+' A',lvl:D.Itot>D.batMaxA?'warn':''}];
+ {l:'Maks. tok',v:fmt(D.Itot)+' A',lvl:D.Itot>D.batMaxA*1.25?'warn':''}];
 
 T.issues=(B,D)=>{const p=B.p,L=[],add=(lvl,t,why)=>L.push({lvl,t,why}),f=p.frame;
  if(p.prop.d>D.maxProp+.05)add('bad',`Parrak ramkaga sig'maydi (${fmt(p.prop.d,1)}" > ${fmt(D.maxProp,1)}")`,"Qo'shni parraklar bir-biriga tegib sinadi. Kichikroq parrak oling yoki motorlar orasini kattalashtiring.");
@@ -144,8 +145,8 @@ T.issues=(B,D)=>{const p=B.p,L=[],add=(lvl,t,why)=>L.push({lvl,t,why}),f=p.frame
  if(D.overload>1.4)add('bad',`Motor ${fmt(D.overload*100)}% yuklanadi — kuyadi`,"KV × kuchlanish juda yuqori yoki parrak juda katta. KV ni pasaytiring, kichikroq parrak yoki kamroq S oling.");
  else if(D.overload>1.1)add('warn',`Motor ${fmt(D.overload*100)}% yuklanadi — qiziydi`,"Uzoq to'liq gazda motor chulg'ami qizib ketadi.");
  if(D.Imot>p.esc.a*1.1)add('bad',`Motor toki ${fmt(D.Imot)} A, ESC esa ${p.esc.a} A`,"ESC tokdan kuyadi. Kamida 20% zaxirali ESC oling.");else if(D.Imot>p.esc.a*.9)add('warn',`ESC toki chegarada (${fmt(D.Imot)} / ${p.esc.a} A)`,'Zaxira 20% dan kam — issiq kunda xavfli.');
- if(D.Itot>D.batMaxA*1.6)add('bad',`Batareya ${fmt(D.batMaxA)} A beradi, kerak ${fmt(D.Itot)} A`,"Kuchlanish keskin tushadi, batareya qizib shishadi. Yuqori C yoki katta sig'imli batareya oling.");
- else if(D.Itot>D.batMaxA)add('warn',`Batareya to'liq gazda yetishmaydi (${fmt(D.batMaxA)} / ${fmt(D.Itot)} A)`,"To'liq gazda kuchlanish pasayadi (voltage sag).");
+ if(D.Itot>D.batMaxA*1.8)add('bad',`Batareya ${fmt(D.batMaxA)} A beradi, kerak ${fmt(D.Itot)} A`,"Kuchlanish keskin tushadi, batareya qizib shishadi. Yuqori C yoki katta sig'imli batareya oling.");
+ else if(D.Itot>D.batMaxA*1.25)add('warn',`Batareya to'liq gazda yetishmaydi (${fmt(D.batMaxA)} / ${fmt(D.Itot)} A)`,"To'liq gazda kuchlanish pasayadi (voltage sag).");
  if(p.bat.chem==='liion'&&B.purpose!=='longrange'&&B.purpose!=='cargo')add('warn','Li-ion akrobatika uchun mos emas',"Li-ion yengil va sig'imli, lekin katta tok bera olmaydi — uzoq masofa uchun yaxshi.");
  if(!D.canHover)add('bad',"Dron ko'tarila olmaydi","Tortish kuchi og'irlikdan kam. Motor/parrakni kuchaytiring yoki yengillashtiring.");
  else if(D.TWR<1.6)add('bad',`Tortish/og'irlik ${fmt(D.TWR,1)} — boshqarib bo'lmaydi`,"Manyovr uchun kamida 2:1 kerak.");
@@ -239,9 +240,9 @@ T.build=(B,D,ctx)=>{const p=B.p,f=p.frame,c=B.col,u=v=>v/10;
  if(p.extra.gps){const g=new THREE.Group();g.add(cyl(.12,.12,4,mPlastic('#333'),0,topY+2,u(f.bl)*.35,8));g.add(rbox(2.4,.7,2.4,.6,mPlastic('#202020',.4),0,topY+4.2,u(f.bl)*.35));g.add(box(1.6,.05,1.6,mPlastic('#c9a227',.4),0,topY+4.58,u(f.bl)*.35));ctx.add('gps',g,[0,12,0])}
  const[bw,bh,bl]=D.batDims;
  {const g=new THREE.Group();g.add(box(1.6,.12,bl+1.5,mPlastic('#111',.8),0,topY+.18,0));g.add(box(1.6,.05,bl*.8,mPlastic('#222',.9),0,topY+.26,0));
-  const s=box(1.5,.1,bw*2.2+bh*2+1,mPlastic('#202020',.7),0,topY+.15,0);s.rotation.y=Math.PI/2;g.add(s);ctx.add('strap',g,[0,10,0])}
+  for(const z of[-bl*.25,bl*.25])g.add(box(bw+1.4,.12,1.5,mPlastic('#202020',.7),0,topY+.2,z));ctx.add('strap',g,[0,10,0])}
  {const g=new THREE.Group(),wm=new THREE.MeshStandardMaterial({map:wrapTex(c.bat,[`${p.bat.cells}S ${p.bat.mah}mAh`,`${p.bat.c}C · ${CHEM[p.bat.chem]}`,`${fmt(D.Vn,1)} V nominal`]),roughness:.4,metalness:.05});
-  g.add(rbox(bw,bh,bl,.3,wm,0,topY+.3+bh/2,0));g.add(box(.4,.4,2.5,mPlastic('#e53935'),.2,topY+.5,bl/2+1.2));g.add(box(.4,.4,2.5,mPlastic('#222'),-.2,topY+.5,bl/2+1.2));
+  g.add(box(bw,bh,bl,wm,0,topY+.3+bh/2,0));for(const z of[-bl*.25,bl*.25])g.add(box(bw+.1,.12,1.5,mPlastic('#202020',.7),0,topY+.3+bh+.04,z));g.add(box(.4,.4,2.5,mPlastic('#e53935'),.2,topY+.5,bl/2+1.2));g.add(box(.4,.4,2.5,mPlastic('#222'),-.2,topY+.5,bl/2+1.2));
   g.add(rbox(1.6,.8,1.2,.15,mPlastic('#f9a825',.4),0,topY+.6,bl/2+2.8));
   const bal=box(1.2,.2,.6,mPlastic('#f5f5f5'),0,topY+.3+bh,bl/2-.2);g.add(bal);ctx.add('bat',g,[0,14,0])}
  // ulangan simlar (3D)
