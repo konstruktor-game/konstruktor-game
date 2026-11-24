@@ -49,7 +49,7 @@ function ctex(key,w,h,draw,rep){if(texCache[key])return texCache[key];const c=do
 // karbon tola (twill to'qima)
 const carbonTex=ctex('carbon',256,256,(g,w,h)=>{g.fillStyle='#0d0d0f';g.fillRect(0,0,w,h);const s=16;
  for(let y=0;y<h;y+=s)for(let x=0;x<w;x+=s){const k=((x/s+y/s)>>1)%2===0,gr=k?g.createLinearGradient(x,y,x+s,y):g.createLinearGradient(x,y,x,y+s);
-  gr.addColorStop(0,'#1b1c20');gr.addColorStop(.5,'#3a3c44');gr.addColorStop(1,'#16171a');g.fillStyle=gr;g.fillRect(x+.5,y+.5,s-1,s-1)}},[4,4]);
+  gr.addColorStop(0,'#1b1c20');gr.addColorStop(.5,'#3a3c44');gr.addColorStop(1,'#16171a');g.fillStyle=gr;g.fillRect(x+.5,y+.5,s-1,s-1)}},[.32,.32]);
 function pcbTex(base,label){return ctex('pcb'+base+label,256,256,(g,w,h)=>{g.fillStyle=base;g.fillRect(0,0,w,h);
  g.strokeStyle='rgba(200,150,70,.35)';g.lineWidth=2;for(let i=0;i<40;i++){g.beginPath();let x=rnd(0,w),y=rnd(0,h);g.moveTo(x,y);for(let k=0;k<3;k++){if(Math.random()<.5)x+=rnd(-60,60);else y+=rnd(-60,60);g.lineTo(x,y)}g.stroke()}
  g.fillStyle='rgba(220,180,90,.8)';for(let i=0;i<60;i++)g.fillRect(rnd(0,w),rnd(0,h),3,3);

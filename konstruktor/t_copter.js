@@ -26,7 +26,7 @@ function motorLayout(f){const n=+f.arms,R=f.wb/2,L=[];
   for(let k=0;k<n;k++){const a=off+k*360/n;L.push({i:k+1,x:Math.sin(a*DEG)*R,z:-Math.cos(a*DEG)*R,a,name:angName(a),dir:k%2?'CCW':'CW'})}}
  return L}
 
-const T={id:'copter',name:'Multikopter (dron)',ic:'🚁',desc:"4, 6 yoki 8 motorli dron: FPV, kino, uzoq masofa, yuk tashish.",
+const T={id:'copter',name:'Multikopter (dron)',ic:'drone',desc:"4, 6 yoki 8 motorli dron: FPV, kino, uzoq masofa, yuk tashish.",
  defPreset:'free5',defPurpose:'freestyle',
  purposes:{freestyle:{t:'Freestyle',twr:[6,14],note:"Akrobatika: kuchli zaxira va tez javob kerak"},racing:{t:'Poyga',twr:[9,20],note:'Maksimal tezlanish, yengil va kuchli'},
   cinematic:{t:'Kino / silliq suratga olish',twr:[3,7],note:"Silliq parvoz; og'irroq kamera ko'tariladi"},longrange:{t:'Uzoq masofa',twr:[2.5,8],note:'Samaradorlik va parvoz vaqti muhim'},
@@ -34,7 +34,7 @@ const T={id:'copter',name:'Multikopter (dron)',ic:'🚁',desc:"4, 6 yoki 8 motor
  colors:{frame:'#e8eaee',stand:'#d32f2f',motor:'#d32f2f',prop:'#ff9800',cam:'#1d1d1f',bat:'#1565c0',ant:'#ffd600',led:'#00e5ff'},
  paint:[['frame','Ramka (lak rangi)'],['stand','Stoykalar'],['motor','Motor qo\'ng\'irog\'i'],['prop','Parraklar'],['cam','Kamera'],['bat','Batareya o\'rami'],['ant','Antennalar'],['led','LED chiroq']],
  spec:{
-  frame:{t:'Ramka',ic:'🔲',g:'frame',f:[
+  frame:{t:'Ramka',ic:'frame',g:'frame',f:[
    {k:'arms',l:'Motorlar soni',type:'sel',o:{4:'4 — kvadrokopter',6:'6 — geksakopter',8:'8 — oktokopter'},g:'arms'},
    {k:'shape',l:'Shakl (4 motorli)',type:'sel',o:{X:'X — simmetrik',H:'H — keng korpus',DC:'Deadcat — kamera oldi ochiq'},g:'shape'},
    {k:'wb',l:'Motorlar orasi (diagonal)',min:90,max:900,step:5,u:'mm',g:'wb'},
@@ -45,24 +45,24 @@ const T={id:'copter',name:'Multikopter (dron)',ic:'🚁',desc:"4, 6 yoki 8 motor
    {k:'sh',l:'Plastinalar orasidagi balandlik',min:16,max:50,step:1,u:'mm',g:'standoff'},
    {k:'mat',l:'Material',type:'sel',o:{carbon:'Karbon tola',alu:'Alyuminiy',plastic:'Plastik (3D bosma)'},g:'material'},
    {k:'stack',l:"Stek o'rni (teshiklar oralig'i)",type:'sel',o:{'20':'20×20 mm','30.5':'30.5×30.5 mm'},g:'stack'}]},
-  motor:{t:'Motorlar',ic:'⚙️',g:'motor',f:[
+  motor:{t:'Motorlar',ic:'motor',g:'motor',f:[
    {k:'d',l:'Stator diametri',min:8,max:60,step:1,u:'mm',g:'stator'},{k:'h',l:'Stator balandligi',min:3,max:20,step:.5,u:'mm',g:'stator'},
    {k:'kv',l:'KV — 1 voltga aylanish/daqiqa',min:100,max:8000,step:50,u:'KV',g:'kv'}]},
-  prop:{t:'Parraklar',ic:'🌀',g:'prop',f:[
+  prop:{t:'Parraklar',ic:'prop',g:'prop',f:[
    {k:'d',l:'Diametr',min:2,max:24,step:.1,u:'"',g:'propd'},{k:'p',l:'Qadam (pitch)',min:1.5,max:12,step:.1,u:'"',g:'pitch'},
    {k:'b',l:'Parraklar soni',type:'sel',o:{2:'2 ta',3:'3 ta',4:'4 ta'},g:'blades'},{k:'mat',l:'Material',type:'sel',o:{pc:'Polikarbonat (egiluvchan)',cf:'Karbon (qattiq, yengil)'}}]},
-  esc:{t:'ESC (tezlik regulyatori)',ic:'⚡',g:'esc',f:[
+  esc:{t:'ESC (tezlik regulyatori)',ic:'bolt',g:'esc',f:[
    {k:'a',l:'Doimiy tok (har motor)',min:6,max:120,step:1,u:'A',g:'escA'},{k:'cells',l:'Maks. batareya',type:'sel',o:{4:'4S gacha',6:'6S gacha',8:'8S gacha',12:'12S gacha'}},
    {k:'size',l:"O'lcham",type:'sel',o:{'20':'20×20','30.5':'30.5×30.5'},g:'stack'},{k:'proto',l:'Protokol',type:'sel',o:{dshot600:'DShot600 (raqamli)',dshot300:'DShot300',pwm:'PWM (eski, analog)'},g:'dshot'}]},
-  fc:{t:'Parvoz kontrolleri',ic:'🧠',g:'fc',f:[
+  fc:{t:'Parvoz kontrolleri',ic:'cpu',g:'fc',f:[
    {k:'mcu',l:'Protsessor',type:'sel',o:{F4:'F4 — 4 UART',F7:'F7 — 6 UART',H7:'H7 — 8 UART'},g:'mcu'},{k:'size',l:"O'lcham",type:'sel',o:{'20':'20×20','30.5':'30.5×30.5'},g:'stack'},
    {k:'baro',l:'Barometr (balandlikni ushlash)',type:'bool',g:'baro'},{k:'bb',l:'Blackbox xotira',type:'bool',g:'blackbox'}]},
-  vid:{t:'Video tizimi',ic:'📷',g:'vtx',f:[
+  vid:{t:'Video tizimi',ic:'camera',g:'vtx',f:[
    {k:'type',l:'Turi',type:'sel',o:{analog:'Analog — kam kechikish, arzon',digital:'Raqamli HD — tiniq tasvir',none:"Yo'q (faqat ko'z bilan boshqarish)"},g:'vtx'},
    {k:'tilt',l:'Kamera burchagi',min:0,max:60,step:1,u:'°',g:'tilt'},{k:'fov',l:"Ko'rish burchagi (FOV)",min:90,max:170,step:5,u:'°'},{k:'mw',l:'Uzatish quvvati',min:25,max:1000,step:25,u:'mW',g:'mw'}]},
-  rx:{t:'Radio qabul qilgich',ic:'📡',g:'rx',f:[{k:'band',l:'Chastota',type:'sel',o:{'2.4':'2.4 GHz — tez, kichik antenna','915':"915 MHz — uzoq, to'siqdan o'tadi"},g:'band'}]},
-  extra:{t:"Qo'shimcha",ic:'➕',f:[{k:'gps',l:'GPS (uyga qaytish, joylashuv)',type:'bool',g:'gps'},{k:'led',l:'LED chiroqlar',type:'bool',g:'led'},{k:'buz',l:'Buzzer (yo\'qolsa topish)',type:'bool',g:'buzzer'},{k:'pay',l:"Qo'shimcha yuk (kamera, sensor)",min:0,max:5000,step:10,u:'g',g:'payload'}]},
-  bat:{t:'Batareya',ic:'🔋',g:'battery',f:[
+  rx:{t:'Radio qabul qilgich',ic:'antenna',g:'rx',f:[{k:'band',l:'Chastota',type:'sel',o:{'2.4':'2.4 GHz — tez, kichik antenna','915':"915 MHz — uzoq, to'siqdan o'tadi"},g:'band'}]},
+  extra:{t:"Qo'shimcha",ic:'plus',f:[{k:'gps',l:'GPS (uyga qaytish, joylashuv)',type:'bool',g:'gps'},{k:'led',l:'LED chiroqlar',type:'bool',g:'led'},{k:'buz',l:'Buzzer (yo\'qolsa topish)',type:'bool',g:'buzzer'},{k:'pay',l:"Qo'shimcha yuk (kamera, sensor)",min:0,max:5000,step:10,u:'g',g:'payload'}]},
+  bat:{t:'Batareya',ic:'battery',g:'battery',f:[
    {k:'chem',l:'Kimyo',type:'sel',o:{lipo:'LiPo — yuqori tok',lihv:'LiHV — yuqori kuchlanish',liion:'Li-ion — yengil, uzoq, past tok',life:'LiFePO4 — xavfsiz, og\'ir'},g:'chem'},
    {k:'cells',l:'Yacheykalar (S)',min:1,max:12,step:1,u:'S',g:'cells'},{k:'mah',l:"Sig'im",min:150,max:22000,step:50,u:'mAh',g:'mah'},{k:'c',l:'Razryad reytingi',min:5,max:150,step:5,u:'C',g:'crating'}]}},
  presets:{
@@ -75,18 +75,18 @@ const T={id:'copter',name:'Multikopter (dron)',ic:'🚁',desc:"4, 6 yoki 8 motor
   cine10:{name:'12" kino / yuk geksakopter',desc:"6 motor, katta kamera ko'taradi",purpose:'cinematic',p:{frame:{arms:6,shape:'X',wb:700,aw:22,at:6,bl:160,bw:110,sh:40,mat:'carbon',stack:'30.5'},motor:{d:35,h:12,kv:720},prop:{d:12,p:5.5,b:2,mat:'cf'},
    esc:{a:50,cells:6,size:'30.5',proto:'dshot300'},fc:{mcu:'H7',size:'30.5',baro:true,bb:true},vid:{type:'digital',tilt:10,fov:120,mw:700},rx:{band:'915'},extra:{gps:true,led:true,buz:true,pay:900},bat:{chem:'lipo',cells:6,mah:8000,c:25}}}},
  steps:[
-  {id:'frame',t:'Ramka',ic:'🔲',cats:['frame'],slots:B=>['frame'],intro:"Ramka — dronning skeleti. Avval o'lcham va shaklni loyihalang: motorlar orasidagi masofa qaysi parrak sig'ishini belgilaydi."},
-  {id:'motors',t:'Motorlar',ic:'⚙️',cats:['motor'],slots:B=>arr(+B.p.frame.arms,i=>'mot'+i),intro:"Motorlarni qo'llarning uchiga o'rnating. Stator kattaligi — kuch, KV — tezlik. Katta parrakka past KV, kichigiga yuqori KV kerak."},
-  {id:'stack',t:'Elektronika steki',ic:'🧠',cats:['esc','fc'],slots:B=>['soft','esc','fc'],intro:"Stek ikki qavat: pastda ESC (motorlarga quvvat beradi), tepada parvoz kontrolleri (dronning miyasi). Tebranishni kamaytirish uchun rezina amortizatorlarga qo'yiladi."},
-  {id:'avionics',t:'Kamera va aloqa',ic:'📡',cats:['vid','rx','extra'],slots:B=>[...(B.p.vid.type!=='none'?['cam','vtx']:[]),'rx',...(B.p.extra.led?['led']:[]),...(B.p.extra.buz?['buz']:[])],intro:"Kamera — uchuvchining ko'zi, VTX — tasvirni ko'zoynakka uzatadi, qabul qilgich — pultdan buyruq oladi."},
-  {id:'wiring',kind:'wiring',t:'Kavsharlash (simlar)',ic:'🔌',intro:"Har bir simni to'g'ri kontaktga ulang. Xato ulangan sim sinovda muammo chiqaradi — xuddi haqiqiy hayotdagidek."},
-  {id:'power',t:'Yopish va batareya',ic:'🔋',cats:['bat'],slots:B=>['top',...(B.p.extra.gps?['gps']:[]),'strap','bat'],intro:"Yuqori plastina stekni yopadi. Batareya tasma bilan mahkamlanadi — parvozda uchib ketmasligi kerak."},
-  {id:'props',kind:'props',t:'Parraklar',ic:'🌀',cats:['prop'],slots:B=>arr(+B.p.frame.arms,i=>'prop'+i),intro:"Har bir motor ma'lum yo'nalishda aylanadi. Parrak shu yo'nalishga mos (CW yoki CCW) bo'lishi shart, aks holda dron ko'tarilmay ag'dariladi."},
-  {id:'paint',kind:'paint',t:'Dizayn va rang',ic:'🎨'},
-  {id:'check',kind:'check',t:'Tekshiruv va hisob-kitob',ic:'📊'},
-  {id:'test',kind:'test',t:'Sinov parvozi',ic:'🚀'},
-  {id:'bom',kind:'bom',t:"Detallar ro'yxati",ic:'🧾'}],
- req:{'mot#':'frame',soft:'frame',esc:'soft',fc:'esc',cam:'frame',vtx:'fc',rx:'fc',led:'frame',buz:'fc',top:'fc',gps:'top',strap:'top',bat:'strap','prop#':'mot#'},
+  {id:'frame',t:'Ramka',ic:'frame',cats:['frame'],slots:B=>['frame'],intro:"Ramka — dronning skeleti. Avval o'lcham va shaklni loyihalang: motorlar orasidagi masofa qaysi parrak sig'ishini belgilaydi."},
+  {id:'motors',t:'Motorlar',ic:'motor',cats:['motor'],slots:B=>arr(+B.p.frame.arms,i=>'mot'+i),intro:"Motorlarni qo'llarning uchiga o'rnating. Stator kattaligi — kuch, KV — tezlik. Katta parrakka past KV, kichigiga yuqori KV kerak."},
+  {id:'stack',t:'Elektronika steki',ic:'cpu',cats:['esc','fc'],slots:B=>['soft','esc','fc'],intro:"Stek ikki qavat: pastda ESC (motorlarga quvvat beradi), tepada parvoz kontrolleri (dronning miyasi). Tebranishni kamaytirish uchun rezina amortizatorlarga qo'yiladi."},
+  {id:'avionics',t:'Kamera va aloqa',ic:'antenna',cats:['vid','rx','extra'],slots:B=>[...(B.p.vid.type!=='none'?['cam','vtx']:[]),'rx',...(B.p.extra.gps?['gps']:[]),...(B.p.extra.led?['led']:[]),...(B.p.extra.buz?['buz']:[])],intro:"Kamera — uchuvchining ko'zi, VTX — tasvirni ko'zoynakka uzatadi, qabul qilgich — pultdan buyruq oladi. GPS ramka orqasidagi ustunchaga, elektronikadan uzoqroq o'rnatiladi (shovqin kamroq)."},
+  {id:'wiring',kind:'wiring',t:'Kavsharlash (simlar)',ic:'plug',intro:"Har bir simni to'g'ri kontaktga ulang. Xato ulangan sim sinovda muammo chiqaradi — xuddi haqiqiy hayotdagidek."},
+  {id:'power',t:'Yopish va batareya',ic:'battery',cats:['bat'],slots:B=>['top','strap','bat'],intro:"Yuqori plastina stekni yopadi. Batareya tasma bilan mahkamlanadi — parvozda uchib ketmasligi kerak."},
+  {id:'props',kind:'props',t:'Parraklar',ic:'prop',cats:['prop'],slots:B=>arr(+B.p.frame.arms,i=>'prop'+i),intro:"Har bir motor ma'lum yo'nalishda aylanadi. Parrak shu yo'nalishga mos (CW yoki CCW) bo'lishi shart, aks holda dron ko'tarilmay ag'dariladi."},
+  {id:'paint',kind:'paint',t:'Dizayn va rang',ic:'palette'},
+  {id:'check',kind:'check',t:'Tekshiruv va hisob-kitob',ic:'chart'},
+  {id:'test',kind:'test',t:'Sinov parvozi',ic:'rocket'},
+  {id:'bom',kind:'bom',t:"Detallar ro'yxati",ic:'list'}],
+ req:{'mot#':'frame',soft:'frame',esc:'soft',fc:'esc',cam:'frame',vtx:'fc',rx:'fc',led:'frame',buz:'fc',top:'fc',gps:'frame',strap:'top',bat:'strap','prop#':'mot#'},
  propSlot:/^prop(\d+)$/,
 };
 const arr=(n,f)=>Array.from({length:n},(_,i)=>f(i+1));
@@ -105,7 +105,7 @@ T.derive=B=>{const p=B.p,f=p.frame,n=+f.arms,m=p.motor,pr=p.prop,ba=p.bat,e=p.es
  const wBat=ba.cells*ba.mah*DENS[ba.chem]+ba.cells*2+6;
  const wEsc=(3+e.a*.18)*n/4,wFc=f.stack==='20'?5:7.5,uarts={F4:4,F7:6,H7:8}[p.fc.mcu];
  const wVid={analog:11,digital:36,none:0}[p.vid.type]+(p.vid.mw>600?4:0),wRx=p.rx.band==='915'?2.5:1.5;
- const wExt=(p.extra.gps?10:0)+(p.extra.led?4:0)+(p.extra.buz?3:0)+4+15+(n-4)*3;
+ const wFast=6+(n*2+8)*.5+n*4*.3+n*(m.d<17?.4:1.1)+4,wExt=(p.extra.gps?10:0)+(p.extra.led?4:0)+(p.extra.buz?3:0)+4+wFast;
  const AUW=wFrame+wTop+n*(wMot+wProp)+wEsc+wFc+wVid+wRx+wExt+wBat+(+p.extra.pay||0);
  const rf=airDensity(B.env.alt,B.env.temp)/RHO0;
  const Tf=r=>.006*Math.pow(r/1000,2)*Math.pow(pr.d,3.5)*Math.sqrt(pr.p/pr.d)*KB[pr.b]*rf, Pf=r=>4.6e-5*Math.pow(r/1000,3)*Math.pow(pr.d,4)*(pr.p/pr.d)*KP[pr.b]*rf;
@@ -122,8 +122,7 @@ T.derive=B=>{const p=B.p,f=p.frame,n=+f.arms,m=p.motor,pr=p.prop,ba=p.bat,e=p.es
  const parts=[['Ramka',wFrame+wTop],['Motorlar',n*wMot],['Parraklar',n*wProp],['ESC',wEsc],['Parvoz kontrolleri',wFc],['Video',wVid],['Qabul qilgich',wRx],["Simlar, vintlar, qo'shimcha",wExt],['Batareya',wBat],["Foydali yuk",+p.extra.pay||0]];
  return{n,mot,maxProp,minAdj,armL,strength,wFrame,wTop,wMot,Pm,wProp,wBat,wEsc,wFc,uarts,wVid,AUW,rf,rpmMax,rpm,overload,Tm,Pmot,Imot,Itot,TWR,canHover,hoverThr,IH,PH,
   tHover,tMix,tAgg,tip,vTop,batMaxA,cmax,V,Vn,Vfull:ba.cells*FULL[ba.chem],kvOpt,table,parts,
-  pitchIn:pr.p,payload:Math.max(0,n*Tm/2-AUW),gw:canHover?AUW/PH:0,batDims:batDims(wBat,ba)}};
-function batDims(w,ba){const vol=w/2.05*1000,l=clamp(45+ba.mah/45,40,190),wd=clamp(26+ba.mah/250,24,90),h=clamp(vol/(l*wd),6,90);return[wd/10,h/10,l/10]}
+  pitchIn:pr.p,payload:Math.max(0,n*Tm/2-AUW),gw:canHover?AUW/PH:0}};
 
 T.pitchV=D=>D.rpm*D.pitchIn*.0254/60;
 T.metrics=(B,D)=>[
@@ -192,79 +191,66 @@ T.wiring=B=>{const p=B.p,D=T.derive(B),n=D.n,boards=[],comps=[];
 
 // ---------------- 3D model ----------------
 T.build=(B,D,ctx)=>{const p=B.p,f=p.frame,c=B.col,u=v=>v/10;
- const fm=mMat(f.mat,f.mat==='carbon'?'#ffffff':c.frame,B.fin),fmCol=f.mat==='carbon'?mCarbon(c.frame):fm;
- const bt=.25,armY=u(f.at)/2,motY=u(f.at),topY=bt+u(f.sh),stk=f.stack==='20'?2.6:3.65;
- // ramka
- {const g=new THREE.Group();g.add(rbox(u(f.bw),bt,u(f.bl),.5,fmCol,0,0,0));
-  D.mot.forEach((q,k)=>{const L=Math.hypot(q.x,q.z),a=Math.atan2(q.x,q.z),arm=rbox(u(f.aw),u(f.at),u(L),u(f.aw)*.45,fmCol);arm.position.set(u(q.x)/2,0,u(q.z)/2);arm.rotation.y=a;g.add(arm);
-   const tip=cyl(u(f.aw)*.75,u(f.aw)*.75,u(f.at),fmCol,u(q.x),armY,u(q.z),28);g.add(tip)});
-  for(const s of[-1,1])g.add(rbox(.2,u(f.sh),3.2,.3,fmCol,s*(stk/2+.9),bt,-u(f.bl)/2+2));
-  for(const[x,z]of[[1,1],[1,-1],[-1,1],[-1,-1]])g.add(cyl(.28,.28,u(f.sh),mMetal(c.stand,.35),x*(u(f.bw)/2-.55),bt+u(f.sh)/2,z*(u(f.bl)/2-.6),12));
+ const fm=f.mat==='carbon'?mCarbon(c.frame):mMat(f.mat,c.frame,B.fin);
+ const at=u(f.at),stk=f.stack==='20'?2.55:3.6,topY=at+u(f.sh),camS=p.vid.type==='digital'?2:1.9,hp=(stk-.55)/2;
+ const mR=(p.motor.d+6)/20,padR=Math.max(u(f.aw)*.6,mR*.95);
+ // ramka: unibody karbon plastina + qo'llar, motor o'rindiqlari, yon kamera plastinalari, stoykalar va vintlar
+ {const g=new THREE.Group();g.add(rbox(u(f.bw),at,u(f.bl),.6,fm,0,at/2,0));
+  for(const q of D.mot){const L=Math.hypot(q.x,q.z),a=Math.atan2(q.x,q.z),arm=rbox(u(f.aw),at,u(L),u(f.aw)*.45,fm);arm.position.set(u(q.x)/2,at/2,u(q.z)/2);arm.rotation.y=a;g.add(arm);
+   g.add(cyl(padR,padR,at,fm,u(q.x),at/2,u(q.z),32));
+   for(const k of[.16,.27]){const sc=mkScrew(3,'#1d1d1d');sc.position.set(u(q.x)*k,at,u(q.z)*k);g.add(sc)}}
+  for(const s of[-1,1]){const sp=rbox(.2,u(f.sh)+.2,3,.3,fm,s*(camS/2+.12),at+u(f.sh)/2,-u(f.bl)/2+1.6);g.add(sp)}
+  for(const[x,z]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const sx=x*(u(f.bw)/2-.55),sz=z*(u(f.bl)/2-.65);g.add(cyl(.25,.25,u(f.sh),mMetal(c.stand,.35),sx,at+u(f.sh)/2,sz,6))}
   ctx.add('frame',g,[0,0,0])}
  // motorlar
- const mR=u(p.motor.d/2+3),mH=u(p.motor.h+6);
- for(const q of D.mot){const g=new THREE.Group();g.position.set(u(q.x),motY,u(q.z));
-  g.add(cyl(mR*.92,mR*.92,.25,mMetal('#2a2d33',.4),0,.12,0,32));
-  g.add(cyl(u(p.motor.d/2),u(p.motor.d/2),u(p.motor.h),mCopper(),0,.3+u(p.motor.h)/2,0,32));
-  const bell=cyl(mR,mR*.97,mH,mPaint(c.motor,'metal'),0,.35+mH/2,0,40);g.add(bell);
-  g.add(cyl(mR*.55,mR*.55,.06,mMetal('#111',.5),0,.36+mH,0,24));
-  g.add(cyl(.2,.2,.9,mMetal('#d0d4da',.2),0,.4+mH+.4,0,12));g.add(cyl(.42,.42,.35,mMetal('#9aa',.3),0,.4+mH+.75,0,6));
-  ctx.add('mot'+q.i,g,[0,2.5,0])}
- // parraklar
- const pR=p.prop.d*1.27,pY=motY+.4+mH+.55;
- for(const q of D.mot){const dir=B.dirs[q.i]||q.dir,g=new THREE.Group();g.position.set(u(q.x),pY,u(q.z));const pm=p.prop.mat==='cf'?mCarbon('#ffffff'):MAT('prop'+c.prop,()=>new THREE.MeshPhysicalMaterial({color:c.prop,roughness:.35,transmission:.25,thickness:.3,clearcoat:.6,transparent:true,opacity:.92}));
-  g.add(cyl(.55,.55,.5,pm,0,0,0,16));
-  for(let k=0;k<+p.prop.b;k++){const bl=new THREE.Mesh(bladeGeo(pR,p.prop.d,p.prop.p),pm);bl.castShadow=true;const h=new THREE.Group();h.rotation.y=k/p.prop.b*Math.PI*2;bl.rotation.x=(dir==='CW'?-1:1)*Math.atan(p.prop.p/(Math.PI*p.prop.d*.75))*.8;if(dir==='CW')bl.scale.z=-1;h.add(bl);g.add(h)}
-  g.userData.dir=dir;const o=ctx.add('prop'+q.i,g,[0,7,0]);if(o&&ctx.inst('prop'+q.i))ctx.spin(g,dir==='CW'?-1:1)}
- // ESC va FC steki
- const sy=bt+.3,brd=(lab,col,y)=>{const g=new THREE.Group();g.add(rbox(stk,.16,stk,.2,mPCB(col,lab),0,y,0));return g};
- {const g=new THREE.Group();for(const[x,z]of[[1,1],[1,-1],[-1,1],[-1,-1]]){g.add(cyl(.22,.22,.5,mRubber('#7b1fa2'),x*stk*.42,sy+.15,z*stk*.42,10));g.add(cyl(.12,.12,1.8,mPlastic('#222'),x*stk*.42,sy+.9,z*stk*.42,8))}ctx.add('soft',g,[0,1,0])}
- {const g=brd(`ESC ${p.esc.a}A`,'#121212',sy+.45);for(let k=0;k<D.n*2;k++){const a=k/(D.n*2)*Math.PI*2;g.add(box(.42,.14,.42,mPlastic('#0a0a0a',.4),Math.cos(a)*stk*.3,sy+.6,Math.sin(a)*stk*.3))}
-  g.add(box(.9,.14,.9,mPlastic('#1a1a1a',.3),0,sy+.6,0));for(const q of D.mot){const a=q.a*DEG;g.add(box(.5,.05,.3,mGold(),Math.sin(a)*stk*.45,sy+.55,-Math.cos(a)*stk*.45))}
-  ctx.add('esc',g,[0,2,0])}
- {const g=brd(`FC ${p.fc.mcu}`,'#0d2a4a',sy+1.45);g.add(box(.9,.12,.9,mPlastic('#111',.25),0,sy+1.58,0));g.add(box(.8,.3,.5,mMetal('#c0c4c9'),stk/2-.2,sy+1.65,0));g.add(sph(.08,mGlow('#2196f3'),-.8,sy+1.6,-.8));
-  if(p.fc.baro)g.add(box(.35,.2,.35,mMetal('#aaa'),.8,sy+1.6,.7));ctx.add('fc',g,[0,4,0])}
+ let mH=1.6;
+ for(const q of D.mot){const m=mkMotor(p.motor.d,p.motor.h,c.motor);mH=m.userData.top;m.position.set(u(q.x),at,u(q.z));
+  const a=Math.atan2(-q.x,-q.z);for(const[k,col]of[[-1,'#1c1c1c'],[0,'#1c1c1c'],[1,'#1c1c1c']]){const o=k*.16;m.add(wireMesh([[Math.sin(a)*mR*.8+Math.cos(a)*o,.15,Math.cos(a)*mR*.8-Math.sin(a)*o],[Math.sin(a)*(mR+.8)+Math.cos(a)*o,.08,Math.cos(a)*(mR+.8)-Math.sin(a)*o]],col,.06))}
+  ctx.add('mot'+q.i,m,[0,2.5,0])}
+ // parraklar (haqiqiy buralishli qanotlar)
+ const pY=at+mH-.35;
+ for(const q of D.mot){const dir=B.dirs[q.i]||q.dir,g=mkProp(p.prop.d,p.prop.p,+p.prop.b,p.prop.mat,c.prop,dir);g.position.set(u(q.x),pY,u(q.z));g.userData.dir=dir;
+  const o=ctx.add('prop'+q.i,g,[0,7,0]);if(o&&ctx.inst('prop'+q.i))ctx.spin(g,dir==='CW'?-1:1)}
+ // stek: rezina amortizatorlar, ESC, parvoz kontrolleri
+ {const g=new THREE.Group();for(const[x,z]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const gr=new THREE.Mesh(GEO('grom',()=>new THREE.TorusGeometry(.22,.12,8,20)),mRubber('#6a1b9a'));gr.rotation.x=Math.PI/2;gr.position.set(x*hp,at+.14,z*hp);g.add(gr);
+  g.add(cyl(.13,.13,2.2,mPlastic('#202020',.5),x*hp,at+1.1,z*hp,10));const n=cyl(.28,.28,.22,mPlastic('#202020',.5),x*hp,at+2.25,z*hp,6);g.add(n)}ctx.add('soft',g,[0,1,0])}
+ {const b=mkBoard(stk,'#121212',`ESC ${p.esc.a}A ${p.esc.cells}S`,'esc',{angles:D.mot.map(q=>q.a)});b.position.y=at+.5;ctx.add('esc',b,[0,2,0])}
+ {const b=mkBoard(stk,'#0d2a4a',`FC ${p.fc.mcu}`,'fc',{baro:p.fc.baro});b.position.y=at+1.5;ctx.add('fc',b,[0,4,0])}
  // video
- if(p.vid.type!=='none'){const cs=p.vid.type==='digital'?2.1:1.9,g=new THREE.Group();g.position.set(0,bt+u(f.sh)/2+.2,-u(f.bl)/2+1.6);g.rotation.x=p.vid.tilt*DEG;
-  g.add(rbox(cs,cs,cs,.25,mPaint(c.cam,'satin'),0,-cs/2,0));g.add(cyl(.75,.85,1.1,mPlastic('#111',.3),0,0,-cs/2-.45).rotateX(Math.PI/2));
-  const lens=cyl(.55,.55,.08,mGlass(),0,0,-cs/2-1.03);lens.rotation.x=Math.PI/2;g.add(lens);ctx.add('cam',g,[0,0,-5]);
-  const v=new THREE.Group();
-  if(p.vid.type==='digital'){v.add(rbox(3,1,3,.3,mMetal('#5a5f66',.45),0,sy+2.2,0));for(let k=-4;k<=4;k++)v.add(box(.08,.5,2.6,mMetal('#6a7078',.4),k*.32,sy+2.95,0))}
-  else v.add(rbox(2,.18,2,.2,mPCB('#1b1b1b','VTX'),0,sy+2.2,u(f.bl)/2-2.2));
-  for(const s of(p.vid.type==='digital'?[-1,1]:[0])){const a=cyl(.18,.18,5,mPlastic(c.ant,.5),s*1.2,topY+2.2,u(f.bl)/2+.8,10);a.rotation.x=.55;a.rotation.z=s*.3;v.add(a)}
+ if(p.vid.type!=='none'){const cm=mkCamera(camS*10,c.cam,p.vid.type==='digital');const g=new THREE.Group();g.position.set(0,at+u(f.sh)/2+.1,-u(f.bl)/2+1.5);g.rotation.x=p.vid.tilt*DEG;g.add(cm);ctx.add('cam',g,[0,0,-5]);
+  const v=new THREE.Group(),antM=mPlastic(c.ant,.45),lolli=(x,z,tilt)=>{const a=new THREE.Group();a.position.set(x,topY+.2,z);a.rotation.x=tilt;a.add(cyl(.12,.12,3.6,mPlastic('#1a1a1a',.5),0,1.8,0,10));const h=sph(.85,antM,0,3.9,0);h.scale.set(1,.42,1);a.add(h);return a};
+  if(p.vid.type==='digital'){const ax=new THREE.Group();ax.position.y=at+2.6;ax.add(rbox(stk*.95,.75,stk*.95,.3,mMetal('#4a4f56',.45),0,0,0));for(let k=-5;k<=5;k++)ax.add(box(.07,.5,stk*.8,mMetal('#5d636b',.4),k*.3,.6,0));ax.add(cyl(.9,.9,.2,mPlastic('#111',.5),0,.95,0,24));v.add(ax);
+   for(const s of[-1,1]){const a=lolli(s*1.1,u(f.bl)/2+.3,.6);a.rotation.z=s*.35;v.add(a)}}
+  else{const vb=mkBoard(2,'#1b1b1b','VTX','vtx');vb.position.set(0,at+.35,u(f.bl)/2-1.6);v.add(vb);v.add(lolli(0,u(f.bl)/2+.3,.7))}
   ctx.add('vtx',v,[0,6,0])}
- {const g=new THREE.Group();g.add(rbox(1,.15,1.4,.12,mPCB('#203020','RX'),stk/2+.8,sy+1.3,stk/2+.4));
-  for(const s of[-1,1]){const a=cyl(.06,.06,p.rx.band==='915'?6:3.2,mPlastic('#111'),s*1.6,bt+1.4,u(f.bl)/2+1.6,6);a.rotation.z=s*1.1;a.rotation.x=.4;g.add(a)}ctx.add('rx',g,[2,4,3])}
- if(p.extra.led){const g=new THREE.Group();for(const q of D.mot){if(q.z<=0)continue;const L=Math.hypot(q.x,q.z),s=box(.6,.12,u(L)*.6,mGlow(c.led));s.position.set(u(q.x)*.55,-.08,u(q.z)*.55);s.rotation.y=Math.atan2(q.x,q.z);g.add(s)}ctx.add('led',g,[0,-2,0])}
- if(p.extra.buz)ctx.add('buz',cyl(.6,.6,.6,mPlastic('#111',.4),-stk/2-.8,sy+1.2,stk/2),[-2,3,2]);
- ctx.add('top',rbox(u(f.bw)*.85,.2,u(f.bl)*.85,.4,fmCol,0,topY,0),[0,9,0]);
- if(p.extra.gps){const g=new THREE.Group();g.add(cyl(.12,.12,4,mPlastic('#333'),0,topY+2,u(f.bl)*.35,8));g.add(rbox(2.4,.7,2.4,.6,mPlastic('#202020',.4),0,topY+4.2,u(f.bl)*.35));g.add(box(1.6,.05,1.6,mPlastic('#c9a227',.4),0,topY+4.58,u(f.bl)*.35));ctx.add('gps',g,[0,12,0])}
- const[bw,bh,bl]=D.batDims;
- {const g=new THREE.Group();g.add(box(1.6,.12,bl+1.5,mPlastic('#111',.8),0,topY+.18,0));g.add(box(1.6,.05,bl*.8,mPlastic('#222',.9),0,topY+.26,0));
-  for(const z of[-bl*.25,bl*.25])g.add(box(bw+1.4,.12,1.5,mPlastic('#202020',.7),0,topY+.2,z));ctx.add('strap',g,[0,10,0])}
- {const g=new THREE.Group(),wm=new THREE.MeshStandardMaterial({map:wrapTex(c.bat,[`${p.bat.cells}S ${p.bat.mah}mAh`,`${p.bat.c}C · ${CHEM[p.bat.chem]}`,`${fmt(D.Vn,1)} V nominal`]),roughness:.4,metalness:.05});
-  g.add(box(bw,bh,bl,wm,0,topY+.3+bh/2,0));for(const z of[-bl*.25,bl*.25])g.add(box(bw+.1,.12,1.5,mPlastic('#202020',.7),0,topY+.3+bh+.04,z));g.add(box(.4,.4,2.5,mPlastic('#e53935'),.2,topY+.5,bl/2+1.2));g.add(box(.4,.4,2.5,mPlastic('#222'),-.2,topY+.5,bl/2+1.2));
-  g.add(rbox(1.6,.8,1.2,.15,mPlastic('#f9a825',.4),0,topY+.6,bl/2+2.8));
-  const bal=box(1.2,.2,.6,mPlastic('#f5f5f5'),0,topY+.3+bh,bl/2-.2);g.add(bal);ctx.add('bat',g,[0,14,0])}
+ {const g=new THREE.Group(),rl=p.rx.band==='915'?4:1.6;g.add(rbox(1,.3,1.3,.1,mPCB('#1b3a24','RX'),stk/2+.75,at+.9,stk/2-.2));
+  for(const s of[-1,1]){const el=cyl(.04,.04,rl*2,mPlastic('#111'),s*1.4,at+.5,u(f.bl)/2+1.2,6);el.rotation.z=s*1.15;el.rotation.x=.35;g.add(el);g.add(cyl(.09,.09,1,mPlastic('#222'),s*.6,at+.5,u(f.bl)/2+.6,8).rotateX(Math.PI/2))}
+  ctx.add('rx',g,[2,4,3])}
+ if(p.extra.led){const g=new THREE.Group();for(const q of D.mot){if(q.z<=0)continue;const L=u(Math.hypot(q.x,q.z)),a=Math.atan2(q.x,q.z),st=new THREE.Group();st.position.set(0,-.02,0);st.rotation.y=a;
+   st.add(box(.8,.06,L*.55,mPlastic('#f5f5f5',.6),0,0,L*.45));for(let k=0;k<Math.floor(L*.55);k++)st.add(box(.5,.12,.5,mGlow(c.led),0,-.08,L*.2+k+.4));g.add(st)}ctx.add('led',g,[0,-2,0])}
+ if(p.extra.buz){const g=new THREE.Group();g.add(cyl(.6,.6,.95,mPlastic('#111',.4),0,0,0,24));g.add(cyl(.12,.12,.02,mPlastic('#333'),0,.48,0,10));g.position.set(-stk/2-.9,at+.5,stk/2);ctx.add('buz',g,[-2,3,2])}
+ {const g=new THREE.Group();g.add(rbox(u(f.bw)*.85,.2,u(f.bl)*.85,.4,fm,0,topY+.1,0));for(const[x,z]of[[1,1],[1,-1],[-1,1],[-1,-1]]){const sc=mkScrew(3);sc.position.set(x*(u(f.bw)/2-.55),topY+.2,z*(u(f.bl)/2-.65));g.add(sc)}ctx.add('top',g,[0,9,0])}
+ if(p.extra.gps){const g=new THREE.Group(),gz=u(f.bl)/2+.9,mh=u(f.sh)+5;g.add(box(1.4,.5,1.4,mPlastic('#333',.6),0,at+.25,gz-.3));g.add(cyl(.18,.18,mh,mPlastic('#2b2b2b',.5),0,at+mh/2,gz,10));
+  g.add(rbox(2.5,.75,2.5,.4,mPlastic('#1c1c1c',.4),0,at+mh+.4,gz));g.add(box(1.8,.4,1.8,mPlastic('#d7c9a7',.6),0,at+mh+.85,gz));g.add(box(1.1,.06,1.1,mMetal('#c0a050',.3),0,at+mh+1.06,gz));ctx.add('gps',g,[0,10,2])}
+ const bd=realBat(p.bat.cells,p.bat.mah,p.bat.chem),bh=bd.kind==='cyl'?bd.h:bd.h,bw=bd.w,bl=bd.kind==='cyl'?7.2:bd.l;
+ {const g=new THREE.Group();g.add(box(bw*.9,.12,bl*.9,mRubber('#202020'),0,topY+.26,0));for(const z of[-bl*.22,bl*.22]){g.add(box(bw+.3,.1,2,mPlastic('#1d1d1d',.7),0,topY+.24,z));g.add(box(.35,.4,2.1,mMetal('#9aa',.4),bw/2+.35,topY+.3,z))}ctx.add('strap',g,[0,10,0])}
+ {const g=mkBattery(p.bat.cells,p.bat.mah,p.bat.chem,c.bat,[`${p.bat.cells}S ${p.bat.mah}mAh`,`${p.bat.c}C · ${CHEM[p.bat.chem]}`,`${fmt(D.Vn,1)} V nominal`],{awg:p.frame.wb>=200?12:14});g.position.y=topY+.32;
+  for(const z of[-bl*.22,bl*.22])g.add(box(bw+.12,.1,2,mPlastic('#1d1d1d',.7),0,bh+.05,z));ctx.add('bat',g,[0,14,0])}
  // ulangan simlar (3D)
- const W=B.wires;
- if(ctx.inst('esc'))for(const q of D.mot){if(!W['m'+q.i]||!ctx.inst('mot'+q.i))continue;const to=W['m'+q.i].slice(1),t=D.mot.find(o=>o.i==to)||q,a=t.a*DEG,ex=Math.sin(a)*stk*.45,ez=-Math.cos(a)*stk*.45;
-  ['#c58a3a','#b0702a','#d39a4a'].forEach((col,k)=>{const o=(k-1)*.18,px=-Math.cos(Math.atan2(q.x,q.z))*o,pz=Math.sin(Math.atan2(q.x,q.z))*o;
-   ctx.deco(wireMesh([[u(q.x)+px,motY+.25,u(q.z)+pz],[u(q.x)*.55+px,motY+.15,u(q.z)*.55+pz],[ex+px*.5,sy+.6,ez+pz*.5]],col,.07))})}
- if(ctx.inst('esc')&&W['bat+']){ctx.deco(wireMesh([[.2,sy+.5,stk/2-.3],[.3,sy+.3,u(f.bl)/2],[.3,bt+.2,u(f.bl)/2+3.5]],W['bat+']==='VBAT+'?'#e53935':'#e53935',.18));
-  ctx.deco(wireMesh([[-.2,sy+.5,stk/2-.3],[-.3,sy+.3,u(f.bl)/2],[-.3,bt+.2,u(f.bl)/2+3.5]],'#222',.18));
-  const xt=rbox(1.6,.8,1.2,.15,mPlastic('#f9a825',.4),0,bt+.4,u(f.bl)/2+4.2);xt.userData.label='xt60';ctx.deco(xt)}
- if(ctx.inst('esc')&&W['cap+']){const cp=cyl(.5,.5,2.2,mPlastic('#1c1c1c',.3),0,bt+.5,u(f.bl)/2+1.6,16);cp.rotation.z=Math.PI/2;cp.userData.label='cap';ctx.deco(cp)}
- if(ctx.inst('fc')&&W.escfc)ctx.deco(wireMesh([[stk/2-.4,sy+.6,0],[stk/2+.2,sy+1,0],[stk/2-.4,sy+1.45,0]],'#eeeeee',.12));
+ const W=B.wires,ey=at+.62;
+ if(ctx.inst('esc'))for(const q of D.mot){if(!W['m'+q.i]||!ctx.inst('mot'+q.i))continue;const to=W['m'+q.i].slice(1),t=D.mot.find(o=>o.i==to)||q,a=t.a*DEG,ex=Math.sin(a)*stk*.44,ez=-Math.cos(a)*stk*.44,aa=Math.atan2(q.x,q.z),L=Math.hypot(u(q.x),u(q.z));
+  [-1,0,1].forEach(k=>{const o=k*.16,px=Math.cos(aa)*o,pz=-Math.sin(aa)*o,ux=Math.sin(aa),uz=Math.cos(aa);
+   ctx.deco(wireMesh([[u(q.x)-ux*(mR+.8)+px,at+.1,u(q.z)-uz*(mR+.8)+pz],[ux*L*.45+px,at+.12,uz*L*.45+pz],[ex+px*.6,ey,ez+pz*.6]],'#1c1c1c',.06))})}
+ if(ctx.inst('esc')&&W['bat+']){const zr=u(f.bl)/2;for(const[s,col]of[[.45,'#d32f2f'],[-.45,'#1b1b1b']])ctx.deco(wireMesh([[s,ey,stk/2-.35],[s*.8,at+.3,zr],[s*.4,at+.2,zr+3.2]],col,p.frame.wb>=200?.165:.13));
+  const xt=mkXT60(false);xt.position.set(0,at+.45,zr+4.1);xt.userData.label='xt60';ctx.deco(xt)}
+ if(ctx.inst('esc')&&W['cap+']){const cp=mkCap(p.bat.cells);cp.position.set(0,at+.7,u(f.bl)/2+1.4);cp.rotation.y=Math.PI/2;cp.userData.label='cap';ctx.deco(cp)}
+ if(ctx.inst('fc')&&W.escfc)ctx.deco(wireMesh([[stk/2-.35,at+.75,0],[stk/2+.25,at+1.1,0],[stk/2-.35,at+1.65,0]],'#eeeeee',.12));
  // parrak yo'nalishi ko'rsatkichlari (parraklar bosqichida)
- if(ctx.step==='props')for(const q of D.mot){const want=B.rev?(q.dir==='CW'?'CCW':'CW'):q.dir,col=want==='CW'?'#42a5f5':'#ff9800';
+ if(ctx.step==='props')for(const q of D.mot){const want=B.rev?(q.dir==='CW'?'CCW':'CW'):q.dir,col=want==='CW'?'#42a5f5':'#ff9800',pR=p.prop.d*1.27;
   const ar=new THREE.Mesh(new THREE.TorusGeometry(pR*.55,.12,6,32,Math.PI*1.4),mGlow(col));ar.rotation.x=-Math.PI/2;ar.position.set(u(q.x),pY+1.4,u(q.z));if(want==='CW')ar.scale.y=-1;ar.userData.dispose=true;ctx.deco(ar);
   const tipA=(want==='CW'?-1:1)*Math.PI*1.4,cone=new THREE.Mesh(new THREE.ConeGeometry(.35,.9,10),mGlow(col));cone.position.set(u(q.x)+Math.cos(tipA)*pR*.55,pY+1.4,u(q.z)-Math.sin(tipA)*pR*.55*(want==='CW'?-1:1));
   cone.rotation.z=Math.PI/2;cone.rotation.y=(want==='CW'?1:-1)*(Math.PI*1.4)+(want==='CW'?Math.PI:0);cone.userData.dispose=true;ctx.deco(cone)}
 };
-function bladeGeo(R,D,P){return GEO(`blade${R.toFixed(2)},${P}`,()=>{const s=new THREE.Shape(),w=Math.max(.5,R*.24);s.moveTo(.4,-w*.25);s.bezierCurveTo(R*.3,-w*.75,R*.75,-w*.55,R,-w*.08);s.quadraticCurveTo(R*1.01,w*.15,R*.92,w*.22);s.bezierCurveTo(R*.6,w*.45,R*.3,w*.6,.4,w*.3);s.closePath();
- const g=new THREE.ExtrudeGeometry(s,{depth:.07,bevelEnabled:true,bevelThickness:.02,bevelSize:.02,bevelSegments:1,curveSegments:10});g.rotateX(-Math.PI/2);g.translate(0,.05,0);return g})}
-
 // yorliqlar uchun slot → lug'at kaliti
 T.labels={frame:'frame',top:'plate',soft:'softmount',esc:'esc',fc:'fc',cam:'cam',vtx:'vtx',rx:'rx',led:'led',buz:'buzzer',gps:'gps',strap:'strap',bat:'battery','mot#':'motor','prop#':'prop'};
 
@@ -278,8 +264,13 @@ T.bom=(B,D)=>{const p=B.p,n=D.n;return[
  ...(p.vid.type!=='none'?[['vtx',p.vid.type==='digital'?'Raqamli HD kamera + havo moduli':'Analog kamera + VTX',`${p.vid.mw} mW, FOV ${p.vid.fov}°`,1,D.wVid]]:[]),
  ['rx',`Qabul qilgich ${p.rx.band} GHz`.replace('915 GHz','915 MHz'),'ExpressLRS yoki shunga o\'xshash',1,p.rx.band==='915'?2.5:1.5],
  ['battery',`Batareya ${p.bat.cells}S ${p.bat.mah}mAh ${p.bat.c}C ${CHEM[p.bat.chem]}`,`${fmt(D.Vn,1)} V nominal, ${fmt(D.Vfull,1)} V to'liq`,1,D.wBat],
- ...(p.extra.gps?[['gps','GPS moduli','M10 turidagi, kompas bilan',1,10]]:[]),...(p.extra.led?[['led','LED lenta (WS2812)','5V',1,4]]:[]),...(p.extra.buz?[['buzzer','Buzzer','5V',1,3]]:[]),
- ['cap','Kondensator 1000µF 35V (6S uchun 50V)','Kuchlanish sakrashlaridan himoya',1,4],['xt60','XT60 kabel, simlar, vintlar, tasma','14–12 AWG quvvat simi',1,15]]};
+ ...(+p.extra.pay>0?[['payload',`Foydali yuk (kamera, sensor yoki yuk)`,`Mahkamlagich bilan`,1,+p.extra.pay]]:[]),...(p.extra.gps?[['gps','GPS moduli','M10 turidagi, kompas bilan',1,10]]:[]),...(p.extra.led?[['led','LED lenta (WS2812)','5V',1,4]]:[]),...(p.extra.buz?[['buzzer','Buzzer','5V',1,3]]:[]),
+ ['cap',p.bat.cells>=5?'Kondensator 1000µF 50V (Ø12,5×25 mm)':'Kondensator 470µF 35V (Ø10×16 mm)','Low-ESR, VBAT kontaktlariga',1,4],
+ ['xt60','XT60 ulagich + silikon sim '+(p.frame.wb>=200?'12':'14')+' AWG',"Batareya — ESC, ~8 sm",1,6],
+ ['screw',`Vintlar M3×8 (ramka, stoyka)`,`${D.n*2+8} dona, po'lat yoki titan`,D.n*2+8,.5],
+ ['screw',p.motor.d<17?'Motor vintlari M2×6':'Motor vintlari M3×6',`Har motorga 4 ta; ${p.motor.d<17?'12×12 mm':'16×16 mm'} teshiklar`,D.n*4,.3],
+ ['nut',p.motor.d<17?'Parrak gaykasi M3':'Parrak gaykasi M5 (neylon qistirmali)',`O'z-o'zidan bo'shamaydi`,D.n,p.motor.d<17?.4:1.1],
+ ['strap','Batareya tasmasi 20 mm (kevlar) ×2 + sirpanmas qoplama','',1,4]]};
 
 // ---------------- Betaflight namunaviy sozlamasi ----------------
 T.cli=(B,W)=>{const p=B.p,L=['# Namunaviy Betaflight CLI — simlaringizga qarab yaratildi. Kiritishdan oldin tekshiring!'];const fn={};

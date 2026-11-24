@@ -132,7 +132,7 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
   if(stall&&V>2&&!S.onGround&&!S.stallMsg){S.stallMsg=1;setTimeout(()=>{if(SIM)SIM.stallMsg=0},2500);S.status=`STALL! Tezlik ${fmt(V*3.6)} km/soat — sekin uchish chegarasidan past (${fmt(D.Vs*3.6)}).`}
   const I_A=S.armed?D.Imot*Math.pow(S.thr,3)+.8:.3;S.used+=I_A*dt/3.6*(window.SIM_FAST||1);S.amp=I_A;S.volt=D.V*sag;
   if(soc<=0&&S.armed){S.armed=false;S.status='Batareya tugadi — sirpanib qo\'nish kerak.'}
-  humSet(S.armed,S.thr);for(const s of S.model.userData.spinners)s.o.rotation.z+=dt*(S.armed?S.thr*90:0);
+  humSet(S.armed,S.thr);for(const s of S.model.userData.spinners)s.o.rotation.y+=dt*(S.armed?S.thr*90:0);
   const e=new THREE.Euler().setFromQuaternion(S.q,'YXZ');S.yaw=e.y;S.pitch=e.x;S.roll=e.z}
  else{const p=B.p,m=D.AUW/1000,soc=1-S.used/p.bat.mah,sag=.85+.15*clamp(soc,0,1);
   let thr=0;if(S.armed&&soc>0)thr=(I.thrUp||KEYS.ArrowUp?1:0)-(I.thrDn||KEYS.ArrowDown?1:0)+(-STK.l.y);thr=clamp(thr,-1,1);if(S.rev)thr=-thr;
@@ -156,7 +156,7 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
   if(S.rev&&thr!==0&&!S.revMsg&&S.armed){S.revMsg=1;S.status="Mashina teskari yurmoqda: motor yo'nalishi teskari. ESC'da yo'nalishni o'zgartiring yoki ikki simni almashtiring."}
   if(S.ctl.steer!=='CH1'&&!S.steerMsg&&S.armed&&(steerIn!==0||thr!==0)){S.steerMsg=1;S.status=S.ctl.steer==='CH2'?"Rul gaz bilan birga buriladi: servo CH2 ga ulangan (CH1 bo'lishi kerak).":"Rul ishlamayapti: servo CH1 ga ulanmagan."}
   humSet(S.armed&&Math.abs(S.spd)>.1,Math.min(1,Math.abs(S.spd)/Math.max(1,D.vTop)));
-  for(const sp of S.model.userData.spinners)sp.o.rotation.y+=0}
+  }
  S.t+=dt;const sp=S.vel.length();S.maxV=Math.max(S.maxV,sp);S.maxH=Math.max(S.maxH,S.pos.y);if(S.volt)S.minV=Math.min(S.minV,S.volt);
  if(Math.hypot(S.pos.x,S.pos.z)>600){S.pos.multiplyScalar(600/Math.hypot(S.pos.x,S.pos.z))}
  if(B.type!=='plane'){S.obj.position.copy(S.pos);S.obj.position.y+=S.groundOff;S.obj.quaternion.setFromEuler(new THREE.Euler(S.pitch,S.yaw,S.roll,'YXZ'))}

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Konstruktor — dron, samolyot va mashina yig'ish ustaxonasi</title>
 <meta name="description" content="Dron, RC samolyot va RC mashinani detallardan loyihalang, yig'ing, simlarini ulang, hisoblang va virtual sinovdan o'tkazing.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠️</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>K</text></svg>">
 <style>
 :root{--bg:#0b0f16;--p1:#111824;--p2:#172131;--p3:#1e2a3e;--ln:rgba(255,255,255,.09);--tx:#e7edf7;--mu:#8e9bb3;--ac:#ffb020;--ac2:#4aa3ff;--ok:#2ecc71;--bad:#ff5a5a;--warn:#ffb020;--info:#5ab4ff;--r:12px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -125,7 +125,7 @@ textarea{width:100%;min-height:120px;background:var(--bg);border:1px solid var(-
  header{flex-wrap:wrap;padding:8px 10px;gap:6px}.logo small,.hide-s{display:none}#pName{order:5;max-width:none;flex-basis:100%}
  main{grid-template-columns:1fr;grid-template-rows:auto 58vh auto}
  #steps{display:flex;overflow-x:auto;padding:6px;border-right:0;border-bottom:1px solid var(--ln)}.stHead{display:none}.st{flex:none;width:auto;padding:6px;margin:0 3px 0 0}
- #viewWrap{height:58vh}#panel{border-left:0}.stick{width:110px;height:110px}.stick i{left:33px;top:33px}
+ #viewWrap{height:58vh}#panel{border-left:0}#hint{font-size:11.5px;padding:5px 10px;top:6px;left:8px;transform:none;max-width:calc(100% - 64px);border-radius:10px}.vt{width:34px;height:34px;font-size:14px}.stick{width:110px;height:110px}.stick i{left:33px;top:33px}
 }
 @media print{header,#steps,#viewWrap,.nav,.noprint{display:none!important}main{display:block}#panel{overflow:visible;background:#fff;color:#000}.card,.iss,.kv{background:#fff;color:#000;border-color:#ccc}}
 </style>
@@ -133,17 +133,17 @@ textarea{width:100%;min-height:120px;background:var(--bg);border:1px solid var(-
 <body>
 <div id="app">
  <header>
-  <div class="logo">🛠️ Konstruktor <small>loyihala · yig'· sina</small></div>
+  <div class="logo"><i class=i-tools></i> Konstruktor <small>loyihala · yig'· sina</small></div>
   <div class="typeSw" id="typeSw"></div>
   <input id="pName" maxlength="60" aria-label="Loyiha nomi">
-  <button class="hb" id="bUndo" title="Bekor qilish (Ctrl+Z)">↶</button><button class="hb" id="bRedo" title="Qaytarish (Ctrl+Y)">↷</button>
+  <button class="hb" id="bUndo" title="Bekor qilish (Ctrl+Z)"><i class=i-undo></i></button><button class="hb" id="bRedo" title="Qaytarish (Ctrl+Y)"><i class=i-redo></i></button>
   <span class="hsp"></span>
-  <button class="hb" id="bNew">➕ <span class="hide-s">Yangi</span></button>
-  <button class="hb" id="bGloss">📖 <span class="hide-s">Lug'at</span></button>
-  <button class="hb" id="bGallery">🖼️ <span class="hide-s">Galereya</span></button>
-  <button class="hb" id="bShare">🔗 <span class="hide-s">Saqlash / ulashish</span></button>
-  <button class="hb" id="bAcc">👤 <span id="accName" class="hide-s">Kirish</span></button>
-  <button class="hb" id="bMute" title="Ovoz">🔊</button>
+  <button class="hb" id="bNew"><i class=i-plus></i> <span class="hide-s">Yangi</span></button>
+  <button class="hb" id="bGloss"><i class=i-book></i> <span class="hide-s">Lug'at</span></button>
+  <button class="hb" id="bGallery"><i class=i-image></i> <span class="hide-s">Galereya</span></button>
+  <button class="hb" id="bShare"><i class=i-link></i> <span class="hide-s">Saqlash / ulashish</span></button>
+  <button class="hb" id="bAcc"><i class=i-user></i> <span id="accName" class="hide-s">Kirish</span></button>
+  <button class="hb" id="bMute" title="Ovoz"><i class=i-volume></i></button>
  </header>
  <main>
   <nav id="steps"></nav>
@@ -152,12 +152,12 @@ textarea{width:100%;min-height:120px;background:var(--bg);border:1px solid var(-
     <div id="labels"></div>
     <div id="hint"></div>
     <div id="vtools">
-     <button class="vt" id="tExplode" title="Detallarga ajratib ko'rish">💥</button>
-     <button class="vt on" id="tLabels" title="Detal nomlari">🏷️</button>
-     <button class="vt" id="tXray" title="Ichini ko'rish (shaffof korpus)">🔍</button>
-     <button class="vt" id="tFit" title="Kamerani markazlash">🎯</button>
-     <button class="vt on" id="tAuto" title="Avtomatik aylanish">🔄</button>
-     <button class="vt" id="tShot" title="Rasmini saqlash (PNG)">📸</button>
+     <button class="vt" id="tExplode" title="Detallarga ajratib ko'rish"><i class=i-explode></i></button>
+     <button class="vt on" id="tLabels" title="Detal nomlari"><i class=i-tag></i></button>
+     <button class="vt" id="tXray" title="Ichini ko'rish (shaffof korpus)"><i class=i-search></i></button>
+     <button class="vt" id="tFit" title="Kamerani markazlash"><i class=i-target></i></button>
+     <button class="vt on" id="tAuto" title="Avtomatik aylanish"><i class=i-orbit></i></button>
+     <button class="vt" id="tShot" title="Rasmini saqlash (PNG)"><i class=i-shot></i></button>
     </div>
     <div id="tip" class="hidden"></div>
     <div id="wires" class="hidden"></div>
@@ -175,6 +175,8 @@ textarea{width:100%;min-height:120px;background:var(--bg);border:1px solid var(-
 <div id="modal" class="modal hidden"><div class="mbox" id="mbox"></div></div>
 <script src="/lib/three.js"></script>
 <script src="/konstruktor/core.js"></script>
+<script src="/konstruktor/icons.js"></script>
+<script src="/konstruktor/parts.js"></script>
 <script src="/konstruktor/gloss.js"></script>
 <script src="/konstruktor/t_copter.js"></script>
 <script src="/konstruktor/t_plane.js"></script>
