@@ -103,7 +103,7 @@ class ApiTests(TestCase):
 
     def test_new_types_and_chat(self):
         tok = self.register()
-        for t in ('boat', 'robot', 'heli', 'rocket', 'tank'):
+        for t in ('boat', 'robot', 'heli', 'rocket', 'tank', 'lab'):
             r = self.call('post', '/api/builds', {'type': t, 'data': project(t)}, tok)
             self.assertEqual(r.status_code, 201, t)
         # AI o'chirilgan: chat "offline" qaytaradi, brauzer o'zi javob beradi

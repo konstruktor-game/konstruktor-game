@@ -116,5 +116,12 @@ const GLOSS={
  mixing:{n:'Aralashtirish (mix)',en:'Mixing',w:"Gaz va burilish buyrug'ini ikki motorga taqsimlash.",y:"Bitta tayoqcha bilan tank oldinga yuradi va buriladi.",h:"ESC yoki pultda yoqiladi."},
  fcmcu:{n:'Protsessor',en:'MCU',w:"F4, F7, H7 — parvoz kontrolleri protsessori avlodlari.",y:"UART portlar soni va hisoblash tezligi.",h:"GPS + raqamli video bo'lsa F7 yoki H7."},
  rudder:{n:"Yo'nalish ruli",en:'Rudder',w:"Vertikal dumdagi harakatlanuvchi yuza.",y:"Burunni chapga-o'ngga buradi (yaw).",h:"Pult 4-kanal."},
+ breadboard:{n:'Maket plata (breadboard)',en:'Breadboard',w:"Kavsharsiz sxema yig'ish uchun teshikli plata; ichida metall qisqichlar.",y:"Detallarni tez ulash va o'zgartirish mumkin.",h:"5 talik ustunlar o'zaro ulangan; chetdagi qizil (+) va ko'k (−) qatorlar — quvvat shinalari."},
+ resistor:{n:'Rezistor',en:'Resistor',w:"Tokni cheklaydigan detal; qarshiligi rangli halqalar bilan belgilanadi.",y:"LED va pinlarni ortiqcha tokdan himoya qiladi.",h:"5 V da LED uchun 220–330 Ω: I = (5 − 2) / 220 ≈ 14 mA."},
+ button:{n:'Tugma',en:'Push button',w:"Bosilganda ikki kontaktni ulaydigan kalit.",y:"Foydalanuvchi buyrug'ini Arduino ga beradi.",h:"INPUT_PULLUP bilan: tugmaning bir oyog'i pinga, ikkinchisi GND ga; bosilganda LOW o'qiladi."},
+ pot:{n:'Potensiometr',en:'Potentiometer',w:"Aylanadigan o'zgaruvchan rezistor (kuchlanish bo'lgich).",y:"Analog qiymat beradi: analogRead 0–1023.",h:"Chetki oyoqlar 5V va GND ga, o'rtadagi (surgich) — A0 ga."},
+ lcd:{n:'LCD 16×2 displey',en:'Character LCD',w:"16 belgidan 2 qatorli suyuq kristall displey, I2C adapter bilan.",y:"Qiymatlarni kompyutersiz ko'rsatadi.",h:"I2C bilan faqat 4 sim: VCC, GND, SDA, SCL. Manzil odatda 0x27."},
+ pullup:{n:'Pull-up / pull-down',en:'Pull resistor',w:"Kirishni aniq holatda ushlab turuvchi rezistor.",y:"Rezistorsiz kirish «suzadi» va tasodifiy 0/1 o'qiladi.",h:"Arduino ichida pull-up bor: pinMode(pin, INPUT_PULLUP)."},
+ i2c:{n:'I2C shinasi',en:'I2C bus',w:"Ikki simli aloqa: SDA (ma'lumot) va SCL (takt).",y:"Bir nechta qurilma bir xil 2 simga ulanadi, har biri o'z manziliga ega.",h:"Uno: SDA — A4, SCL — A5; ESP32: 21 va 22."},
  brushed:{n:"Cho'tkali motor",en:'Brushed motor',w:"Eng oddiy, arzon motor; 'turns' bilan belgilanadi.",y:"Boshlovchi va crawler uchun yetarli.",h:"Kam turns — tez; ko'p turns — kuchli va sekin."},
 };
