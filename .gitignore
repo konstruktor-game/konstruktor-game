@@ -1,7 +1,14 @@
-*.backup-*.html
-*.pre-features.html
-backend/.venv/
-backend/db.sqlite3
+# Python
 __pycache__/
 *.pyc
+backend/.venv/
+.venv/
+# Lokal baza va build natijalari
+backend/db.sqlite3
+backend/staticfiles/
+backend/frontend_dist/
+# Maxfiy sozlamalar
 .env
+# Eski zaxira fayllar
+*.backup-*.html
+*.pre-features.html

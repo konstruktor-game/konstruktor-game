@@ -1,3 +1,7 @@
 Django>=6.1,<6.2
+gunicorn>=23
+whitenoise>=6.7
+dj-database-url>=2.2
+psycopg[binary]>=3.2
 # Ixtiyoriy: chat yordamchisini Claude bilan ishlatish uchun (KONS_AI_CHAT=1 va ANTHROPIC_API_KEY)
 # anthropic>=1.0

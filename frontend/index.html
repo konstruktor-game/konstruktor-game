@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Konstruktor — dron, samolyot va mashina yig'ish ustaxonasi</title>
 <meta name="description" content="Dron, RC samolyot va RC mashinani detallardan loyihalang, yig'ing, simlarini ulang, hisoblang va virtual sinovdan o'tkazing.">
-<link rel="icon" type="image/png" href="/konstruktor/img/favicon.png">
+<link rel="icon" type="image/png" href="img/favicon.png">
 <meta property="og:title" content="Konstruktor — dron, samolyot va mashina yig'ish ustaxonasi">
-<meta property="og:image" content="/konstruktor/img/logo.jpg">
+<meta property="og:image" content="img/logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -223,7 +223,7 @@ header:after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;
 <body>
 <div id="app">
  <header>
-  <div class="logo"><img src="/konstruktor/img/logo-mark-64.png" alt="" width="26" height="26"> Konstruktor <small>loyihala · yig' · sina</small></div>
+  <div class="logo"><img src="img/logo-mark-64.png" alt="" width="26" height="26"> Konstruktor <small>loyihala · yig' · sina</small></div>
   <div class="typeSw" id="typeSw"></div>
   <input id="pName" maxlength="60" aria-label="Loyiha nomi">
   <button class="hb" id="bUndo" title="Bekor qilish (Ctrl+Z)"><i class=i-undo></i></button><button class="hb" id="bRedo" title="Qaytarish (Ctrl+Y)"><i class=i-redo></i></button>
@@ -264,26 +264,34 @@ header:after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;
  </main>
 </div>
 <div id="modal" class="modal hidden"><div class="mbox" id="mbox"></div></div>
-<script src="/lib/three.js"></script>
-<script src="/konstruktor/core.js"></script>
-<script src="/konstruktor/icons.js"></script>
-<script src="/konstruktor/parts.js"></script>
-<script src="/konstruktor/gloss.js"></script>
-<script src="/konstruktor/t_copter.js"></script>
-<script src="/konstruktor/t_plane.js"></script>
-<script src="/konstruktor/t_car.js"></script>
-<script src="/konstruktor/t_boat.js"></script>
-<script src="/konstruktor/ardsim.js"></script>
-<script src="/konstruktor/t_robot.js"></script>
-<script src="/konstruktor/t_heli.js"></script>
-<script src="/konstruktor/t_rocket.js"></script>
-<script src="/konstruktor/t_tank.js"></script>
-<script src="/konstruktor/t_lab.js"></script>
-<script src="/konstruktor/sim.js"></script>
-<script src="/konstruktor/app.js"></script>
-<script src="/konstruktor/forge.js"></script>
-<script src="/konstruktor/extras.js"></script>
-<script src="/konstruktor/learn.js"></script>
-<script src="/konstruktor/chat.js"></script>
+<!-- 3D dvigatel -->
+<script src="lib/three.js"></script>
+<!-- API manzili (Render'da build paytida yoziladi; bo'sh bo'lsa — shu domen) -->
+<script src="config.js"></script>
+<!-- yadro: yordamchilar, ikonkalar, detal yasovchilar, lug'at -->
+<script src="js/core/core.js"></script>
+<script src="js/core/icons.js"></script>
+<script src="js/core/parts.js"></script>
+<script src="js/core/gloss.js"></script>
+<!-- simulyatsiya: Arduino kod interpretatori -->
+<script src="js/sim/ardsim.js"></script>
+<!-- qurilma turlari -->
+<script src="js/types/copter.js"></script>
+<script src="js/types/plane.js"></script>
+<script src="js/types/car.js"></script>
+<script src="js/types/boat.js"></script>
+<script src="js/types/robot.js"></script>
+<script src="js/types/heli.js"></script>
+<script src="js/types/rocket.js"></script>
+<script src="js/types/tank.js"></script>
+<script src="js/types/lab.js"></script>
+<!-- sinov maydoni (fizika) -->
+<script src="js/sim/sim.js"></script>
+<!-- interfeys -->
+<script src="js/ui/app.js"></script>
+<script src="js/ui/forge.js"></script>
+<script src="js/ui/extras.js"></script>
+<script src="js/ui/learn.js"></script>
+<script src="js/ui/chat.js"></script>
 </body>
 </html>

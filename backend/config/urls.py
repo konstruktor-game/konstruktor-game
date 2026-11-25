@@ -4,10 +4,8 @@ from django.urls import path
 from api import views
 
 urlpatterns = [
+    # Sayt fayllarini (frontend) WhiteNoise sayt ildizidan beradi; bu faqat zaxira
     path('', views.index, name='index'),
-    path('konstruktor/img/<str:name>', views.image, name='image'),
-    path('konstruktor/<str:name>', views.asset, name='asset'),
-    path('lib/three.js', views.three_js, name='three-js'),
     path('admin/', admin.site.urls),
     path('api/ping', views.ping),
     path('api/register', views.register),

@@ -429,7 +429,8 @@ const NET={base:null,token:null,user:null,online:false,
   try{const r=await fetch(this.base+path,{method:opt.method||'GET',headers:h,body:opt.body?JSON.stringify(opt.body):undefined,signal:ctl.signal});let j={};try{j=await r.json()}catch(e){}return Object.assign({status:r.status},j)}
   catch(e){return{status:0,ok:false,error:"Server bilan aloqa yo'q"}}finally{clearTimeout(to)}},
  async init(){try{this.token=localStorage.getItem('konstruktor.token')}catch(e){}
-  const c=[];if(location.protocol.startsWith('http'))c.push(location.origin);c.push('http://127.0.0.1:8001');
+  // API manzili: config.js dagi KONS_API (Render) → sayt ochilgan domen → lokal ishlab chiqish serveri
+  const c=[],cfg=String(window.KONS_API||'').trim().replace(/\/+$/,'');if(cfg)c.push(cfg);else{if(location.protocol.startsWith('http'))c.push(location.origin);if(/^(localhost|127\.0\.0\.1|)$/.test(location.hostname))c.push('http://127.0.0.1:8001')}
   for(const b of[...new Set(c)]){this.base=b;const r=await this.req('/api/ping');if(r.ok&&r.name==='konstruktor'){this.online=true;break}}
   if(!this.online)this.base=null;else if(this.token){const r=await this.req('/api/me');if(r.ok)this.user=r.user;else if(r.status===401)this.setToken(null)}accUI()},
  setToken(t){this.token=t;try{t?localStorage.setItem('konstruktor.token',t):localStorage.removeItem('konstruktor.token')}catch(e){}}};

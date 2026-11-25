@@ -76,7 +76,7 @@ window.LEARN={open,evalTasks,TASKS};
 @media (max-width:540px){.w3List{grid-template-columns:1fr}.w3Go{opacity:.6;transform:none}}`;document.head.appendChild(st);
  const SUB={copter:'FPV, kino, yuk tashuvchi',plane:'Trener, planer, akrobat',car:'Buggy, monster truck, crawler',boat:'Deep-V, katamaran',robot:'Arduino, sensorlar, kod',heli:'450 / 700 klass, FBL',rocket:'A–G dvigatel, parashyut',tank:'Gusenitsa, minora',lab:'LED, servo, LCD, kod'};
  function welcome(){const T=Object.values(TYPES);
-  openModal(`<div class="w3"><div class="w3Top"><img src="/konstruktor/img/logo-mark-64.png" alt=""><div><small>Konstruktor</small><h2>Qurilmani o'zingiz loyihalang va sinang</h2></div></div>
+  openModal(`<div class="w3"><div class="w3Top"><img src="img/logo-mark-64.png" alt=""><div><small>Konstruktor</small><h2>Qurilmani o'zingiz loyihalang va sinang</h2></div></div>
   <p class="w3Lead">Har bir detalning o'lchamini tanlaysiz, uni qismlardan yig'asiz, simlarini ulaysiz va virtual sinovdan o'tkazasiz. Tortish, tok, og'irlik va barqarorlik real fizika formulalari bilan hisoblanadi.</p>
   <div class="w3Flow">${[['Loyihalash','Detal parametrlari: o\'lcham, material, quvvat'],['Yasash','Detalni ichki va ustki qismlardan yig\'ish'],['Ulash','Simlar; xato ulanish detalni kuydiradi'],['Sinov','Virtual maydonda natijani tekshirish']].map(([t,d],i)=>`<div><b><em>0${i+1}</em>${t}</b><span>${d}</span></div>`).join('')}</div>
   <div class="w3Sec">Qurilma turini tanlang</div><div class="w3List">${T.map(t=>`<button data-wt="${t.id}"><span class="w3Ic">${IC(t.ic)}</span><span class="t"><b>${esc(t.name)}</b><small>${esc(SUB[t.id]||'')}</small></span><span class="w3Go">${IC('right')}</span></button>`).join('')}</div>

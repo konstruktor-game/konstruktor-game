@@ -1,0 +1,61 @@
+# Render Blueprint: Konstruktor — frontend (statik sayt) + backend (Django API) + PostgreSQL.
+# Ishlatish: Render → New → Blueprint → shu repozitoriyni tanlang.
+services:
+  # Backend: Django JSON API (/api/...). Frontendni ham o'zi beradi — bitta servis bilan ham ishlaydi.
+  - type: web
+    name: konstruktor-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application --workers 2 --timeout 60
+    healthCheckPath: /api/ping
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: KONS_DEBUG
+        value: "0"
+      - key: KONS_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: konstruktor-db
+          property: connectionString
+      # Statik frontend domeni — CORS ruxsati uchun
+      - key: KONS_CORS_HOSTS
+        fromService:
+          type: web
+          name: konstruktor-web
+          property: host
+      - key: KONS_AI_CHAT
+        value: "0"
+
+  # Frontend: statik sayt (HTML/JS/rasmlar), CDN orqali tez yuklanadi
+  - type: web
+    name: konstruktor-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: sh scripts/write-config.sh
+    staticPublishPath: .
+    envVars:
+      - key: KONS_API_HOST
+        fromService:
+          type: web
+          name: konstruktor-api
+          property: host
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /lib/*
+        name: Cache-Control
+        value: public, max-age=604800
+      - path: /img/*
+        name: Cache-Control
+        value: public, max-age=604800
+
+databases:
+  - name: konstruktor-db
+    plan: free
+    databaseName: konstruktor
+    user: konstruktor

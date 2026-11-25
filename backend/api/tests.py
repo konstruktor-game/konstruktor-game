@@ -27,15 +27,15 @@ class ApiTests(TestCase):
         r = self.client.get('/')
         self.assertEqual(r.status_code, 200)
         self.assertIn(b'Konstruktor', b''.join(r.streaming_content))
-        self.assertEqual(self.client.get('/konstruktor/app.js').status_code, 200)
-        self.assertEqual(self.client.get('/lib/three.js').status_code, 200)
-        # faqat ruxsat etilgan nomlar (yo'lni chetlab o'tish mumkin emas)
-        self.assertEqual(self.client.get('/konstruktor/..%2F..%2Fbackend%2Fmanage.py').status_code, 404)
-        self.assertEqual(self.client.get('/konstruktor/index.html').status_code, 404)
-        r = self.client.get('/konstruktor/img/logo-mark.png')
-        self.assertEqual((r.status_code, r['Content-Type']), (200, 'image/png'))
-        self.assertEqual(self.client.get('/konstruktor/img/..%2F..%2Fbackend%2Fdb.sqlite3').status_code, 404)
-        self.assertEqual(self.client.get('/konstruktor/img/logo.svg').status_code, 404)
+        # frontend fayllari mavjud va index.html ularga to'g'ri yo'l bilan murojaat qiladi
+        from django.conf import settings
+        html = (settings.FRONTEND_DIR / 'index.html').read_text(encoding='utf-8')
+        import re as _re
+        for src in _re.findall(r'<script src="([^"]+)"', html) + _re.findall(r'(?:href|src)="(img/[^"]+)"', html):
+            self.assertTrue((settings.FRONTEND_DIR / src).is_file(), src)
+        # backend kodi va baza tashqariga berilmaydi
+        self.assertEqual(self.client.get('/manage.py').status_code, 404)
+        self.assertEqual(self.client.get('/db.sqlite3').status_code, 404)
 
     def test_register_login_logout(self):
         tok = self.register()
@@ -111,5 +111,3 @@ class ApiTests(TestCase):
         r = self.call('post', '/api/chat', {'q': 'KV nima?', 'ctx': {'tur': 'Dron'}})
         self.assertEqual(r.json(), {'ok': False, 'offline': True})
         self.assertEqual(self.call('post', '/api/chat', {'q': '  '}).status_code, 400)
-        self.assertEqual(self.client.get('/konstruktor/t_robot.js').status_code, 200)
-        self.assertEqual(self.client.get('/konstruktor/chat.js').status_code, 200)
