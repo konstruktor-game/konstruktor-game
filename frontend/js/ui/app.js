@@ -166,10 +166,13 @@ function showPartCard(e,key,slot){closePop();const g=GLOSS[key]||{n:key,w:'',y:'
  popEl.innerHTML=`<b>${esc(g.n)}</b><p>${esc(g.w)}</p><p><b style="font-size:12px;color:var(--tx)">Nima uchun:</b> ${esc(g.y)}</p>${slot?`<div class="row" style="margin-top:8px"><button class="btn pri" id="p360"><i class=i-orbit></i> 360° ko'rish</button></div>`:''}`;
  document.body.appendChild(popEl);popEl.style.left=clamp(e.clientX+10,8,innerWidth-330)+'px';popEl.style.top=clamp(e.clientY+10,8,innerHeight-popEl.offsetHeight-8)+'px';
  const b=popEl.querySelector('#p360');if(b)b.onclick=()=>{closePop();enterInspect(slot)}}
+// detal o'lchami (eni × uzunligi × balandligi) — tooltip uchun
+function partSize(slot){const ob=slot&&modelObjs[slot];if(!ob||typeof objSize!=='function')return'<br>';const bb=objSize(ob);if(bb.isEmpty())return'<br>';const s=bb.getSize(new V3());
+ return`<span class="tipSz">${IC('ruler')} ${fmtLen(s.x*10)} × ${fmtLen(s.z*10)} × ${fmtLen(s.y*10)}</span>`}
 let hoverT=0;function onHover(e){const tip=$('tip');if((window.FORGE&&FORGE.active)){tip.classList.add('hidden');if(e)FORGE.hover(e);return}if(!e||insp||step().kind==='wiring'||step().kind==='test'){tip.classList.add('hidden');return}
  const n=performance.now();if(n-hoverT<60)return;hoverT=n;const o=pickAt(e,model);if(!o){tip.classList.add('hidden');renderer.domElement.style.cursor='';return}
  const key=o.userData.label,g=GLOSS[key]||{n:key,w:''},r=$('view').getBoundingClientRect();
- tip.innerHTML=o.userData.ghost?`<b><i class=i-pointer></i> O'rnatish: ${esc(g.n)}</b>${esc(g.w)}`:step().kind==='props'&&/^prop/.test(o.userData.slot||'')?`<b>${esc(g.n)} — ${esc(B.dirs[o.userData.slot.slice(4)]||'')}</b>Bosing — yo'nalishini almashtirish`:`<b>${esc(g.n)}</b>${esc(g.w)}<br><small style="color:var(--mu)">Bosing — batafsil va 360°</small>`;
+ tip.innerHTML=o.userData.ghost?`<b><i class=i-pointer></i> O'rnatish: ${esc(g.n)}</b>${esc(g.w)}`:step().kind==='props'&&/^prop/.test(o.userData.slot||'')?`<b>${esc(g.n)} — ${esc(B.dirs[o.userData.slot.slice(4)]||'')}</b>Bosing — yo'nalishini almashtirish`:`<b>${esc(g.n)}</b>${esc(g.w)}${partSize(o.userData.slot)}<small style="color:var(--mu)">Bosing — batafsil va 360°</small>`;
  tip.style.left=clamp(e.clientX-r.left+14,4,r.width-270)+'px';tip.style.top=clamp(e.clientY-r.top+14,4,r.height-90)+'px';tip.classList.remove('hidden');renderer.domElement.style.cursor='pointer'}
 
 // ---------------- detal nomlari (yorliqlar) ----------------
@@ -217,7 +220,7 @@ function wiringPanel(){const W=wcheck(B);const legend=[['#e53935','Quvvat (+, 5V
  <div class="leg" style="margin-bottom:10px">${legend.map(([c,l])=>`<span><i style="background:${c};border:1px solid #666"></i>${l}</span>`).join('')}</div>
  <div class="row" style="margin-bottom:8px"><button class="btn pri" id="bWCheck"><i class=i-search></i> Tekshirish</button><button class="btn" id="bWSolve"><i class=i-bulb></i> Maslahat (1 ta sim)</button></div>
  <div class="row" style="margin-bottom:8px"><button class="btn" id="bWClear"><i class=i-scissors></i> Hammasini uzish</button><button class="btn" data-g2="solder"><i class=i-flame></i> Kavsharlash qoidalari</button></div></div>
- ${burntHTML()}<div id="wRes">${showWireStatus?wireResults(W):''}</div>`}
+ ${burntHTML()}${window.GUIDE?GUIDE.html():''}<div id="wRes">${showWireStatus?wireResults(W):''}</div>`}
 function burntHTML(){const L=Object.keys(B.burnt||{}).filter(k=>B.burnt[k]&&B.inst[k]);if(!L.length)return'';
  return`<div class="card" style="border-color:rgba(255,93,93,.45)"><h3><i class=i-flame></i> Kuygan detallar</h3>${L.map(k=>`<div class="iss bad"><b>${esc(glossName(slotLabel(T,k)))}</b><span>Tutashuvdan kuydi — simni to'g'rilash yetmaydi, detalni almashtiring.</span><button class="btn" data-replace="${esc(k)}" style="margin-top:6px"><i class=i-wrench></i> Yangisini yasash</button></div>`).join('')}</div>`}
 // bitta noto'g'ri yoki ulanmagan sim uchun to'g'ri kontaktni ko'rsatish (o'zi ulamaydi)
@@ -242,34 +245,87 @@ function bindWiringPanel(P){const g=id=>P.querySelector('#'+id);
  g('bWClear').onclick=()=>{pushUndo();B.wires={};snd('place');commit();renderWires()};
  P.querySelector('[data-g2]').onclick=e=>pop(e.target,'solder')}
 function renderWires(){const box=$('wires');if(step().kind!=='wiring'){box.innerHTML='';return}const W=wcheck(B),pads={};
- let s=`<svg viewBox="0 0 1000 660" preserveAspectRatio="xMidYMid meet" xmlns="${SVGNS}"><defs><linearGradient id="pcb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16261c"/><stop offset="1" stop-color="#0c1610"/></linearGradient>
- <filter id="gl"><feGaussianBlur stdDeviation="2.5"/></filter></defs>`;
- for(const b of W.W.boards){const on=!!B.inst[b.need],bu=on&&B.burnt&&B.burnt[b.need];s+=`<g opacity="${on?1:.35}"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="14" fill="${bu?'#2a120c':'url(#pcb)'}" stroke="${bu?'#ff5d5d':on?'#3d6b4c':'#444'}" stroke-width="2"/>${bu?`<text x="${b.x+b.w/2}" y="${b.y+b.h/2+26}" text-anchor="middle" fill="#ff8a80" font-size="12" font-weight="700">KUYDI — almashtiring</text>`:''}
-  <text x="${b.x+b.w/2}" y="${b.y+b.h/2+5}" text-anchor="middle" fill="#cfe8d6" font-size="15" font-weight="700">${esc(b.label)}</text>${on?'':`<text x="${b.x+b.w/2}" y="${b.y+b.h/2+26}" text-anchor="middle" fill="#ff9b9b" font-size="12">o'rnatilmagan</text>`}`;
-  for(const p of b.pads){if(on)pads[p.id]=p;const col={vbat:'#e53935',gnd:'#666',['5v']:'#ef5350',['9v']:'#ff7043',tx:'#43a047',rx:'#e0e0e0',motor:'#c58a3a',ch:'#ff9800',esc:'#90caf9',sig:'#fdd835'}[p.t]||'#e0b050';
-   const lx=p.x<=b.x+1?p.x-12:p.x>=b.x+b.w-1?p.x+12:p.x,ly=p.y<=b.y+1?p.y-14:p.y>=b.y+b.h-1?p.y+22:p.y+4,an=p.x<=b.x+1?'end':p.x>=b.x+b.w-1?'start':'middle';
-   s+=`<g class="pad" data-pad="${p.id}"><circle cx="${p.x}" cy="${p.y}" r="10" fill="#d9b25a" stroke="${col}" stroke-width="3"/><circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#6b5320"/><text x="${lx}" y="${ly}" text-anchor="${an}" fill="#ffe9b0" font-size="11.5" font-weight="700">${esc(p.l)}</text><title>${esc(padTitle(p))}</title></g>`}
+ const PADC={vbat:'#e53935',gnd:'#5f6368',['5v']:'#ef5350',['9v']:'#ff7043',tx:'#43a047',rx:'#e0e0e0',motor:'#c58a3a',ch:'#ff9800',esc:'#90caf9',sig:'#fdd835'};
+ const short=l=>String(l).split(' (')[0],tw=t=>t.length*7.6+14;
+ let s=`<svg viewBox="0 0 1000 660" preserveAspectRatio="xMidYMid meet" xmlns="${SVGNS}"><defs>
+ <linearGradient id="pcb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f5d3a"/><stop offset=".55" stop-color="#174a2e"/><stop offset="1" stop-color="#0f3520"/></linearGradient>
+ <pattern id="trc" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M0 10H18L26 18H40M10 0V8L16 14M30 40V30L22 22" fill="none" stroke="#3fa86a" stroke-width="1.4" opacity=".35"/><circle cx="26" cy="18" r="1.8" fill="#c9a227" opacity=".5"/></pattern>
+ <radialGradient id="gold" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#ffe9a8"/><stop offset=".6" stop-color="#d4a73c"/><stop offset="1" stop-color="#9a7420"/></radialGradient>
+ <radialGradient id="sold" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#b9c0c8"/><stop offset="1" stop-color="#6d747c"/></radialGradient>
+ <filter id="bsh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000" flood-opacity=".55"/></filter>
+ <filter id="gl"><feGaussianBlur stdDeviation="2.5"/></filter></defs>
+ <style>.pad .ring{transition:opacity .15s}.pad.ok .halo{opacity:1;animation:hp2 1s ease-in-out infinite}.pad.no{opacity:.3}.pad .halo{opacity:0}
+ @keyframes hp2{50%{stroke-width:6;stroke-opacity:.35}}.flow{stroke-dasharray:4 14;animation:fl2 .9s linear infinite}@keyframes fl2{to{stroke-dashoffset:-18}}
+ .ripple{animation:rp .6s ease-out forwards}@keyframes rp{from{r:8;opacity:.9}to{r:28;opacity:0}}.wire.hl .body{stroke-width:7}.wire.dim{opacity:.25}
+ .card{cursor:default}.card:hover rect.bg{stroke:#ffb020}text{paint-order:stroke;stroke:#05080c;stroke-width:3px;stroke-linejoin:round}.wend{cursor:grab}.wend:active{cursor:grabbing}.smk{animation:sm2 2.4s ease-out infinite;opacity:0}@keyframes sm2{0%{opacity:.5;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}</style>`;
+ // platalar: PCB, mis yo'llar, bosma yozuv, montaj teshiklari, mikrosxema
+ for(const b of W.W.boards){const on=!!B.inst[b.need],bu=on&&B.burnt&&B.burnt[b.need],big=b.w>=170&&b.h>=150,cx=b.x+b.w/2,cy=b.y+b.h/2;
+  s+=`<g opacity="${on?1:.32}"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="12" fill="url(#pcb)" filter="url(#bsh)" ${on?'':'stroke="#666" stroke-dasharray="6 5"'}/><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="12" fill="url(#trc)"/>
+   <rect x="${b.x+7}" y="${b.y+7}" width="${b.w-14}" height="${b.h-14}" rx="8" fill="none" stroke="#e8f5e9" stroke-opacity=".22"/>`;
+  for(const[hx,hy]of[[b.x+13,b.y+13],[b.x+b.w-13,b.y+13],[b.x+13,b.y+b.h-13],[b.x+b.w-13,b.y+b.h-13]])s+=`<circle cx="${hx}" cy="${hy}" r="6" fill="url(#gold)"/><circle cx="${hx}" cy="${hy}" r="3" fill="#0a1a10"/>`;
+  if(big){const cs=Math.min(b.w,b.h)*.26;s+=`<rect x="${cx-cs/2}" y="${cy-cs/2+10}" width="${cs}" height="${cs}" rx="3" fill="#15171a" stroke="#2c3036"/>`;for(let i=0;i<6;i++){const t=(i+.5)/6*cs-cs/2;s+=`<rect x="${cx+t-1.5}" y="${cy-cs/2+4}" width="3" height="6" fill="#b9c0c8"/><rect x="${cx+t-1.5}" y="${cy+cs/2+10}" width="3" height="6" fill="#b9c0c8"/><rect x="${cx-cs/2-6}" y="${cy+t+8.5}" width="6" height="3" fill="#b9c0c8"/><rect x="${cx+cs/2}" y="${cy+t+8.5}" width="6" height="3" fill="#b9c0c8"/>`}
+   s+=`<circle cx="${cx-cs/2+7}" cy="${cy-cs/2+17}" r="2.4" fill="#3a3f46"/>`}
+  s+=`<text x="${cx}" y="${big?b.y+36:cy+5}" text-anchor="middle" fill="#f1f8f3" font-size="16" font-weight="700" letter-spacing=".02em">${esc(b.label)}</text>`;
+  if(bu)s+=`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="12" fill="#2a120c" opacity=".78"/><ellipse cx="${cx}" cy="${cy}" rx="${b.w*.3}" ry="${b.h*.22}" fill="#000" opacity=".5"/>${[0,1,2].map(i=>`<circle class="smk" style="animation-delay:${i*.7}s" cx="${cx-20+i*20}" cy="${cy}" r="10" fill="#666"/>`).join('')}<text x="${cx}" y="${cy+4}" text-anchor="middle" fill="#ff8a80" font-size="13" font-weight="700">KUYDI — almashtiring</text>`;
+  if(!on)s+=`<text x="${cx}" y="${b.y+b.h-20}" text-anchor="middle" fill="#ffb4a9" font-size="12">o'rnatilmagan</text>`;
+  for(const p of b.pads){if(on)pads[p.id]=p;const col=PADC[p.t]||'#e0b050',side=p.x<=b.x+1?'l':p.x>=b.x+b.w-1?'r':p.y<=b.y+1?'t':p.y>=b.y+b.h-1?'b':'r';
+   const t=String(p.l),pw=tw(t),lx=side==='l'?p.x-16-pw:side==='r'?p.x+16:p.x-pw/2,ly=side==='t'?p.y-34:side==='b'?p.y+15:p.y-9.5;
+   s+=`<g class="pad" data-pad="${p.id}"><circle class="halo" cx="${p.x}" cy="${p.y}" r="15" fill="none" stroke="#2fcf7a" stroke-width="3"/><circle class="ring" cx="${p.x}" cy="${p.y}" r="10.5" fill="url(#gold)" stroke="${col}" stroke-width="2.5"/><circle cx="${p.x}" cy="${p.y}" r="3.8" fill="#2a1d05"/>
+    <rect x="${lx}" y="${ly}" width="${pw}" height="19" rx="5" fill="#0b1118" fill-opacity=".9" stroke="${col}" stroke-opacity=".7"/><text x="${lx+pw/2}" y="${ly+13.8}" text-anchor="middle" fill="#fff3d6" font-size="12.5" font-weight="700">${esc(t)}</text><title>${esc(padTitle(p))}</title></g>`}
   s+='</g>'}
- let wiresSvg='',ends='';
- for(const c of W.W.comps){const on=!!B.inst[c.need];const tb=W.W.boards.find(b=>c.wires.some(w=>(w.ok||[]).some(x=>b.pads.some(p=>p.id===x))))||W.W.boards[W.W.boards.length-1],cx=tb.x+tb.w/2,cy=tb.y+tb.h/2;
-  let dx=cx-c.x,dy=cy-c.y;const L=Math.hypot(dx,dy)||1;dx/=L;dy/=L;const bw=136,bh=34,ax=c.x+dx*(Math.abs(dx)>Math.abs(dy)?bw/2:bh/2/Math.max(.3,Math.abs(dy))*Math.abs(dy)),ay=c.y+dy*(Math.abs(dy)>=Math.abs(dx)?bh/2:bh/2*Math.abs(dy));
-  s+=`<g opacity="${on?1:.3}"><rect x="${c.x-bw/2}" y="${c.y-bh/2}" width="${bw}" height="${bh}" rx="9" fill="${on&&B.burnt&&B.burnt[c.need]?'#2a120c':'#1d2a40'}" stroke="${on&&B.burnt&&B.burnt[c.need]?'#ff5d5d':'#3a4f73'}"/><text x="${c.x}" y="${c.y+5}" text-anchor="middle" fill="#e7edf7" font-size="12" font-weight="700">${esc(c.label.length>20?c.label.slice(0,19)+'…':c.label)}</text><title>${esc(c.label)}</title></g>`;
-  if(!on)continue;const n=c.wires.length;
-  c.wires.forEach((w,k)=>{const off=(k-(n-1)/2)*15,px=-dy*off,py=dx*off,a=[ax+px,ay+py],pid=B.wires[w.id],pad=pid&&pads[pid],rest=[ax+px+dx*46,ay+py+dy*46],e=pad?[pad.x,pad.y]:rest;
-   const st=W.st[w.id],col=showWireStatus&&st==='bad'?'#ff3b3b':w.col;
-   wiresSvg+=`<path data-wp="${w.id}" d="${wpath(a,e)}" fill="none" stroke="${col}" stroke-width="${(w.w||2.5)+1}" stroke-linecap="round" opacity="${pad?.95:.75}" ${showWireStatus&&st==='bad'?'stroke-dasharray="7 5"':''}/>`;
-   ends+=`<g class="wend" data-w="${w.id}" data-ax="${a[0]}" data-ay="${a[1]}" data-rx="${rest[0]}" data-ry="${rest[1]}"><circle cx="${e[0]}" cy="${e[1]}" r="${pad?7:9}" fill="${w.col}" stroke="${showWireStatus?(st==='ok'?'#2ecc71':st==='warn'?'#ffb020':st==='bad'?'#ff3b3b':'#fff'):'#fff'}" stroke-width="2.5"/>${pad?'':`<text x="${e[0]}" y="${e[1]-13}" text-anchor="middle" fill="#fff" font-size="10.5" font-weight="700">${esc(w.l)}</text>`}<title>${esc(c.label+' — '+w.l)}</title></g>`})}
- s+=wiresSvg+ends+'</svg>';box.innerHTML=s;bindWireDrag(box.querySelector('svg'),pads)}
+ // detal kartochkalari: o'lchami yozuvga qarab, ustma-ust tushmasligi uchun bir-biridan va platalardan itariladi
+ const cards=W.W.comps.map(c=>({c,x:c.x,y:c.y,w:Math.min(176,Math.max(118,tw(c.label.length>24?c.label.slice(0,23)+'…':c.label)+26)),h:44}));
+ const obst=W.W.boards.map(b=>({x:b.x+b.w/2,y:b.y+b.h/2,w:b.w+24,h:b.h+56}));
+ for(let it=0;it<60;it++){let moved=false;for(let i=0;i<cards.length;i++){const a=cards[i];for(const o of[...cards.slice(i+1),...obst]){const dx=o.x-a.x,dy=o.y-a.y,ox=(a.w+o.w)/2+10-Math.abs(dx),oy=(a.h+o.h)/2+10-Math.abs(dy);if(ox>0&&oy>0){moved=true;const isB=obst.includes(o);
+   if(ox<oy){const m=(dx<0?1:-1)*ox*(isB?1:.5);a.x+=m;if(!isB)o.x-=m}else{const m=(dy<0?1:-1)*oy*(isB?1:.5);a.y+=m;if(!isB)o.y-=m}}}
+   a.x=clamp(a.x,a.w/2+6,1000-a.w/2-6);a.y=clamp(a.y,a.h/2+6,660-a.h/2-6)}if(!moved)break}
+ let wiresSvg='',solder='',cardsSvg='',ends='';
+ for(const k of cards){const c=k.c,on=!!B.inst[c.need],bu=on&&B.burnt&&B.burnt[c.need];const tb=W.W.boards.find(b=>c.wires.some(w=>(w.ok||[]).some(x=>b.pads.some(p=>p.id===x))))||W.W.boards[W.W.boards.length-1],tcx=tb.x+tb.w/2,tcy=tb.y+tb.h/2;
+  let dx=tcx-k.x,dy=tcy-k.y;const L=Math.hypot(dx,dy)||1;dx/=L;dy/=L;const ax=k.x+dx*(Math.abs(dx)*k.w/2>Math.abs(dy)*k.h/2?k.w/2:Math.abs(k.h/2/dy)*Math.abs(dx)),ay=k.y+dy*(Math.abs(dy)*k.w/2>=Math.abs(dx)*k.h/2?k.h/2:Math.abs(k.w/2/dx)*Math.abs(dy));
+  const n=c.wires.length,con=c.wires.filter(w=>B.wires[w.id]&&pads[B.wires[w.id]]).length,allOk=showWireStatus&&c.wires.every(w=>W.st[w.id]==='ok'||W.st[w.id]==='warn'),lbl=c.label.length>24?c.label.slice(0,23)+'…':c.label;
+  cardsSvg+=`<g class="card" data-card="${c.id}" opacity="${on?1:.3}"><rect class="bg" x="${k.x-k.w/2}" y="${k.y-k.h/2}" width="${k.w}" height="${k.h}" rx="10" fill="${bu?'#2a120c':'#16202f'}" stroke="${bu?'#ff5d5d':allOk?'#2fcf7a':'#34465f'}" stroke-width="1.5" filter="url(#bsh)"/>
+   <rect x="${k.x-k.w/2}" y="${k.y-k.h/2}" width="4" height="${k.h}" rx="2" fill="${c.wires[0].col}"/><text x="${k.x+2}" y="${k.y-2}" text-anchor="middle" fill="#e7edf7" font-size="13" font-weight="700">${esc(lbl)}</text>
+   <text x="${k.x+2}" y="${k.y+14}" text-anchor="middle" fill="${con===n?(allOk?'#2fcf7a':'#9fb0c8'):'#ffb020'}" font-size="11">${on?`${con}/${n} ulangan${allOk?' · tayyor':''}`:"o'rnatilmagan"}</text><title>${esc(c.label)}</title></g>`;
+  if(!on)continue;
+  c.wires.forEach((w,j)=>{const off=(j-(n-1)/2)*25,px=-dy*off,py=dx*off,a=[ax+px,ay+py],pid=B.wires[w.id],pad=pid&&pads[pid],rest=[ax+px+dx*62,ay+py+dy*62],e=pad?[pad.x,pad.y]:rest;
+   const st=W.st[w.id],bad=showWireStatus&&st==='bad',col=bad?'#ff3b3b':w.col,wd=(w.w||2.5)+1.5,d=wpath(a,e),works=W.works[c.id]&&W.works.xt60!==false&&(w.kind==='bat+'||w.kind==='p9'||w.kind==='p5'||w.kind==='motor'||w.kind==='vraw');
+   wiresSvg+=`<g class="wire" data-wc="${c.id}"><path data-wp="${w.id}" d="${d}" fill="none" stroke="#000" stroke-opacity=".45" stroke-width="${wd+3}" stroke-linecap="round" transform="translate(0,2)"/>
+    <path class="body" data-wp="${w.id}" d="${d}" fill="none" stroke="${col}" stroke-width="${wd}" stroke-linecap="round" opacity="${pad?1:.85}" ${bad?'stroke-dasharray="7 5"':''}/>
+    <path data-wp="${w.id}" d="${d}" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="1" stroke-linecap="round" transform="translate(-.6,-.8)"/>
+    ${pad&&showWireStatus&&works&&!bad?`<path class="flow" data-wp="${w.id}" d="${d}" fill="none" stroke="#ffe082" stroke-width="2" stroke-linecap="round"/>`:''}</g>`;
+   if(pad)solder+=`<circle cx="${pad.x}" cy="${pad.y}" r="7.5" fill="url(#sold)" stroke="${col}" stroke-width="1.5"/>`;
+   const t=short(w.l),pw=tw(t),stc=showWireStatus?(st==='ok'?'#2fcf7a':st==='warn'?'#ffb020':st==='bad'?'#ff3b3b':'#ffffff'):'#ffffff';
+   ends+=`<g class="wend" data-w="${w.id}" data-ok="${esc((w.ok||[]).join(' '))}" data-ax="${a[0]}" data-ay="${a[1]}"><circle cx="${e[0]}" cy="${e[1]}" r="${pad?6:9}" fill="${pad?'transparent':w.col}" stroke="${stc}" stroke-width="2.5"/>
+    ${pad?'':`<g class="lb"><rect x="${e[0]+dx*19-pw/2}" y="${e[1]+dy*19-9.5}" width="${pw}" height="19" rx="5" fill="#0b1118" fill-opacity=".92" stroke="${w.col}" stroke-opacity=".8"/><text x="${e[0]+dx*19}" y="${e[1]+dy*19+4.3}" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="700">${esc(t)}</text></g>`}<title>${esc(c.label+' — '+w.l)}</title></g>`})}
+ s+=wiresSvg+solder+cardsSvg+ends+'<g id="fx"></g></svg>';box.innerHTML=s+`<div class="wzoom"><button data-wz="in" title="Kattalashtirish">+</button><button data-wz="out" title="Kichraytirish">−</button><button data-wz="fit" title="Butun sxema">${IC('orbit')}</button></div>`;const svg=box.querySelector('svg');wzBind(box,svg);
+ svg.querySelectorAll('.card').forEach(g=>{g.onmouseenter=()=>svg.querySelectorAll('.wire').forEach(w=>w.classList.add(w.dataset.wc===g.dataset.card?'hl':'dim'));g.onmouseleave=()=>svg.querySelectorAll('.wire').forEach(w=>w.classList.remove('hl','dim'))});
+ bindWireDrag(svg,pads)}
 function padTitle(p){if(p.title)return p.title+` · ${p.id}`;return{vbat:'Batareya plusi (+)',gnd:'GND — minus / yer',['5v']:'5 V quvvat chiqishi',['9v']:'9 V quvvat chiqishi (VTX uchun)',tx:'UART TX — kontroller uzatadi (qurilmaning RX iga)',rx:'UART RX — kontroller qabul qiladi (qurilmaning TX idan)',motor:'Motor fazasi',ch:'Qabul qilgich kanali (signal + quvvat)',esc:'ESC ulagichi (8-pin)',sig:'Signal kontakti'}[p.t]+` · ${p.id}`}
 function wpath(a,e){const mx=(a[0]+e[0])/2;return`M${a[0]},${a[1]} C${mx},${a[1]} ${mx},${e[1]} ${e[0]},${e[1]}`}
+// sxemani kattalashtirish va surish (viewBox orqali): g'ildirak, +/− tugmalari, bo'sh joyni sudrash
+let WZ={x:0,y:0,w:1000,h:660};
+function wzApply(svg){svg.setAttribute('viewBox',`${WZ.x} ${WZ.y} ${WZ.w} ${WZ.h}`)}
+function wzZoom(svg,k,cx,cy){const nw=clamp(WZ.w*k,250,1000),r=nw/WZ.w;cx=cx??WZ.x+WZ.w/2;cy=cy??WZ.y+WZ.h/2;WZ={x:clamp(cx-(cx-WZ.x)*r,-150,1150-nw),y:clamp(cy-(cy-WZ.y)*r,-100,760-nw*.66),w:nw,h:nw*.66};wzApply(svg)}
+function wzBind(box,svg){wzApply(svg);const toS=ev=>{const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse())};
+ svg.addEventListener('wheel',ev=>{ev.preventDefault();const p=toS(ev);wzZoom(svg,ev.deltaY>0?1.15:1/1.15,p.x,p.y)},{passive:false});
+ let pan=null;svg.addEventListener('pointerdown',ev=>{if(ev.target.closest('.wend,.card,.pad'))return;pan={x:ev.clientX,y:ev.clientY,v:{...WZ}};svg.setPointerCapture(ev.pointerId)});
+ svg.addEventListener('pointermove',ev=>{if(!pan)return;const k=WZ.w/svg.getBoundingClientRect().width;WZ.x=pan.v.x-(ev.clientX-pan.x)*k;WZ.y=pan.v.y-(ev.clientY-pan.y)*k;wzApply(svg)});
+ const up=()=>{pan=null};svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+ box.querySelectorAll('[data-wz]').forEach(b=>b.onclick=()=>{const m=b.dataset.wz;if(m==='fit'){WZ={x:0,y:0,w:1000,h:660};wzApply(svg)}else wzZoom(svg,m==='in'?1/1.3:1.3);snd('click')})}
 function bindWireDrag(svg,pads){let drag=null;const toSvg=ev=>{const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse())};
- svg.addEventListener('pointerdown',ev=>{const g=ev.target.closest('.wend');if(!g)return;ev.preventDefault();svg.setPointerCapture(ev.pointerId);drag={g,id:g.dataset.w,a:[+g.dataset.ax,+g.dataset.ay],path:svg.querySelector(`[data-wp="${CSS.escape(g.dataset.w)}"]`)};audioInit()});
- svg.addEventListener('pointermove',ev=>{if(!drag)return;const p=toSvg(ev);const c=drag.g.querySelector('circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);const t=drag.g.querySelector('text');if(t){t.setAttribute('x',p.x);t.setAttribute('y',p.y-13)}
-  if(drag.path)drag.path.setAttribute('d',wpath(drag.a,[p.x,p.y]));svg.querySelectorAll('.pad circle:first-child').forEach(o=>o.removeAttribute('filter'));const near=nearPad(p,pads);if(near){const el=svg.querySelector(`[data-pad="${CSS.escape(near.id)}"] circle`);if(el)el.setAttribute('filter','url(#gl)')}});
- const end=ev=>{if(!drag)return;const p=toSvg(ev),near=nearPad(p,pads),id=drag.id;drag=null;pushUndo();const before=new Set(wcheck(B).fatal.map(f=>f.k+'|'+f.w));if(near){B.wires[id]=near.id;snd('solder')}else{delete B.wires[id];snd('place')}
+ const mark=ok=>svg.querySelectorAll('.pad').forEach(g=>{g.classList.remove('ok','no');if(ok&&pads[g.dataset.pad])g.classList.add(ok.includes(g.dataset.pad)?'ok':'no')});
+ svg.addEventListener('pointerdown',ev=>{const g=ev.target.closest('.wend');if(!g)return;ev.preventDefault();svg.setPointerCapture(ev.pointerId);
+  drag={g,id:g.dataset.w,a:[+g.dataset.ax,+g.dataset.ay],paths:[...svg.querySelectorAll(`[data-wp="${CSS.escape(g.dataset.w)}"]`)],lb:g.querySelector('.lb'),c:g.querySelector('circle'),c0:[+g.querySelector('circle').getAttribute('cx'),+g.querySelector('circle').getAttribute('cy')]};
+  // o'quv rejimi: mos kontaktlar yashil, mos kelmaydiganlari xira (simni ulash qoidasini ko'rsatadi)
+  mark((g.dataset.ok||'').split(' ').filter(Boolean));audioInit()});
+ svg.addEventListener('pointermove',ev=>{if(!drag)return;const p=toSvg(ev);drag.c.setAttribute('cx',p.x);drag.c.setAttribute('cy',p.y);drag.c.setAttribute('r',9);
+  if(drag.lb)drag.lb.setAttribute('transform',`translate(${p.x-drag.c0[0]},${p.y-drag.c0[1]})`);for(const path of drag.paths)path.setAttribute('d',wpath(drag.a,[p.x,p.y]));
+  svg.querySelectorAll('.pad .ring').forEach(o=>o.removeAttribute('filter'));const near=nearPad(p,pads);if(near){const el=svg.querySelector(`[data-pad="${CSS.escape(near.id)}"] .ring`);if(el)el.setAttribute('filter','url(#gl)')}});
+ const end=ev=>{if(!drag)return;const p=toSvg(ev),near=nearPad(p,pads),id=drag.id;drag=null;mark(null);pushUndo();const before=new Set(wcheck(B).fatal.map(f=>f.k+'|'+f.w));if(near){B.wires[id]=near.id;snd('solder')}else{delete B.wires[id];snd('place')}
   const nf=near?wcheck(B).fatal.filter(f=>!before.has(f.k+'|'+f.w)&&f.w===id):[];
   if(nf.length){B.burnt=B.burnt||{};for(const f of nf)if(f.slot&&B.inst[f.slot])B.burnt[f.slot]=true;showWireStatus=true}
   saveLocal();renderWires();scheduleRebuild(true);
+  if(near&&!nf.length){const fx=document.querySelector('#wires #fx');if(fx){const r=document.createElementNS(SVGNS,'circle');r.setAttribute('cx',near.x);r.setAttribute('cy',near.y);r.setAttribute('r',8);r.setAttribute('fill','none');r.setAttribute('stroke','#2fcf7a');r.setAttribute('stroke-width','3');r.setAttribute('class','ripple');fx.appendChild(r);setTimeout(()=>r.remove(),700)}}
   if(nf.length){const f=nf[0],nm=f.slot?glossName(slotLabel(T,f.slot)):'';sparkAt(near.x,near.y);snd('boom',.45);setTimeout(()=>snd('err'),250);toast(`<i class=i-flame></i> ${esc(f.t)}${nm?' — '+esc(nm)+' kuydi':''}`,3800)}};
  svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end)}
 // uchqun va tutun (SVG animatsiya) — qisqa tutashuv joyida
@@ -306,7 +362,7 @@ function checkPanel(){const W=wcheck(B),I=T.issues(B,D),bad=I.filter(i=>i.lvl===
  <div class="card"><h3><i class=i-globe></i> Muhit sharoiti <button class="q" data-g="twr">?</button></h3><div class="grid2"><div class="fld"><div class="fl"><span>Balandlik (dengizdan), m</span></div><input class="inp" type="number" id="envAlt" min="0" max="5000" step="50" value="${B.env.alt}"></div>
  <div class="fld"><div class="fl"><span>Harorat, °C</span></div><input class="inp" type="number" id="envTemp" min="-30" max="50" step="1" value="${B.env.temp}"></div></div>
  <p style="font-size:12px;color:var(--mu);margin-bottom:8px">Havo zichligi: ${fmt(airDensity(B.env.alt,B.env.temp),3)} kg/m³ (dengiz sathida 1.225). Tog'da va issiqda havo siyrak — tortish kamayadi.</p></div>
- ${window.ADV?ADV.html():''}
+ ${window.ADV?ADV.html():''}${window.GUIDE?GUIDE.html():''}
  <h3 style="font-size:13px;font-weight:600;margin:6px 0 6px"><i class=i-search></i> Batafsil tekshiruv</h3>
  ${W.fatal.map(f=>`<div class="iss bad"><b><i class=i-bolt></i> ${esc(f.t)}</b><span>${esc(f.why)}</span></div>`).join('')}${W.complete?'':`<div class="iss warn"><b><i class=i-plug></i> Simlar to'liq ulanmagan (${W.connected}/${W.total})</b><span>Kavsharlash bosqichiga qayting.</span></div>`}
  ${issuesHTML(false)}<p style="font-size:11.5px;color:var(--mu);margin-top:10px"><i class=i-info></i> Hisob-kitoblar taxminiy (±15–25%): ommabop detallarning sinov natijalariga moslangan formulalar asosida. Haqiqiy detal sotib olishdan oldin ishlab chiqaruvchining sinov jadvallarini tekshiring.</p>`}

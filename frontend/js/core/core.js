@@ -202,7 +202,7 @@ function wcheck(B){const T=TYPES[B.type],W=T.wiring(B),pads={};
  // UART qurilmalar uchun port raqami
  const uartUse={};
  for(const c of comps){for(const w of c.wires){total+=c.opt?0:1;const pid=B.wires[w.id],pad=pid&&pads[pid];
-  if(!pad){st[w.id]=c.opt?'opt':'miss';continue}connected++;
+  if(!pad){st[w.id]=c.opt?'opt':'miss';continue}if(!c.opt)connected++;
   const t=pad.t,k=w.kind;let s='ok',msg='';
   if(PWR.includes(k)&&t==='gnd'){s='bad';if(k==='bat+'){fatal.push({slot:pad.board&&(W.boards.find(b=>b.id===pad.board)||{}).need,w:w.id,k:'polarity',t:'Batareya qutblari teskari!',why:"Plus simi minus kontaktga ulangan — ulash bilan ESC kuyadi. Qizil sim doim + ga."})}
    else if(k==='cap+')fatal.push({slot:c.need,w:w.id,k:'cap',t:'Kondensator teskari ulangan',why:"Elektrolitik kondensatorning uzun oyog'i (+) plusga ulanadi. Teskari ulansa qizib portlaydi."});

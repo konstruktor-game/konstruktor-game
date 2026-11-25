@@ -90,3 +90,42 @@ window.ADV={html,bind,run,score};window.STLX={exportSTL};
   const r=$('view').getBoundingClientRect(),v=R.pts[0].clone().add(R.pts[1]).multiplyScalar(.5);if(explode>.01){}v.project(camera);
   R.lbl.innerHTML=v.z<1?`<div class="fLbl next" style="left:${(v.x+1)/2*r.width}px;top:${(1-v.y)/2*r.height}px">${fmt(R.pts[0].distanceTo(R.pts[1])*10,1)} mm</div>`:''}
  btn.onclick=()=>{snd('click');toggle()};window.RULER={get active(){return R.active},pick,toggle};})();
+// ---------- O'lchamlar: modelning umumiy eni, uzunligi, balandligi (chizma kabi o'lcham chiziqlari) ----------
+// Model birligi: 1 = 1 sm. Uzunlik avtomatik birlikda: ≥ 1 m — metr, ≥ 10 sm — santimetr, aks holda millimetr.
+const fmtLen=mm=>mm>=1000?`${fmt(mm/1000,2)} m`:mm>=100?`${fmt(mm/10,1)} sm`:`${fmt(mm,0)} mm`;
+function objSize(o){const bb=new THREE.Box3();o.updateMatrixWorld(true);o.traverse(m=>{if(m.isMesh&&m.visible&&!(m.material&&(m.material===ghostMat||(m.material.transparent&&m.material.opacity<.3))))bb.expandByObject(m)});return bb}
+(()=>{const D={on:false,grp:null,lbl:null,raf:0,bb:null,k:0};
+ const btn=document.createElement('button');btn.className='vt';btn.id='tDims';btn.title="Modelning eni, uzunligi va balandligini chizmadagidek ko'rsatadi (m / sm)";btn.innerHTML=`${IC('ruler')}<span>O'lchamlar</span>`;
+ const ref=document.getElementById('tRuler')||document.getElementById('tXray');if(ref)ref.after(btn);
+ const names=()=>({plane:['Qanot yoyilishi','Uzunligi'],copter:['Eni (parraklar bilan)','Uzunligi'],heli:['Eni','Rotor bilan uzunligi'],rocket:['Diametri','Diametri']}[B.type]||['Eni','Uzunligi']);
+ function clear(){if(D.grp){scene.remove(D.grp);D.grp.traverse(o=>{if(o.geometry)o.geometry.dispose()})}D.grp=null;if(D.lbl)D.lbl.remove();D.lbl=null;D.bb=null}
+ function draw(){if(D.grp){scene.remove(D.grp);D.grp.traverse(o=>{if(o.geometry)o.geometry.dispose()})}D.grp=new THREE.Group();scene.add(D.grp);if(!model)return;
+  const bb=objSize(model);if(bb.isEmpty())return;D.bb=bb;const s=bb.getSize(new V3()),off=Math.max(1.5,Math.max(s.x,s.z)*.08),y0=bb.min.y+.05,
+   mat=new THREE.LineBasicMaterial({color:'#ffb020',depthTest:false,transparent:true,opacity:.95}),mat2=new THREE.LineBasicMaterial({color:'#ffb020',depthTest:false,transparent:true,opacity:.45}),
+   L=(pts,m=mat)=>{const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map(p=>new V3(...p))),m);l.renderOrder=11;D.grp.add(l)},t=off*.35,
+   dim=(a,b,ext,dir)=>{L([a,b]);for(const p of[a,b]){L([p.map((v,i)=>v-ext[i]*off*.9),p.map((v,i)=>v+ext[i]*t)],mat2);L([p.map((v,i)=>v-dir[i]*t-ext[i]*t*.6),p.map((v,i)=>v+dir[i]*t+ext[i]*t*.6)])}};
+  // eni (X) — old tomonda, uzunlik (Z) — o'ng tomonda, balandlik (Y) — o'ng-old burchakda
+  dim([bb.min.x,y0,bb.min.z-off],[bb.max.x,y0,bb.min.z-off],[0,0,1],[0,0,0]);
+  dim([bb.max.x+off,y0,bb.min.z],[bb.max.x+off,y0,bb.max.z],[-1,0,0],[0,0,0]);
+  dim([bb.max.x+off,bb.min.y,bb.min.z-off],[bb.max.x+off,bb.max.y,bb.min.z-off],[0,0,0],[0,0,0]);
+  D.pts=[[new V3((bb.min.x+bb.max.x)/2,y0,bb.min.z-off),names()[0],s.x],[new V3(bb.max.x+off,y0,(bb.min.z+bb.max.z)/2),names()[1],s.z],[new V3(bb.max.x+off,(bb.min.y+bb.max.y)/2,bb.min.z-off),'Balandligi',s.y]]}
+ function loop(){if(!D.on)return;D.raf=requestAnimationFrame(loop);if(++D.k%30===1)draw();if(!D.lbl||!D.pts)return;
+  const r=$('view').getBoundingClientRect();let h='';for(const[p,n,v]of D.pts){const q=p.clone().project(camera);if(q.z<1)h+=`<div class="fLbl next dimL" style="left:${(q.x+1)/2*r.width}px;top:${(1-q.y)/2*r.height}px"><small>${n}</small> ${fmtLen(v*10)}</div>`}D.lbl.innerHTML=h}
+ function toggle(on){D.on=on==null?!D.on:on;btn.classList.toggle('on',D.on);cancelAnimationFrame(D.raf);clear();if(D.on){D.lbl=document.createElement('div');D.lbl.className='fLbls';$('view').appendChild(D.lbl);D.k=0;loop()}}
+ btn.onclick=()=>{snd('click');toggle()};window.DIMS={toggle,get on(){return D.on}};
+ const st=document.createElement('style');st.textContent='.dimL small{color:var(--mu);font-weight:500;margin-right:4px}.tipSz{display:block;margin-top:4px;color:#ffd58a;font-weight:600;font-size:11.5px}';document.head.appendChild(st)})();
+// ---------- Klaviatura yorliqlari va "Tugmalar" qo'llanmasi ----------
+// Har bir ko'rish tugmasiga harf biriktiriladi (tugma ustida ko'rinadi), "?" — barcha tugmalar ro'yxati.
+(()=>{const KEYS=[['KeyE','tExplode','E','Ajratish — detallarni bir-biridan uzoqlashtiradi'],['KeyL','tLabels','L','Nomlar — har detal ustida nomi'],['KeyX','tXray','X',"Ichini ko'rish — kuzov shaffof bo'ladi"],
+  ['KeyM','tRuler','M',"O'lchash — ikki nuqta orasidagi masofa"],['KeyD','tDims','D',"O'lchamlar — eni, uzunligi, balandligi (m / sm)"],['KeyF','tFit','F','Markazlash — modelni ekranga sig\'diradi'],['KeyR','tAuto','R','Aylanish — model sekin aylanadi'],['KeyS','tShot','S','Rasm — PNG sifatida saqlash'],
+  ['BracketRight','bNext',']','Keyingi bosqich'],['BracketLeft','bPrev','[','Oldingi bosqich']],
+  OTHER=[['Ctrl + Z','Bekor qilish'],['Ctrl + Y','Qaytarish'],['Esc',"Oynani yopish / 360° ko'rishdan chiqish"],['Sichqoncha chap','Aylantirish, detalni tanlash'],['Sichqoncha o\'ng / Shift','Surish'],['G\'ildirakcha','Yaqinlashtirish'],['?','Shu ro\'yxat']];
+ for(const[,id,k]of KEYS){const b=document.getElementById(id);if(b&&b.classList.contains('vt')&&!b.querySelector('kbd'))b.insertAdjacentHTML('beforeend',`<kbd class="vk">${k}</kbd>`);if(b&&!/\(/.test(b.title||''))b.title=(b.title||'')+` (${k})`}
+ const st=document.createElement('style');st.textContent=`.vt{position:relative}.vk{margin-left:auto;padding:0 5px;min-width:16px;height:16px;line-height:16px;border-radius:4px;border:1px solid var(--ln2);color:var(--mu);font:600 10px/16px ui-monospace,Consolas,monospace;text-align:center;opacity:.8}
+ .vt.on .vk{color:inherit;border-color:currentColor}.kbList{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;align-items:center;font-size:13px}.kbList kbd{justify-self:start;padding:2px 8px;border-radius:6px;border:1px solid var(--ln2);background:var(--bg2,#11161e);font:600 12px ui-monospace,Consolas,monospace;color:var(--tx);white-space:nowrap}
+ .kbList h4{grid-column:1/-1;margin:8px 0 0;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}`;document.head.appendChild(st);
+ function help(){openModal(`<h2>${IC('keyboard')} Tugmalar va klaviatura</h2><p class="note">Har bir tugmaning vazifasi. Harfni bossangiz ham ishlaydi.</p><div class="kbList"><h4>Ko'rish oynasi</h4>${KEYS.map(([,,k,t])=>`<kbd>${esc(k)}</kbd><span>${esc(t)}</span>`).join('')}<h4>Umumiy</h4>${OTHER.map(([k,t])=>`<kbd>${esc(k)}</kbd><span>${esc(t)}</span>`).join('')}</div>`)}
+ addEventListener('keydown',e=>{const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(typeof SIM!=='undefined'&&SIM&&SIM.on)return;if(e.key==='?'){e.preventDefault();help();return}
+  const k=KEYS.find(x=>x[0]===e.code);if(!k)return;const b=document.getElementById(k[1]);if(b&&!b.disabled&&b.offsetParent!==null){e.preventDefault();b.click()}});
+ const hb=document.createElement('button');hb.className='hb';hb.id='bKeys';hb.title='Tugmalar va klaviatura yorliqlari (?)';hb.innerHTML=`${IC('keyboard')}<span>Tugmalar</span>`;const m=document.getElementById('bMute');if(m)m.before(hb);hb.onclick=()=>{snd('click');help()};window.KEYHELP=help})();

@@ -137,54 +137,79 @@ T.build=(B,D,ctx)=>{const p=B.p,ch=p.chassis,wh=p.wheel,c=B.col,u=v=>v/10,X=!!wi
   g.add(cyl(.06,.06,8,mPlastic('#111'),x,y+4.5,z-1.2,6));g.add(cyl(.22,.22,1,mPlastic('#333'),x,y+.9,z-1.2,10));return g})(),[-2,5,0]);
  // batareya: qattiq korpusli LiPo (hardcase), shassi o'rtasida pastda
  {const g=mkBattery(p.bat.cells,p.bat.mah,p.bat.chem,c.bat,[`${p.bat.cells}S ${p.bat.mah}mAh`,`${p.bat.c}C hardcase`,`${fmt(D.Vn,1)} V`],{hard:true,awg:12,lead:3});g.position.set(u(ch.track)*.02,plateY+.2,-hz*.05);ctx.add('bat',g,[0,8,0])}
- // kuzov: turi bo'yicha — jip / pikap (qutisimon, yumaloq qirrali panellar), buggy / sedan (silliq qobiq)
+ // kuzov: haqiqiy avtomobil kuzovlari kabi — yon profil (silueti) chiziladi, g'ildirak arkalari kesiladi,
+ // keyin kenglik bo'yicha yumaloq qirrali qilib cho'ziladi (polikarbonat qobiq). Ustiga kabina (oynalar bilan),
+ // faralar, panjara, bamper, oynalar, eshik chiziqlari qo'shiladi. Proporsiyalar g'ildirak radiusiga (R) bog'langan.
  {const g=new THREE.Group(),bs=ch.body||'jeep',bm=X?MAT('xrb'+c.body,()=>new THREE.MeshPhysicalMaterial({color:c.body,transparent:true,opacity:.2,depthWrite:false})):mPaint(c.body,B.fin),bm2=mPaint(c.body2,B.fin),
-   gl=MAT('carglass',()=>new THREE.MeshPhysicalMaterial({color:'#0c1218',roughness:.05,metalness:.3,clearcoat:1,transparent:true,opacity:.85})),blk=mPlastic('#1b1d20',.7),chr=mMetal('#c9ced4',.2),
-   y0=plateY+.4,Wd=u(ch.track)*.84,L=u(ch.wb)*1.32,Z=f=>f*L;
-  if(bs==='jeep'||bs==='pickup'){
-   // proporsiyalar g'ildirakka bog'langan (real 1/10 crawler jiplar kabi): kuzov pastki qirrasi o'q balandligida,
-   // korpus ≈ 0,52·D, kabina ≈ 0,72·D — tom g'ildirak tepasidan ancha baland bo'ladi
-   const Dw=2*R,y0=Math.max(plateY+.4,R*.78),tub=Dw*.52,cabH=Dw*.72,zf=-L/2,hoodL=L*.31,ws=zf+hoodL+L*.02,cabEnd=bs==='pickup'?ws+L*.3:L/2-L*.05,cabL=cabEnd-ws,roofY=y0+tub+cabH,cw=Wd*.88,top=mPlastic('#1d2024',.55);
-   // korpus va kapot
-   g.add(box(Wd,tub,L*.96,bm,0,y0+tub/2,0));
-   g.add(box(Wd*.9,Dw*.07,hoodL,bm,0,y0+tub+Dw*.03,zf+hoodL/2+L*.02));
-   g.add(box(Wd*.55,Dw*.035,hoodL*.78,bm,0,y0+tub+Dw*.075,zf+hoodL/2+L*.03));
-   for(const sx of[-1,1]){g.add(box(.5,.25,.9,blk,sx*Wd*.32,y0+tub+Dw*.08,ws-.6));g.add(box(.3,.18,1.4,mPlastic('#111',.5),sx*(Wd*.5+.02),y0+tub*.82,ws+cabL*.3))}
-   // panjara (7 ta tirqish), dumaloq faralar, burilish chiroqlari
-   g.add(box(Wd*.84,tub*.66,.3,blk,0,y0+tub*.6,zf+.02));for(let k=-3;k<=3;k++)g.add(box(Wd*.055,tub*.48,.14,mPlastic('#050505',.5),k*Wd*.1,y0+tub*.62,zf-.08));
-   for(const sx of[-1,1]){const hl=cyl(tub*.16,tub*.16,.32,chr,sx*Wd*.37,y0+tub*.64,zf-.02,32);hl.rotation.x=Math.PI/2;g.add(hl);const ln=cyl(tub*.125,tub*.125,.06,mGlow('#fffbe6'),sx*Wd*.37,y0+tub*.64,zf-.2,28);ln.rotation.x=Math.PI/2;g.add(ln);
-    g.add(box(Wd*.08,tub*.08,.1,mGlow('#ff9800'),sx*Wd*.37,y0+tub*.36,zf-.1))}
-   // old oyna: biroz orqaga og'gan ramka, shisha, ikki artgich
-   const wf=new THREE.Group();wf.position.set(0,y0+tub+Dw*.06,ws);wf.rotation.x=-.18;wf.add(box(Wd*.9,cabH*.92,.24,bm,0,cabH*.46,0));wf.add(box(Wd*.8,cabH*.76,.06,gl,0,cabH*.48,-.13));
-   for(const sx of[-.22,.22])wf.add(box(Wd*.3,.06,.06,mPlastic('#0a0a0a',.4),sx*Wd,cabH*.14,-.2));g.add(wf);
-   // kabina: qora qattiq tom (hardtop), ozgina toraygan yon devorlar, eshik va orqa oynalar, eshik tutqichlari
-   for(const sx of[-1,1]){const side=box(.18,cabH,cabL,top,sx*cw*.5,y0+tub+cabH/2,ws+cabL/2);side.rotation.z=-sx*.05;g.add(side);
-    g.add(box(.06,cabH*.55,cabL*.4,gl,sx*(cw*.5+.05),y0+tub+cabH*.58,ws+cabL*.27));g.add(box(.06,cabH*.55,cabL*.38,gl,sx*(cw*.5+.05),y0+tub+cabH*.58,ws+cabL*.73));
-    g.add(box(.06,tub*.78,.06,mPlastic('#000',.6),sx*(Wd*.5+.01),y0+tub*.52,ws+cabL*.5));g.add(box(.1,.12,.5,chr,sx*(Wd*.5+.04),y0+tub*.78,ws+cabL*.42));
-    g.add(box(.55,.5,.28,blk,sx*(Wd*.5+.35),y0+tub+cabH*.5,ws+.3))}
-   g.add(box(cw*.96,.34,cabL+.3,top,0,roofY,ws+cabL/2));
-   // tom bagajnigi va LED chiroq paneli
-   for(const sx of[-1,1])g.add(box(.18,.18,cabL*.85,mMetal('#2a2d31',.4),sx*cw*.42,roofY+.45,ws+cabL/2));for(let k=0;k<4;k++)g.add(box(cw*.86,.12,.15,mMetal('#2a2d31',.4),0,roofY+.45,ws+cabL*(.12+k*.25)));
-   g.add(box(cw*.8,.5,.45,blk,0,roofY+.75,ws+.3));g.add(box(cw*.74,.32,.06,mGlow('#fff7d6'),0,roofY+.75,ws+.06));
-   // havo quvuri (snorkel) o'ng old qanot yonidan tom tomonga
-   if(bs==='jeep'){const sn=wireMesh([[Wd*.52,y0+tub*.8,ws-hoodL*.35],[Wd*.56,y0+tub+.4,ws-.2],[Wd*.5,roofY-.2,ws+.25]],'#141414',.32);g.add(sn);g.add(box(.7,.6,.8,mPlastic('#141414',.5),Wd*.5,roofY+.1,ws+.45))}
-   if(bs==='pickup'){const bedL=L/2-cabEnd-.2;for(const sx of[-1,1])g.add(box(.2,Dw*.3,bedL,bm,sx*Wd*.45,y0+tub+Dw*.15,cabEnd+bedL/2+.1));g.add(box(Wd*.9,Dw*.3,.2,bm,0,y0+tub+Dw*.15,L/2-.2));
-    g.add(box(Wd*.86,.1,bedL,blk,0,y0+tub+.06,cabEnd+bedL/2+.1));for(const sx of[-1,1])g.add(cyl(.14,.14,cabH*.9,mMetal('#222'),sx*Wd*.38,y0+tub+cabH*.45,cabEnd+.5,10))}
-   else{const sp=mkWheel(wh.d*.9,wh.w*.85,wh.tire,c.rim,c.tire);sp.rotation.y=Math.PI/2;sp.position.set(0,y0+tub*.62,L/2+u(wh.w)*.45);g.add(sp);g.add(box(.4,.4,.6,mMetal('#333'),0,y0+tub*.62,L/2+.2))}
-   // bamperlar, tortish ilgaklari, ostona himoyasi (rock slider), qanot kengaytmalari
-   g.add(box(Wd*1.06,tub*.26,.8,blk,0,y0+tub*.16,zf-.3));g.add(box(Wd*1.02,tub*.26,.7,blk,0,y0+tub*.16,L/2+.25));
-   for(const sx of[-1,1]){const th=new THREE.Mesh(GEO('towhook',()=>new THREE.TorusGeometry(.35,.1,8,16)),mPaint('#c62828','gloss'));th.position.set(sx*Wd*.3,y0+tub*.16,zf-.8);th.castShadow=true;g.add(th);
-    g.add(box(.45,.45,L*.46,mMetal('#26292d',.45),sx*(Wd*.5+.15),y0-.05,ws+cabL*.35))}
-   for(const sz of[-1,1])for(const sx of[-1,1]){const fl=new THREE.Mesh(GEO(`flare${R.toFixed(1)},${W.toFixed(1)}`,()=>new THREE.TorusGeometry(R*1.1,W*.2,8,28,Math.PI)),blk);fl.scale.set(1,1,1.9);fl.rotation.y=Math.PI/2;fl.position.set(sx*(hx+W/2-.3),R,sz*hz);fl.castShadow=true;g.add(fl)}
-   for(const sx of[-1,1]){g.add(box(Wd*.1,tub*.22,.12,mGlow('#b71c1c'),sx*Wd*.42,y0+tub*.62,L/2+.02));g.add(box(Wd*.1,tub*.08,.12,mPlastic('#f0f0f0',.3),sx*Wd*.42,y0+tub*.46,L/2+.02))}}
-  else{const Hl=Math.max(3,R*1.15),S={sedan:{lo:[[-.5,.8,.42],[-.47,.93,.68],[-.38,.99,.8],[-.1,1,.88],[.2,1,.9],[.42,.98,.86],[.49,.9,.7],[.5,.8,.48]],gh:[-.17,.31],ghH:.62,wing:[.47,.9]},
-    buggy:{lo:[[-.5,.55,.36],[-.42,.72,.55],[-.22,.88,.75],[0,.94,.9],[.25,.95,.92],[.44,.88,.75],[.5,.72,.5]],gh:[-.12,.18],ghH:.6,wing:[.44,1.05]}}[bs];
-   g.add(loft(S.lo.map(([z,w,h])=>[Z(z),Wd*w,Hl*h,y0+Hl*h/2]),bm,3.2));
-   const top=Math.max(...S.lo.filter(r=>r[0]>=S.gh[0]&&r[0]<=S.gh[1]).map(r=>r[2]).concat([S.lo[2][2]]))*Hl,gb=y0+top-.2,gH=Hl*S.ghH,gz=t=>Z(S.gh[0]+(S.gh[1]-S.gh[0])*t);
-   g.add(loft([[gz(0),Wd*.84,gH*.05,gb],[gz(.18),Wd*.8,gH*.85,gb+gH*.42],[gz(.8),Wd*.76,gH*.88,gb+gH*.44],[gz(1),Wd*.7,gH*.06,gb+.02]],gl,3));
-   g.add(loft([[gz(.2),Wd*.74,.18,gb+gH*.86],[gz(.3),Wd*.78,.24,gb+gH*.9],[gz(.75),Wd*.74,.24,gb+gH*.9],[gz(.82),Wd*.7,.18,gb+gH*.84]],bm,3));
-   g.add(box(Wd*S.wing[1],.22,2.6,bm2,0,y0+Hl*.9+1.4,Z(S.wing[0])));for(const s2 of[-1,1])g.add(box(.2,1.5,1.4,bm2,s2*Wd*.36,y0+Hl*.82+.7,Z(S.wing[0])));
-   for(const s2 of[-1,1]){g.add(box(Wd*.16,Hl*.12,.15,mPlastic('#f5f0d0',.2),s2*Wd*.3,y0+Hl*.5,Z(-.5)+.12));g.add(box(Wd*.14,Hl*.1,.15,mGlow('#b71c1c'),s2*Wd*.32,y0+Hl*.55,Z(.5)-.12))}}
+   gl=MAT('carglass',()=>new THREE.MeshPhysicalMaterial({color:'#0b1117',roughness:.04,metalness:.4,clearcoat:1,transparent:true,opacity:.88})),blk=mPlastic('#17191c',.75),chr=mMetal('#c9ced4',.18),seam=mPlastic('#0a0a0a',.6),
+   ST={jeep:{ovF:.55,ovR:.75,w:'in',yb:.7,lo:[[0,.95,.12],[0,1.9,.18],[.025,1.98,.12],[.36,2.04,.08],[1,2.04,.14],[1,.95,.12]],gh:[.36,.405,.975,1],roof:3.32,ghw:.92,rr:.22,win:2},
+    pickup:{ovF:.55,ovR:.9,w:'in',yb:.7,lo:[[0,.95,.12],[0,1.9,.18],[.025,1.98,.12],[.34,2.04,.08],[1,2.04,.14],[1,.95,.12]],gh:[.34,.385,.6,.625],roof:3.3,ghw:.92,rr:.22,win:1},
+    sedan:{ovF:1,ovR:1.1,w:'out',yb:.45,lo:[[0,.8,.3],[0,1.22,.35],[.07,1.5,.45],[.34,1.76,.4],[.86,1.86,.35],[1,1.8,.2],[1,.8,.3]],gh:[.3,.48,.7,.87],roof:2.72,ghw:.8,rr:.55,win:2},
+    buggy:{ovF:.95,ovR:.8,w:'out',yb:.5,lo:[[0,.85,.3],[0,1.08,.3],[.27,1.62,.45],[.72,1.78,.3],[1,1.62,.2],[1,.85,.3]],gh:[.21,.39,.6,.76],roof:2.55,ghw:.64,rr:.6,win:1}}[bs]||null;
+  const S=ST||{ovF:.55,ovR:.75,w:'in',yb:.7,lo:[[0,.95,.12],[0,1.9,.18],[.36,2.04,.08],[1,2.04,.14],[1,.95,.12]],gh:[.36,.405,.975,1],roof:3.3,ghw:.92,rr:.22,win:2};
+  const ra=R*1.1,zf=-hz-ra-R*S.ovF,zr=hz+ra+R*S.ovR,L=zr-zf,Z=t=>zf+t*L,yb=Math.max(plateY+.25,R*S.yb),
+   Wd=S.w==='in'?u(ch.track)*.86:2*(hx+W*.78),bev=Math.min(.45,R*.09);
+  // yumaloqlangan ko'pburchakdan (z,y,r) Shape — har burchak kvadratik egri bilan silliqlanadi
+  const shapeOf=pts=>{const s=new THREE.Shape(),n=pts.length,P=pts.map(([z,y,r])=>({x:-z,y,r}));let first=true;
+   for(let i=0;i<n;i++){const v=P[i],a=P[(i+n-1)%n],b=P[(i+1)%n];
+    if(!v.r){first?s.moveTo(v.x,v.y):s.lineTo(v.x,v.y);first=false;continue}
+    const la=Math.hypot(a.x-v.x,a.y-v.y),lb=Math.hypot(b.x-v.x,b.y-v.y),d=Math.min(v.r,la*.45,lb*.45),
+     p1={x:v.x+(a.x-v.x)/la*d,y:v.y+(a.y-v.y)/la*d},p2={x:v.x+(b.x-v.x)/lb*d,y:v.y+(b.y-v.y)/lb*d};
+    first?s.moveTo(p1.x,p1.y):s.lineTo(p1.x,p1.y);first=false;s.quadraticCurveTo(v.x,v.y,p2.x,p2.y)}
+   s.closePath();return s};
+  const extr=(pts,width,mat,b=bev,x=0)=>{const geo=new THREE.ExtrudeGeometry(shapeOf(pts),{depth:Math.max(.05,width-2*b),bevelEnabled:b>0,bevelThickness:b,bevelSize:b,bevelSegments:b>0?4:0,curveSegments:10});
+   geo.translate(0,0,-Math.max(.05,width-2*b)/2);geo.rotateY(Math.PI/2);const m=new THREE.Mesh(geo,mat);m.position.x=x;m.castShadow=true;m.receiveShadow=true;m.userData.dispose=true;return m};
+  // pastki korpus: yuqori silueti + pastki chiziq, har bir g'ildirak ustida arka (orqadan oldinga)
+  const lo=S.lo.map(([t,y,r],i)=>[Z(t),(i===0||i===S.lo.length-1)?Math.max(R*y,yb+R*.18):R*y,R*r]),arch=zc=>{const a0=Math.asin(clamp((yb-R)/ra,-.95,.95)),A=[];for(let k=0;k<=14;k++){const a=a0+(Math.PI-2*a0)*k/14;A.push([zc+ra*Math.cos(a),R+ra*Math.sin(a),0])}return A};
+  const body=[...lo,[zr-R*.25,yb,R*.15],...arch(hz),...arch(-hz),[zf+R*.25,yb,R*.15]];
+  g.add(extr(body,Wd,bm));
+  // kabina (oynali qism): to'rtta tayanch nuqta — old oyna osti, tom oldi, tom orqasi, orqa oyna osti
+  const up=S.lo.slice(1,-1),hAt=t=>{for(let i=0;i<up.length-1;i++){const[a,ya]=up[i],[b,yb2]=up[i+1];if(t>=a&&t<=b)return R*(ya+(yb2-ya)*(b>a?(t-a)/(b-a):0))}return R*up[up.length-1][1]};
+  const belt=R*up.reduce((m,r)=>Math.max(m,r[1]),0),roof=R*S.roof,[tb0,tt0,tt1,tb1]=S.gh.map(Z),b0=hAt(S.gh[0])-.12,b1=hAt(S.gh[3])-.12,ghW=Wd*S.ghw,bl=Math.max(b0,b1),hh=roof-bl;
+  g.add(extr([[tb0,b0,0],[tt0,roof,R*S.rr],[tt1,roof,R*S.rr],[tb1,b1,0]],ghW,bm,Math.min(.5,R*.12)));
+  // yon oynalar: kabina siluetidan ustun (pillar) qalinligida ichkariga surilgan; jip/sedanda o'rtada B-ustun
+  const pw=Math.max(.3,hh*.13),y1=bl+hh*.14,y2=roof-hh*.13,fe=y=>tb0+(tt0-tb0)*(y-b0)/(roof-b0)+pw,re=y=>tb1-(tb1-tt1)*(y-b1)/(roof-b1)-pw,
+   winShape=(a,b)=>new THREE.Shape([new THREE.Vector2(-a(y1),y1),new THREE.Vector2(-a(y2),y2),new THREE.Vector2(-b(y2),y2),new THREE.Vector2(-b(y1),y1)]);
+  const wins=S.win===2?[[fe,y=>(fe(y)+re(y))/2-pw*.45],[y=>(fe(y)+re(y))/2+pw*.45,re]]:[[fe,re]];
+  for(const[a,b]of wins){const geo=new THREE.ExtrudeGeometry(winShape(a,b),{depth:.06,bevelEnabled:false});geo.rotateY(Math.PI/2);
+   for(const sx of[-1,1]){const m=new THREE.Mesh(geo,gl);m.position.x=sx*(ghW/2+.03)-(sx<0?.06:0);m.userData.dispose=true;g.add(m)}}
+  // old va orqa oyna: kabinaning qiya yuzalariga parallel shisha
+  for(const[zA,zB,front,yA]of[[tb0,tt0,1,b0],[tb1,tt1,0,b1]]){const dz=zB-zA,dy=roof-yA,len=Math.hypot(dz,dy),nz=front?-dy/len:dy/len,ny=front?dz/len:-dz/len,off=Math.min(.5,R*.12)+.05,
+   p=box(ghW*.84,len*.74,.06,gl,0,yA+dy/2+ny*off,(zA+zB)/2+nz*off);p.rotation.x=Math.atan2(dz,dy);g.add(p)}
+  // eshik chiziqlari va tutqichlar
+  const doorZ=S.win===2?[tb0+R*.15,(tb0+tb1)/2,tb1-R*.1]:[tb0+R*.15,tb1-R*.1];
+  for(const sx of[-1,1]){for(const z of doorZ)g.add(box(.05,(belt-yb)*.72,.06,seam,sx*(Wd/2+.01),yb+(belt-yb)*.5,z));
+   for(let k=0;k<doorZ.length-1;k++)g.add(box(.1,.14,R*.38,chr,sx*(Wd/2+.04),belt-(belt-yb)*.22,doorZ[k+1]-R*.45));
+   // yon ko'zgu
+   const mz=tb0+R*.35,mx=sx*(ghW/2+R*.32);g.add(box(R*.36,.06,.06,blk,sx*(ghW/2+R*.14),belt+R*.18,mz));g.add(box(R*.14,R*.26,R*.36,bs==='sedan'||bs==='buggy'?bm:blk,mx,belt+R*.22,mz))}
+  const fz=zf-bev-.03,rz=zr+bev+.03;
+  if(bs==='jeep'||bs==='pickup'||!ST){
+   // panjara (7 tirqish), dumaloq faralar xrom halqa bilan, burilish chiroqlari
+   const gy=R*1.42;g.add(box(Wd*.56,R*.62,.14,blk,0,gy,fz));for(let k=-3;k<=3;k++)g.add(box(Wd*.045,R*.5,.1,mPlastic('#030303',.5),k*Wd*.075,gy,fz-.08));
+   for(const sx of[-1,1]){const rim=cyl(R*.24,R*.24,.22,chr,sx*Wd*.38,gy,fz-.05,28);rim.rotation.x=Math.PI/2;g.add(rim);const ln=cyl(R*.18,R*.18,.06,mGlow('#fffbe6'),sx*Wd*.38,gy,fz-.17,28);ln.rotation.x=Math.PI/2;g.add(ln);
+    g.add(box(R*.26,R*.12,.1,mGlow('#ff9800'),sx*Wd*.38,R*1.08,fz-.05))}
+   // po'lat bamperlar, qizil tortish ilgaklari, ostona himoyasi
+   const by=Math.max(yb+R*.1,R*.95);g.add(rbox(Wd*1.08,R*.34,R*.5,.12,blk,0,by,fz-R*.28));g.add(rbox(Wd*1.04,R*.34,R*.45,.12,blk,0,by,rz+R*.25));
+   for(const sx of[-1,1]){const th=new THREE.Mesh(GEO('towhook',()=>new THREE.TorusGeometry(.32,.09,8,16)),mPaint('#c62828','gloss'));th.position.set(sx*Wd*.3,by,fz-R*.56);th.castShadow=true;g.add(th);
+    g.add(box(.4,.4,(hz-ra)*2*.9,mMetal('#26292d',.45),sx*(Wd/2+.2),yb+.1,0));
+    g.add(box(R*.2,R*.42,.1,mGlow('#b71c1c'),sx*Wd*.4,R*1.55,rz))}
+   // qanot kengaytmalari (fender flare): kuzov yonidan g'ildirak ustiga chiqadi
+   const fw=Math.max(.5,(hx+W/2-.2)-Wd/2+W*.15);
+   for(const zc of[-hz,hz])for(const sx of[-1,1]){const fl=new THREE.Mesh(GEO(`flr${ra.toFixed(2)}`,()=>new THREE.TorusGeometry(ra+.15,.35,8,28,Math.PI)),blk);fl.rotation.y=Math.PI/2;fl.scale.z=fw/.7;fl.position.set(sx*(Wd/2+fw/2-.1),R,zc);fl.castShadow=true;g.add(fl)}
+   // tom: ochiq rangli qopqoq, bagajnik va LED panel
+   g.add(rbox(ghW*.96,.18,(tt1-tt0)*.98,.08,bm2,0,roof+.1,(tt0+tt1)/2));
+   for(const sx of[-1,1])g.add(box(.16,.16,(tt1-tt0)*.8,mMetal('#2a2d31',.4),sx*ghW*.4,roof+.42,(tt0+tt1)/2));for(let k=0;k<4;k++)g.add(box(ghW*.82,.1,.14,mMetal('#2a2d31',.4),0,roof+.42,tt0+(tt1-tt0)*(.12+k*.25)));
+   g.add(box(ghW*.7,R*.13,R*.16,blk,0,roof+.6,tt0+R*.2));g.add(box(ghW*.64,R*.08,.05,mGlow('#fff7d6'),0,roof+.6,tt0+R*.1));
+   if(bs==='pickup'){const bz0=tb1+R*.25,bz1=zr-R*.1;g.add(box(Wd*.86,.08,bz1-bz0,blk,0,belt+.04,(bz0+bz1)/2));
+    const rb=wireMesh([[-ghW*.42,belt,bz0+R*.3],[-ghW*.42,roof*.97,bz0+R*.3],[ghW*.42,roof*.97,bz0+R*.3],[ghW*.42,belt,bz0+R*.3]],'#1c1c1c',.2);g.add(rb)}
+   else{const sp=mkWheel(wh.d*.9,wh.w*.85,wh.tire,c.rim,c.tire);sp.rotation.y=Math.PI/2;sp.position.set(0,R*1.5,rz+u(wh.w)*.45+.3);g.add(sp)}}
+  else{
+   // sedan / buggy: qiya faralar, pastki havo olgich, orqa chiroq chizig'i va spoyler/qanot
+   for(const sx of[-1,1]){const hl=box(Wd*.2,R*.1,R*.55,mGlow('#eef6ff'),sx*Wd*.3,R*1.36,zf+R*.42);hl.rotation.x=-.42;g.add(hl);
+    g.add(box(Wd*.18,R*.12,.1,mGlow('#b71c1c'),sx*Wd*.3,R*1.6,rz-.02))}
+   g.add(box(Wd*.5,R*.2,.1,blk,0,R*.98,fz));g.add(box(Wd*.86,R*.12,.6,blk,0,yb+R*.2,fz-.1));
+   if(bs==='sedan'){g.add(box(Wd*.86,.12,R*.55,bm2,0,R*1.86+R*.38,zr-R*.45));for(const sx of[-1,1])g.add(box(.12,R*.38,R*.35,bm2,sx*Wd*.36,R*1.86+R*.18,zr-R*.45))}
+   else{const wy=roof+R*.35;g.add(rbox(Wd*1.02,.2,R*.95,.08,bm2,0,wy,zr-R*.35));for(const sx of[-1,1]){g.add(box(.16,wy-R*1.6,R*.4,bm2,sx*Wd*.3,(wy+R*1.6)/2,zr-R*.35));g.add(box(.12,R*.5,R*.95,bm2,sx*Wd*.51,wy+R*.2,zr-R*.35))}}}
   ctx.add('body',g,[0,12,0])}};
 
 T.bom=(B,D)=>{const p=B.p;return[
