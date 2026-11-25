@@ -125,11 +125,11 @@ matTex.repeat.set(50,50);
 
 // ---------------- kamera boshqaruvi (aylantirish, surish, yaqinlashtirish) ----------------
 const orb={th:.7,ph:1.0,r:60,tr:60,tg:new V3(0,4,0),auto:true,idle:0};
-function camUpdate(dt){if(orb.auto&&orb.idle>6)orb.th+=dt*.1;orb.idle+=dt;orb.r+=(orb.tr-orb.r)*Math.min(1,dt*6);
+function camUpdate(dt){if(!isFinite(orb.r))orb.r=isFinite(orb.tr)?orb.tr:60;if(!isFinite(orb.tr))orb.tr=orb.r;if(!isFinite(orb.th))orb.th=.8;if(!isFinite(orb.ph))orb.ph=1.1;if(orb.auto&&orb.idle>6)orb.th+=dt*.1;orb.idle+=dt;orb.r+=(orb.tr-orb.r)*Math.min(1,dt*6);
  camera.position.set(orb.tg.x+orb.r*Math.sin(orb.ph)*Math.cos(orb.th),orb.tg.y+orb.r*Math.cos(orb.ph),orb.tg.z+orb.r*Math.sin(orb.ph)*Math.sin(orb.th));camera.lookAt(orb.tg)}
 const contactTex=ctex('contact',128,128,(g,w,h)=>{const r=g.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2);r.addColorStop(0,'rgba(0,0,0,.75)');r.addColorStop(.55,'rgba(0,0,0,.3)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,w,h)});
 const contact=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:contactTex,transparent:true,depthWrite:false,opacity:.8}));contact.rotation.x=-Math.PI/2;contact.position.y=.03;contact.renderOrder=1;
-function fitCamera(size){orb.tr=clamp(size*1.9+12,28,900);orb.tg.set(0,Math.min(size*.1,14),0)}
+function fitCamera(size){if(!isFinite(size)||size<=0)size=20;orb.tr=clamp(size*1.9+12,28,900);orb.tg.set(0,Math.min(size*.1,14),0)}
 // soya kamerasi modelga moslanadi: kichik dronda ham soyalar aniq bo'ladi
 function fitLights(size){const s=Math.max(20,size*.85);Object.assign(key.shadow.camera,{left:-s,right:s,top:s,bottom:-s});key.shadow.camera.updateProjectionMatrix();key.shadow.mapSize.set(4096,4096);if(key.shadow.map){key.shadow.map.dispose();key.shadow.map=null}}
 const ptrs=new Map();let pinch0=0,downAt=null;
