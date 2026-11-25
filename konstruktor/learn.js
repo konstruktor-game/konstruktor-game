@@ -52,40 +52,34 @@ const hb=document.createElement('button');hb.className='hb';hb.id='bLearn';hb.ti
 let last='';setInterval(()=>{try{if(!B||!TASKS[B.type])return;const sig=JSON.stringify(B.p)+B.type;if(sig===last)return;last=sig;const{L,nw}=evalTasks();if(nw){const x=L.find(y=>y.ok);toast(`${IC('trophy')} Topshiriq bajarildi: ${esc(x?x.t:'')}`,3000);snd('ok')}}catch(e){}},1500);
 window.LEARN={open,evalTasks,TASKS};
 })();
-// ---- birinchi tashrif: xush kelibsiz oynasi ----
+// ---- birinchi tashrif: xush kelibsiz oynasi (ixcham, professional uslub) ----
 (()=>{const st=document.createElement('style');st.textContent=`
-.w2{position:relative;padding:4px 2px 2px;overflow:hidden}
-.w2:before{content:'';position:absolute;inset:-120px -60px auto;height:300px;background:radial-gradient(closest-side,rgba(255,176,32,.18),transparent 70%),radial-gradient(closest-side at 80% 40%,rgba(74,163,255,.14),transparent 70%);pointer-events:none}
-.w2Hero{position:relative;text-align:center;padding:6px 30px 4px}
-.w2Logo{width:64px;height:64px;margin:0 auto 10px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(145deg,#1f2733,#121821);border:1px solid rgba(255,176,32,.35);box-shadow:0 10px 30px rgba(255,176,32,.18),inset 0 1px 0 rgba(255,255,255,.06)}
-.w2Logo img{width:42px;height:42px}
-.w2Badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ac);background:var(--ac-soft);border:1px solid rgba(255,176,32,.3);padding:4px 10px;border-radius:20px;margin-bottom:8px}
-.w2Hero h2{font-size:clamp(20px,3.4vw,28px);line-height:1.2;font-weight:700;letter-spacing:-.02em;margin:0 0 8px;display:block}
-.w2Hero h2 em{font-style:normal;background:linear-gradient(90deg,#ffc04a,#ff8a3d 55%,#4aa3ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.w2Hero p{color:var(--tx2);max-width:560px;margin:0 auto;font-size:13.5px;line-height:1.6}
-.w2Stats{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0 4px}.w2Stats span{font-size:12px;color:var(--tx2);background:var(--p2);border:1px solid var(--ln);padding:6px 11px;border-radius:10px}.w2Stats b{color:var(--tx);font-size:13px;margin-right:3px}
-.w2Steps{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 6px}
-.w2Steps:before{content:'';position:absolute;left:12%;right:12%;top:19px;height:2px;background:linear-gradient(90deg,var(--ac),#4aa3ff);opacity:.35}
-.w2Step{position:relative;text-align:center;padding:0 4px}.w2Step .n{width:38px;height:38px;margin:0 auto 7px;border-radius:50%;display:grid;place-items:center;background:var(--p1);border:2px solid var(--ac);color:var(--ac);box-shadow:0 0 0 5px var(--p1)}
-.w2Step .n i{width:17px;height:17px}.w2Step b{display:block;font-size:12.5px;margin-bottom:2px}.w2Step span{display:block;font-size:11.5px;color:var(--mu);line-height:1.45}
-.w2H{display:flex;align-items:center;gap:10px;margin:16px 0 10px;font-size:13px;font-weight:600;color:var(--tx2)}.w2H:after{content:'';flex:1;height:1px;background:var(--ln)}
-.w2Types{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.w2Types button{--c:var(--ac);position:relative;display:flex;align-items:center;gap:11px;text-align:left;padding:11px 12px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),transparent),var(--p2);border:1px solid var(--ln);transition:transform .18s,border-color .18s,box-shadow .18s;overflow:hidden}
-.w2Types button:after{content:'';position:absolute;inset:auto -30% -60% auto;width:120px;height:120px;border-radius:50%;background:var(--c);opacity:0;filter:blur(36px);transition:opacity .2s}
-.w2Types button:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--c) 60%,transparent);box-shadow:0 10px 26px rgba(0,0,0,.35)}.w2Types button:hover:after{opacity:.22}
-.w2Ic{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,transparent);border:1px solid color-mix(in srgb,var(--c) 35%,transparent);color:var(--c)}
-.w2Ic i{width:22px;height:22px}.w2Types b{display:block;font-size:13px;font-weight:600;margin-bottom:2px}.w2Types small{display:block;font-size:11px;color:var(--mu);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.w2Types .new{display:inline-block;vertical-align:2px;margin-left:6px;font-size:9px;font-weight:700;letter-spacing:.05em;color:#06210f;background:var(--ok);padding:2px 6px;border-radius:6px}
-.w2Foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:16px;padding-top:12px;border-top:1px solid var(--ln);font-size:11.5px;color:var(--mu)}
-@media (max-width:720px){.w2Types{grid-template-columns:repeat(2,1fr)}.w2Steps{grid-template-columns:repeat(2,1fr);row-gap:14px}.w2Steps:before{display:none}.w2Hero{padding:6px 26px 4px}}
-@media (max-width:380px){.w2Types{grid-template-columns:1fr}}`;document.head.appendChild(st);
- const HUE={copter:'#ffb020',plane:'#4aa3ff',car:'#ff7043',boat:'#26c6da',robot:'#2fcf7a',heli:'#b388ff',rocket:'#ff5d8f',tank:'#9ccc65',lab:'#1de9b6'},NEW=new Set(['heli','rocket','tank','lab']);
- function welcome(){const T=Object.values(TYPES),nG=Object.keys(GLOSS).length;
-  openModal(`<div class="w2"><div class="w2Hero"><div class="w2Logo"><img src="/konstruktor/img/logo-mark-64.png" alt=""></div><div class="w2Badge">${IC('wrench')} O'quv ustaxonasi</div>
-  <h2><em>Konstruktor</em> ustaxonasiga xush kelibsiz</h2><p>Haqiqiy texnikani o'zingiz loyihalaysiz: har bir detalning o'lchamini belgilaysiz, qismlardan yig'asiz, simlarini ulaysiz va virtual sinovdan o'tkazasiz. Hisob-kitoblar real fizikaga asoslangan.</p>
-  <div class="w2Stats"><span><b>${T.length}</b> qurilma turi</span><span><b>${nG}</b> atama lug'atda</span><span><b>3D</b> yig'ish va sinov</span><span><b>Arduino</b> kod simulyatori</span></div></div>
-  <div class="w2Steps">${[['ruler','Loyihalash',"Har bir detal parametrini o'zingiz tanlaysiz"],['wrench','Yasash',"Detalni ichki va ustki qismlardan yig'asiz"],['plug','Ulash','Xato sim — qisqa tutashuv va kuygan detal'],['flag','Sinov','Uchirish, haydash, suzish — natijani ko\'rasiz']].map(([ic,t,d],i)=>`<div class="w2Step"><div class="n">${IC(ic)}</div><b>${i+1}. ${t}</b><span>${d}</span></div>`).join('')}</div>
-  <div class="w2H">Nimani yasaymiz?</div><div class="w2Types">${T.map(t=>`<button data-wt="${t.id}" style="--c:${HUE[t.id]||'var(--ac)'}"><span class="w2Ic">${IC(t.ic)}</span><span><b>${esc(t.name)}${NEW.has(t.id)?'<span class="new">YANGI</span>':''}</b><small>${esc(t.desc)}</small></span></button>`).join('')}</div>
-  <div class="w2Foot"><span>${IC('help')} Savollar bo'lsa — pastdagi «?» tugmasi. Topshiriqlar — sarlavhadagi kubok.</span><button class="btn" id="w2Later">Keyinroq tanlayman</button></div></div>`,true);
-  document.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{closeModal();setProject(newProject(b.dataset.wt));snd('ok')});const l=document.getElementById('w2Later');if(l)l.onclick=closeModal;try{localStorage.setItem('konstruktor.seen','1')}catch(e){}}
+.w3{padding:2px 4px 0}
+.w3Top{display:flex;align-items:center;gap:12px;padding-right:36px;margin-bottom:14px}
+.w3Top img{width:36px;height:36px;border-radius:9px;background:var(--p2);border:1px solid var(--ln);padding:5px}
+.w3Top small{display:block;font-size:11px;color:var(--mu);letter-spacing:.06em;text-transform:uppercase}
+.w3Top h2{font-size:19px;font-weight:600;letter-spacing:-.01em;margin:0;display:block}
+.w3Lead{color:var(--tx2);font-size:13.5px;line-height:1.6;margin:0 0 16px;max-width:640px}
+.w3Flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--ln);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.w3Flow div{padding:11px 12px;border-right:1px solid var(--ln);background:var(--p2)}.w3Flow div:last-child{border-right:0}
+.w3Flow b{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;margin-bottom:3px}.w3Flow b em{font-style:normal;font-size:11px;color:var(--mu);font-variant-numeric:tabular-nums}
+.w3Flow span{display:block;font-size:11.5px;color:var(--mu);line-height:1.45}
+.w3Sec{font-size:11px;font-weight:600;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px}
+.w3List{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.w3List button{min-width:0}
+.w3List button{display:flex;align-items:center;gap:10px;text-align:left;padding:10px 11px;border-radius:10px;background:transparent;border:1px solid var(--ln);transition:background .15s,border-color .15s}
+.w3List button:hover{background:var(--p2);border-color:var(--ln2)}.w3List button:hover .w3Go{opacity:1;transform:none}
+.w3Ic{flex:none;width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--p3);color:var(--tx2)}.w3Ic i{width:17px;height:17px}
+.w3List b{display:block;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.w3List small{display:block;font-size:11px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w3List span.t{min-width:0;flex:1}.w3Go{color:var(--mu);opacity:0;transform:translateX(-3px);transition:.15s}.w3Go i{width:14px;height:14px}
+.w3Foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:16px;padding-top:12px;border-top:1px solid var(--ln);font-size:11.5px;color:var(--mu)}
+@media (max-width:760px){.w3List{grid-template-columns:repeat(2,minmax(0,1fr))}.w3Flow{grid-template-columns:repeat(2,minmax(0,1fr))}.w3Flow div:nth-child(2){border-right:0}.w3Flow div:nth-child(-n+2){border-bottom:1px solid var(--ln)}}
+@media (max-width:540px){.w3List{grid-template-columns:1fr}.w3Go{opacity:.6;transform:none}}`;document.head.appendChild(st);
+ const SUB={copter:'FPV, kino, yuk tashuvchi',plane:'Trener, planer, akrobat',car:'Buggy, monster truck, crawler',boat:'Deep-V, katamaran',robot:'Arduino, sensorlar, kod',heli:'450 / 700 klass, FBL',rocket:'A–G dvigatel, parashyut',tank:'Gusenitsa, minora',lab:'LED, servo, LCD, kod'};
+ function welcome(){const T=Object.values(TYPES);
+  openModal(`<div class="w3"><div class="w3Top"><img src="/konstruktor/img/logo-mark-64.png" alt=""><div><small>Konstruktor</small><h2>Qurilmani o'zingiz loyihalang va sinang</h2></div></div>
+  <p class="w3Lead">Har bir detalning o'lchamini tanlaysiz, uni qismlardan yig'asiz, simlarini ulaysiz va virtual sinovdan o'tkazasiz. Tortish, tok, og'irlik va barqarorlik real fizika formulalari bilan hisoblanadi.</p>
+  <div class="w3Flow">${[['Loyihalash','Detal parametrlari: o\'lcham, material, quvvat'],['Yasash','Detalni ichki va ustki qismlardan yig\'ish'],['Ulash','Simlar; xato ulanish detalni kuydiradi'],['Sinov','Virtual maydonda natijani tekshirish']].map(([t,d],i)=>`<div><b><em>0${i+1}</em>${t}</b><span>${d}</span></div>`).join('')}</div>
+  <div class="w3Sec">Qurilma turini tanlang</div><div class="w3List">${T.map(t=>`<button data-wt="${t.id}"><span class="w3Ic">${IC(t.ic)}</span><span class="t"><b>${esc(t.name)}</b><small>${esc(SUB[t.id]||'')}</small></span><span class="w3Go">${IC('right')}</span></button>`).join('')}</div>
+  <div class="w3Foot"><span>Savollar uchun — pastki o'ng burchakdagi yordamchi. Topshiriqlar va test — sarlavhadagi «O'quv markazi».</span><button class="btn" id="w3Later">Yopish</button></div></div>`,true);
+  document.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{closeModal();setProject(newProject(b.dataset.wt));snd('ok')});const l=document.getElementById('w3Later');if(l)l.onclick=closeModal;try{localStorage.setItem('konstruktor.seen','1')}catch(e){}}
  let seen=null;try{seen=localStorage.getItem('konstruktor.seen')}catch(e){}if(!seen)setTimeout(welcome,600);window.LEARN.welcome=welcome})();
