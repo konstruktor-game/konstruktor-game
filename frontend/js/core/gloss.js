@@ -123,5 +123,9 @@ const GLOSS={
  lcd:{n:'LCD 16×2 displey',en:'Character LCD',w:"16 belgidan 2 qatorli suyuq kristall displey, I2C adapter bilan.",y:"Qiymatlarni kompyutersiz ko'rsatadi.",h:"I2C bilan faqat 4 sim: VCC, GND, SDA, SCL. Manzil odatda 0x27."},
  pullup:{n:'Pull-up / pull-down',en:'Pull resistor',w:"Kirishni aniq holatda ushlab turuvchi rezistor.",y:"Rezistorsiz kirish «suzadi» va tasodifiy 0/1 o'qiladi.",h:"Arduino ichida pull-up bor: pinMode(pin, INPUT_PULLUP)."},
  i2c:{n:'I2C shinasi',en:'I2C bus',w:"Ikki simli aloqa: SDA (ma'lumot) va SCL (takt).",y:"Bir nechta qurilma bir xil 2 simga ulanadi, har biri o'z manziliga ega.",h:"Uno: SDA — A4, SCL — A5; ESP32: 21 va 22."},
+ fplate:{n:'Plastina',en:'Plate',w:"Yassi tayanch detal: plastik, fanera, alyuminiy yoki karbon.",y:"Boshqa detallar unga vint bilan mahkamlanadi — konstruksiyaning asosi.",h:"Qalinroq va qattiqroq material — mustahkamroq, lekin og'irroq."},
+ fbeam:{n:'Profil (brus)',en:'Beam / extrusion',w:"Uzun ingichka tirgak: alyuminiy profil yoki yog'och reyka.",y:"Detallarni masofada ushlaydi: ustun, qo'l, ramka.",h:"Alyuminiy profil yengil va qattiq; uzun bo'lsa egiladi."},
+ fbox:{n:'Korpus (quti)',en:'Enclosure',w:"Ichiga elektronika va batareya joylanadigan quti.",y:"Detallarni chang va zarbadan himoya qiladi.",h:"Devor qalinligi 2–3 mm plastik ko'p narsaga yetadi."},
+ ftube:{n:'Truba (silindr)',en:'Tube',w:"Ichi bo'sh silindr: plastik, karton yoki metall.",y:"Fonar korpusi, minora, o'q — dumaloq detallar uchun.",h:"Devori yupqa — yengil; qalin — mustahkam."},
  brushed:{n:"Cho'tkali motor",en:'Brushed motor',w:"Eng oddiy, arzon motor; 'turns' bilan belgilanadi.",y:"Boshlovchi va crawler uchun yetarli.",h:"Kam turns — tez; ko'p turns — kuchli va sekin."},
 };

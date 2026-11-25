@@ -74,7 +74,7 @@ window.LEARN={open,evalTasks,TASKS};
 .w3Foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:16px;padding-top:12px;border-top:1px solid var(--ln);font-size:11.5px;color:var(--mu)}
 @media (max-width:760px){.w3List{grid-template-columns:repeat(2,minmax(0,1fr))}.w3Flow{grid-template-columns:repeat(2,minmax(0,1fr))}.w3Flow div:nth-child(2){border-right:0}.w3Flow div:nth-child(-n+2){border-bottom:1px solid var(--ln)}}
 @media (max-width:540px){.w3List{grid-template-columns:1fr}.w3Go{opacity:.6;transform:none}}`;document.head.appendChild(st);
- const SUB={copter:'FPV, kino, yuk tashuvchi',plane:'Trener, planer, akrobat',car:'Buggy, monster truck, crawler',boat:'Deep-V, katamaran',robot:'Arduino, sensorlar, kod',heli:'450 / 700 klass, FBL',rocket:'A–G dvigatel, parashyut',tank:'Gusenitsa, minora',lab:'LED, servo, LCD, kod'};
+ const SUB={copter:'FPV, kino, yuk tashuvchi',plane:'Trener, planer, akrobat',car:'Buggy, monster truck, crawler',boat:'Deep-V, katamaran',robot:'Arduino, sensorlar, kod',heli:'450 / 700 klass, FBL',rocket:'A–G dvigatel, parashyut',tank:'Gusenitsa, minora',lab:'LED, servo, LCD, kod',free:"Istalgan narsa: ventilyator, fonar, mashina…"};
  function welcome(){const T=Object.values(TYPES);
   openModal(`<div class="w3"><div class="w3Top"><img src="img/logo-mark-64.png" alt=""><div><small>Konstruktor</small><h2>Qurilmani o'zingiz loyihalang va sinang</h2></div></div>
   <p class="w3Lead">Har bir detalning o'lchamini tanlaysiz, uni qismlardan yig'asiz, simlarini ulaysiz va virtual sinovdan o'tkazasiz. Tortish, tok, og'irlik va barqarorlik real fizika formulalari bilan hisoblanadi.</p>

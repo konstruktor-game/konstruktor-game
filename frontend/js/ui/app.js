@@ -117,8 +117,9 @@ function renderPanel(){const s=step(),P=$('panel');closePop();
  else if(s.kind==='check')h+=checkPanel();
  else if(s.kind==='test')h+=testPanel();
  else if(s.kind==='bom')h+=bomPanel();
+ else if(s.kind==='custom'&&T.panel)h+=T.panel(B,D);
  else{if(s.kind==='props')h+=propsTools();h+=(s.cats||[]).map(catCard).join('')+slotsHTML()+`<h3 style="font-size:13px;font-weight:600;margin:6px 0 6px"><i class=i-warn></i> Tekshiruv natijasi</h3><div id="stepIssues">${issuesHTML(true)}</div>`}
- P.innerHTML=h+navHTML();bindPanel()}
+ P.innerHTML=h+navHTML();bindPanel();if(s.kind==='custom'&&T.bindPanel)T.bindPanel(P)}
 function bindPanel(){const P=$('panel');
  P.querySelectorAll('.q').forEach(b=>b.onclick=e=>{e.stopPropagation();pop(b,b.dataset.g)});
  P.querySelectorAll('input[type=range][data-c],input[type=number][data-c]').forEach(inp=>{inp.oninput=()=>{const c=inp.dataset.c,k=inp.dataset.k,f=T.spec[c].f.find(x=>x.k===k);let v=+inp.value;if(!isFinite(v))return;v=clamp(v,f.min,f.max);beginEdit();B.p[c][k]=v;
@@ -154,6 +155,7 @@ function onPick(e){if(step().kind==='wiring'||step().kind==='test')return;closeP
  if(insp)return;const o=pickAt(e,model);if(!o)return;const slot=o.userData.slot;
  if(o.userData.ghost){if(window.FORGE)FORGE.start(slot);else install(slot);return}
  if(o.userData.burnt||(B.burnt&&B.burnt[slot])){showBurntCard(e,slot);return}
+ if(T.pick&&slot&&step().kind==='custom'){T.pick(slot);return}
  if(step().kind==='props'&&slot&&/^prop\d+$/.test(slot)){pushUndo();const i=slot.slice(4);B.dirs[i]=(B.dirs[i]||correctDir(i))==='CW'?'CCW':'CW';snd('flip');commit();return}
  const key=o.userData.label;if(key){const g=GLOSS[key];showPartCard(e,key,slot)}}
 function replacePart(slot){pushUndo();if(B.burnt)delete B.burnt[slot];delete B.inst[slot];for(const k in B.wires){}const i=T.steps.findIndex(s=>s.slots&&s.slots(B).includes(slot));saveLocal();if(i>=0)goStep(i);else commit();toast(`<i class=i-wrench></i> Kuygan detal olib tashlandi — yangisini yasab o'rnating`,2600)}
@@ -359,7 +361,7 @@ function startSim(){simStart(B);$('hudFail').classList.add('hidden');resize();$(
 let hudT=0;function updateHud(force){const S=SIM;if(!S)return;const n=performance.now();if(!force&&n-hudT<150)return;hudT=n;const soc=S.B.p.bat?clamp(1-S.used/S.B.p.bat.mah,0,1):1,sp=S.vel.length()*3.6;
  const MM=(MODES[S.B.type]||[]).find(x=>x[0]===S.mode),mode=MM?`<div class="hm">${esc(MM[1])} rejim</div>`:'';
  $('hudL').innerHTML=`<div class="hs ${S.armed?'on':''}"><i></i>${S.armed?'Ishlayapti':"To'xtagan"}</div>${mode}${S.T.noSpeed?'':`<div>Tezlik <b>${fmt(sp)}</b> km/soat</div>`}${!GND(S.B.type)?`<div>Balandlik <b>${fmt(S.pos.y,1)}</b> m</div>`:''}
-  ${S.B.p.bat?`<div>Batareya <b>${fmt(soc*100)}%</b> · ${fmt(S.volt||S.D.V,1)} V</div><div class="batbar"><i style="width:${soc*100}%;background:${soc<.2?'#ff5a5a':soc<.4?'#ffb020':'#2ecc71'}"></i></div><div>Vaqt <b>${mmss(S.t)}</b> · ${fmt(S.amp||0,1)} A</div>`:`<div>Holat <b>${esc({run:'Kod ishlamoqda',pad:'Sterjenda',count:'Ortga sanash',burn:'Dvigatel yonmoqda',coast:'Inersiya',chute:'Parashyutda',ballistic:'Erkin tushish',landed:"Qo'ndi"}[S.st]||'—')}</b></div><div>Vaqt <b>${mmss(S.t)}</b></div>`}`;
+  ${S.B.p.bat?`<div>Batareya <b>${fmt(soc*100)}%</b> · ${fmt(S.volt||S.D.V,1)} V</div><div class="batbar"><i style="width:${soc*100}%;background:${soc<.2?'#ff5a5a':soc<.4?'#ffb020':'#2ecc71'}"></i></div><div>Vaqt <b>${mmss(S.t)}</b> · ${fmt(S.amp||0,1)} A</div>`:`<div>Holat <b>${esc({on:'Quvvat yoqilgan',off:"O'chiq",run:'Kod ishlamoqda',pad:'Sterjenda',count:'Ortga sanash',burn:'Dvigatel yonmoqda',coast:'Inersiya',chute:'Parashyutda',ballistic:'Erkin tushish',landed:"Qo'ndi"}[S.st]||'—')}</b></div><div>Vaqt <b>${mmss(S.t)}</b></div>`}`;
  $('hudMsg').textContent=S.status;$('hudMsg').classList.toggle('hidden',!S.status);
  const tl=$('telem');if(tl)tl.innerHTML=[['Maks. tezlik',fmt(S.maxV*3.6)+' km/soat'],['Maks. balandlik',fmt(S.maxH,1)+' m'],['Sarflangan',fmt(S.used)+' mAh'],['Min. kuchlanish',S.minV<99?fmt(S.minV,1)+' V':'—']].map(([l,v])=>`<div class="kv"><small>${l}</small><b>${v}</b></div>`).join('');
  if(S.fail&&$('hudFail').classList.contains('hidden')){$('hudFail').innerHTML=`<div><h3><i class=i-explode></i> ${esc(S.fail.t)}</h3><p style="color:#c4cee0;margin-bottom:12px">${esc(S.fail.why)}</p><button class="btn pri" id="bFailR"><i class=i-ccw></i> Qaytadan</button></div>`;$('hudFail').classList.remove('hidden');$('bFailR').onclick=()=>startSim()}
