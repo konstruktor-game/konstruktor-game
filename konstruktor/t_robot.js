@@ -130,7 +130,7 @@ T.build=(B,D,ctx)=>{const p=B.p,c=B.col,X=!!window.XRAY,M=MOT[p.motor.kind],L=p.
  const mcuY=deck?top+deck+th:top,mz=deck?-L*.05:-L*.12;
  {const g=new THREE.Group(),k=p.mcu.kind;g.position.set(0,mcuY+.5,mz);
   if(k==='uno'){const pw=5.34,pl=6.86;g.add(box(pw,.16,pl,mPCB('#00798c','UNO'),0,0,0));g.add(box(.9,.4,3.5,blk,0,.25,.2));for(const sx of[-1,1])g.add(box(.26,.85,sx<0?4.2:3.4,hdr,sx*(pw/2-.25),.5,-.4));
-   g.add(box(1.2,1.1,1.6,mMetal('#c9ced4',.25),-pw*.27,.6,pl/2-.6));g.add(box(.9,1.1,1.4,blk,pw*.3,.6,pl/2-.6));g.add(box(.5,.3,.5,mPlastic('#ddd',.4),pw*.35,.2,-pl*.38));g.add(sph(.08,mGlow('#4caf50'),-pw*.3,.12,-pl*.3));
+   g.add(box(1.2,1.1,1.6,mMetal('#c9ced4',.25),-pw*.27,.6,pl/2-.6));g.add(box(.9,1.1,1.4,blk,pw*.3,.6,pl/2-.6));g.add(box(.5,.3,.5,mPlastic('#ddd',.4),pw*.35,.2,-pl*.38));g.add(sph(.08,mGlow('#4caf50'),-pw*.3,.12,-pl*.3));{const l=box(.2,.1,.12,mPlastic('#5d4020',.4),-pw*.3,.12,-pl*.18);l.userData.led13=true;g.add(l)}
    for(const sx of[-1,1])for(const sz of[-1,1])g.add(cyl(.2,.2,.5,brass,sx*pw*.4,-.3,sz*pl*.42,6))}
   else if(k==='nano'){g.add(box(1.8,.16,4.5,mPCB('#1565c0','NANO'),0,0,0));for(const sx of[-1,1])g.add(box(.25,.85,4,hdr,sx*.76,.5,0));g.add(box(.8,.2,.8,blk,0,.15,0));g.add(box(.8,.4,.9,mMetal('#c9ced4',.25),0,.25,2.1));g.add(box(4,.3,2.6,mPlastic('#fafafa',.6),0,-.35,0))}
   else{g.add(box(2.8,.16,5.15,mPCB('#1b1b1b','ESP32'),0,0,0));g.add(box(1.8,.32,1.6,mMetal('#c9ced4',.2),0,.25,-1.4));g.add(box(1.8,.06,.6,mPlastic('#111'),0,.1,-2.35));for(const sx of[-1,1])g.add(box(.25,.85,4.6,hdr,sx*1.2,.5,.2));g.add(box(.8,.4,.9,mMetal('#c9ced4',.25),0,.25,2.4));g.add(sph(.07,mGlow('#e53935'),.6,.12,1.6))}
@@ -171,18 +171,33 @@ T.ext=D=>[['Tezlik',fmt(D.v*100)+' sm/s'],['Tezlanish',fmt(D.acc,1)+' m/s²'],["
 T.startTitle="Sinov maydoniga tayyor";
 T.startNote="Robot 5×5 m fanera maydonda, qora chiziq va to'siqlar bor. Rejimni tanlang: qo'lda yoki Arduino dasturi bilan avtonom.";
 T.linkMsg=()=>"Drayver boshqaruv simlari ulanmagan — Arduino motorlarni boshqara olmaydi.";
-T.armMsg=S=>({manual:"W/S — oldinga/orqaga, A/D — burilish",avoid:"Avtonom: robot to'siqlarni o'zi aylanib o'tadi",line:"Avtonom: robot qora chiziq bo'ylab yuradi"}[S.mode]||'');
+T.armMsg=S=>({code:"Arduino kodi bajarilmoqda. Serial monitor — pastda chapda; W/A/S/D/X — Serial orqali buyruq.",manual:"W/S — oldinga/orqaga, A/D — burilish",avoid:"Avtonom: robot to'siqlarni o'zi aylanib o'tadi",line:"Avtonom: robot qora chiziq bo'ylab yuradi"}[S.mode]||'');
 T.camMin=.55;T.camMinY=.18;T.pilotCam=[0,0,0];
-T.simInit=(S,B,WC,ex)=>{if(!['manual','avoid','line'].includes(S.mode))S.mode='manual';S.pos.set(ARENA.x,0,ARENA.z+ARENA.line);S.yaw=Math.PI/2;T.pilotCam=[ARENA.x+2.2,1.5,ARENA.z+2.6];
+// platadagi LED (Uno/Nano — D13, ESP32 — GPIO2) va Arduino kodi bajarilishi
+function pinNo(B,id){const v=B.wires[id];if(!v)return -1;if(/^A\d$/.test(v))return 14+(+v[1]);return +v.replace(/^[DG]/,'')}
+function startCode(S,B){const src=B.code||T.code(B,S.D,S.pf.WC),p=B.p;S.io={pins:{},serial:[],L:0,R:0,dist:4};
+ const echo=pinNo(B,'echo'),lnL=pinNo(B,'lnL'),lnR=pinNo(B,'lnR');
+ const r=ARD.run(src,{write:(pin,v)=>{S.io.pins[pin]=v},read:pin=>pin===lnL?S.io.L:pin===lnR?S.io.R:0,aread:pin=>pin===lnL?(S.io.L?900:80):pin===lnR?(S.io.R?900:80):512,
+  pulse:(pin)=>pin===echo&&S.usOk?Math.round(Math.min(4,S.io.dist)*100*58):0,serial:t=>{S.io.serial.push(t);if(S.io.serial.length>40)S.io.serial.shift()}});
+ if(!r.ok){S.status='Kodda xato: '+r.err;S.ard=null;return}S.ard=r.R;S.status="Arduino kodi ishga tushdi (setup → loop)"}
+T.simInit=(S,B,WC,ex)=>{if(!['manual','avoid','line','code'].includes(S.mode))S.mode='code';S.pos.set(ARENA.x,0,ARENA.z+ARENA.line);S.yaw=Math.PI/2;T.pilotCam=[ARENA.x+2.2,1.5,ARENA.z+2.6];
  const w=WC.works,iss=T.issues(B,S.D);S.link=w.drvsig&&w.xt60;S.mcuOk=w.mcupwr&&!iss.some(i=>/kuyadi/.test(i.t)&&i.lvl==='bad');S.gndOk=!!B.wires.mcuG;S.usOk=B.p.sens.us&&w.us;S.lineOk=B.p.sens.line&&w.line;
- S.revL=!!ex.revL;S.revR=!!ex.revR;S.vL=0;S.vR=0;S.ai={st:'fwd',t:0,dir:1,last:0};S.wh={};S.model.traverse(o=>{if(o.userData.slot==='wL')S.wh.L=o;if(o.userData.slot==='wR')S.wh.R=o})};
+ S.revL=!!ex.revL;S.revR=!!ex.revR;S.vL=0;S.vR=0;S.led=null;S.model.traverse(o=>{if(o.userData.led13)S.led=o});if(S.mode==='code'&&S.mcuOk&&S.gndOk)startCode(S,B);S.ai={st:'fwd',t:0,dir:1,last:0};S.wh={};S.model.traverse(o=>{if(o.userData.slot==='wL')S.wh.L=o;if(o.userData.slot==='wR')S.wh.R=o})};
 function rayDist(x,z,dx,dz,max){let best=max;for(const o of ARENA.obs){let t0=-1e9,t1=1e9;for(const[p,d,lo,hi]of[[x,dx,o.x-o.hw,o.x+o.hw],[z,dz,o.z-o.hd,o.z+o.hd]]){if(Math.abs(d)<1e-9){if(p<lo||p>hi){t0=1e9;break}}else{let a=(lo-p)/d,b=(hi-p)/d;if(a>b)[a,b]=[b,a];t0=Math.max(t0,a);t1=Math.min(t1,b)}}if(t0<=t1&&t0>0&&t0<best)best=t0}return best}
 T.simTick=(S,dt,I,{soc})=>{const B=S.B,D=S.D,p=B.p,sag=.85+.15*soc;let cL=0,cR=0;
  const dir=new V3(-Math.sin(S.yaw),0,-Math.cos(S.yaw)),right=new V3(-dir.z,0,dir.x),hl=p.chassis.len/2000;
  const run=S.armed&&soc>0&&S.mcuOk&&S.gndOk;
  if(S.armed&&!S.gndOk&&!S.gMsg){S.gMsg=1;S.status="Motorlar qimirlamayapti: Arduino GND batareya minusiga ulanmagan (umumiy GND yo'q)."}
  if(S.armed&&!S.mcuOk&&!S.mMsg){S.mMsg=1;S.status="Arduino yoqilmadi: quvvat simi noto'g'ri ulangan yoki plata kuygan."}
- if(run){if(S.mode==='manual'){const f=clamp((I.thrUp||KEYS.ArrowUp?1:0)-(I.thrDn||KEYS.ArrowDown?1:0)+(-STK.l.y),-1,1),t=clamp((KEYS.KeyA||KEYS.ArrowLeft?1:0)-(KEYS.KeyD||KEYS.ArrowRight?1:0)+(-STK.r.x),-1,1);cL=clamp(f-t*.7,-1,1);cR=clamp(f+t*.7,-1,1)}
+ if(run&&S.mode==='code'&&S.ard){const sx=S.pos.x+dir.x*hl,sz=S.pos.z+dir.z*hl;S.io.dist=Math.min(rayDist(sx,sz,dir.x,dir.z,4),4);
+  const g2=p.sens.gap/2000,fx=S.pos.x+dir.x*hl*.85,fz=S.pos.z+dir.z*hl*.85,on=(ox,oz)=>Math.abs(Math.hypot(ox-ARENA.x,oz-ARENA.z)-ARENA.line)<.0125;
+  S.io.L=p.sens.line&&on(fx-right.x*g2,fz-right.z*g2)?1:0;S.io.R=p.sens.line&&on(fx+right.x*g2,fz+right.z*g2)?1:0;
+  for(const[k,c]of[['KeyW','w'],['KeyA','a'],['KeyS','s'],['KeyD','d'],['KeyX','x']])if(KEYS[k]&&!S['k'+k]){S['k'+k]=1;S.ard.send(c)}else if(!KEYS[k])S['k'+k]=0;
+  S.ard.step(dt*1000);const P=S.io.pins,pv=id=>{const n=pinNo(B,id);return n<0?0:(P[n]||0)},Dv=DRV[p.drv.kind];
+  if(Dv.en){const dL=pv('in1')&&!pv('in2')?1:!pv('in1')&&pv('in2')?-1:0,dR=pv('in3')&&!pv('in4')?1:!pv('in3')&&pv('in4')?-1:0;cL=dL*pv('ena');cR=dR*pv('enb')}else{cL=pv('in1')-pv('in2');cR=pv('in3')-pv('in4')}
+  if(S.led){const on=P[p.mcu.kind==='esp32'?2:13];S.led.material=on?mGlow('#ffa726'):mPlastic('#5d4020',.4)}
+  if(S.ard.err&&!S.eMsg){S.eMsg=1;S.status=S.ard.err}else if(S.io.serial.length&&!S.ard.err)S.status='Serial: '+S.io.serial[S.io.serial.length-1]}
+ else if(run){if(S.mode==='manual'){const f=clamp((I.thrUp||KEYS.ArrowUp?1:0)-(I.thrDn||KEYS.ArrowDown?1:0)+(-STK.l.y),-1,1),t=clamp((KEYS.KeyA||KEYS.ArrowLeft?1:0)-(KEYS.KeyD||KEYS.ArrowRight?1:0)+(-STK.r.x),-1,1);cL=clamp(f-t*.7,-1,1);cR=clamp(f+t*.7,-1,1)}
   else if(S.mode==='avoid'){if(!S.usOk){if(!S.uMsg){S.uMsg=1;S.status="HC-SR04 ishlamayapti (o'rnatilmagan yoki simlari noto'g'ri) — avtonom rejim mumkin emas."}}
    else{const sx=S.pos.x+dir.x*hl,sz=S.pos.z+dir.z*hl,dist=Math.min(rayDist(sx,sz,dir.x,dir.z,4),rayDist(sx+right.x*.03,sz+right.z*.03,dir.x,dir.z,4));S.ai.t-=dt;
     if((S.ai.last-=dt)<=0){S.ai.last=.4;S.status=`HC-SR04: ${dist>=4?'> 400':fmt(dist*100)} sm · ${S.ai.st==='fwd'?'oldinga':S.ai.st==='back'?'orqaga':'burilmoqda'}`}
@@ -230,11 +245,11 @@ T.code=(B,D,WC)=>{const p=B.p,w=B.wires,en=DRV[p.drv.kind].en,esp=p.mcu.kind==='
  o('}');o('');
  if(p.sens.us){o('long distanceCm() {');o('  digitalWrite(TRIG, LOW);  delayMicroseconds(2);');o('  digitalWrite(TRIG, HIGH); delayMicroseconds(10);');o('  digitalWrite(TRIG, LOW);');o('  long us = pulseIn(ECHO, HIGH, 25000);   // 25 ms ≈ 4 m');o('  return us == 0 ? 400 : us / 58;        // tovush 2 tomonga: 29 µs/sm × 2');o('}');o('')}
  o('void setup() {');o('  Serial.begin(115200);');o(en?'  pinMode(ENA, OUTPUT); pinMode(ENB, OUTPUT);\n  pinMode(IN1, OUTPUT); pinMode(IN2, OUTPUT); pinMode(IN3, OUTPUT); pinMode(IN4, OUTPUT);':'  pinMode(AIN1, OUTPUT); pinMode(AIN2, OUTPUT); pinMode(BIN1, OUTPUT); pinMode(BIN2, OUTPUT);');
- if(p.sens.us)o('  pinMode(TRIG, OUTPUT); pinMode(ECHO, INPUT);');if(p.sens.line)o('  pinMode(LINE_L, INPUT); pinMode(LINE_R, INPUT);');o('  drive(0, 0);');o('  delay(1000);   // yoqilgandan keyin 1 s kutish');o('}');o('');
+ if(p.sens.us)o('  pinMode(TRIG, OUTPUT); pinMode(ECHO, INPUT);');if(p.sens.line)o('  pinMode(LINE_L, INPUT); pinMode(LINE_R, INPUT);');o('  drive(0, 0);');o('  Serial.println("Robot tayyor");');o('  delay(1000);   // yoqilgandan keyin 1 s kutish');o('}');o('');
  o('void loop() {');
- o('#if defined(MODE_AVOID)');if(p.sens.us){o('  long d = distanceCm();');o('  if (d < STOP_CM) {');o('    drive(-SPEED, -SPEED); delay(350);        // orqaga chekinish');o('    if (random(2)) drive(SPEED, -SPEED); else drive(-SPEED, SPEED);');o('    delay(random(350, 700));                  // tasodifiy tomonga burilish');o('  } else {');o('    drive(SPEED, SPEED);');o('  }');o('  delay(30);')}else o('  // HC-SR04 o\'rnatilmagan');
- o('#elif defined(MODE_LINE)');if(p.sens.line){o('  bool l = digitalRead(LINE_L);   // TCRT5000: qora = 1');o('  bool r = digitalRead(LINE_R);');o('  if (l && !r)      drive(0, SPEED);        // chiziq chapda — chapga');o('  else if (r && !l) drive(SPEED, 0);        // chiziq o\'ngda — o\'ngga');o('  else              drive(SPEED, SPEED);    // chiziq o\'rtada');}else o('  // chiziq sensorlari o\'rnatilmagan');
- o('#else');o('  // Serial orqali: w a s d x (Bluetooth modul HC-05 ham shunday ishlaydi)');o('  if (Serial.available()) {');o('    char c = Serial.read();');o("    if (c == 'w') drive(SPEED, SPEED);");o("    if (c == 's') drive(-SPEED, -SPEED);");o("    if (c == 'a') drive(-SPEED, SPEED);");o("    if (c == 'd') drive(SPEED, -SPEED);");o("    if (c == 'x') drive(0, 0);");o('  }');o('#endif');o('}');
+ o('#if defined(MODE_AVOID)');if(p.sens.us){o('  long d = distanceCm();');o('  Serial.print("Masofa: "); Serial.print(d); Serial.println(" sm");');o('  if (d < STOP_CM) {');o('    Serial.println("To‘siq! Orqaga va burilish");');o('    drive(-SPEED, -SPEED); delay(350);        // orqaga chekinish');o('    if (random(2)) drive(SPEED, -SPEED); else drive(-SPEED, SPEED);');o('    delay(random(350, 700));                  // tasodifiy tomonga burilish');o('  } else {');o('    drive(SPEED, SPEED);');o('  }');o('  delay(30);')}else o('  // HC-SR04 o\'rnatilmagan');
+ o('#elif defined(MODE_LINE)');if(p.sens.line){o('  bool l = digitalRead(LINE_L);   // TCRT5000: qora = 1');o('  bool r = digitalRead(LINE_R);');o('  if (millis() % 500 < 30) { Serial.print("Sensor L="); Serial.print(l); Serial.print(" R="); Serial.println(r); }');o('  if (l && !r)      drive(0, SPEED);        // chiziq chapda — chapga');o('  else if (r && !l) drive(SPEED, 0);        // chiziq o\'ngda — o\'ngga');o('  else              drive(SPEED, SPEED);    // chiziq o\'rtada');}else o('  // chiziq sensorlari o\'rnatilmagan');
+ o('#else');o('  // Serial orqali: w a s d x (Bluetooth modul HC-05 ham shunday ishlaydi)');o('  if (Serial.available()) {');o('    char c = Serial.read();');o("    if (c == 'w') drive(SPEED, SPEED);");o("    if (c == 's') drive(-SPEED, -SPEED);");o("    if (c == 'a') drive(-SPEED, SPEED);");o("    if (c == 'd') drive(SPEED, -SPEED);");o("    if (c == 'x') drive(0, 0);");o('    Serial.print("Buyruq: "); Serial.println(c);');o('  }');o('#endif');o('}');
  const miss=['in1','in2','in3','in4',...(en?['ena','enb']:[]),...(p.sens.us?['trig','echo']:[]),...(p.sens.line?['lnL','lnR']:[])].filter(k=>!w[k]);
  if(miss.length)L.unshift(`// DIQQAT: ${miss.length} ta pin hali ulanmagan (${miss.join(', ')}). "Ulash" bosqichida simlarni ulang.`);
  return L.join('\n')};
