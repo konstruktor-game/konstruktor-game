@@ -20,7 +20,8 @@ frontend/                  statik sayt (HTML + JavaScript, build kerak emas)
 backend/                   Django JSON API (akkaunt, loyihalarni saqlash, galereya, chat)
   config/                  sozlamalar, URL'lar, WSGI
   api/                     modellar, view'lar, testlar, migratsiyalar
-  build.sh                 Render build skripti
+  build.sh                 Render build skripti (paketlar, frontend, statik fayllar)
+  start.sh                 Render start skripti (migratsiya + gunicorn)
   requirements.txt
 render.yaml                Render Blueprint: frontend + backend + PostgreSQL
 ```
@@ -39,6 +40,7 @@ Testlar: `backend\.venv\Scripts\python backend\manage.py test api`
    - `konstruktor-api` — Django backend (gunicorn). Frontendni ham o'zi beradi: `https://konstruktor-api…onrender.com`
    - `konstruktor-web` — statik frontend (CDN), API manzili avtomatik ulanadi
    - `konstruktor-db` — PostgreSQL
+   Qo'lda Web Service yaratilsa: Root Directory `backend`, Build Command `bash build.sh`, Start Command `bash start.sh`.
 3. Deploy tugagach, administrator yaratish (Render → konstruktor-api → Shell):
    `python manage.py createsuperuser`
 
