@@ -18,7 +18,7 @@ const T={id:'boat',name:'RC kater',ic:'boat',desc:"Tezyurar qayiq: V-korpus, kat
   motor:{t:'Motor',ic:'motor',g:'motor',f:[{k:'kv',l:'KV',min:800,max:6000,step:50,u:'KV',g:'kv'},{k:'d',l:'Korpus diametri',min:28,max:56,step:1,u:'mm'},{k:'len',l:'Korpus uzunligi',min:30,max:100,step:1,u:'mm'},{k:'cool',l:'Suv bilan sovutish (gilza)',type:'bool',g:'watercool'}]},
   prop:{t:'Suv parragi',ic:'prop',g:'boatprop',f:[{k:'d',l:'Diametr',min:25,max:80,step:1,u:'mm'},{k:'pr',l:'Qadam/diametr nisbati',min:1,max:2.2,step:.05,u:'P/D',g:'pitch'},{k:'b',l:'Parraklar soni',type:'sel',o:{2:'2 ta',3:'3 ta'},g:'blades'}]},
   shaft:{t:'Val va kronshteyn',ic:'wrench',g:'flexshaft',f:[{k:'d',l:'Val diametri',type:'sel',o:{'3.18':'3,18 mm (1/8")','4.76':'4,76 mm (3/16")','6.35':'6,35 mm (1/4")'}},{k:'ang',l:'Val qiyaligi',min:5,max:18,step:1,u:'°'},{k:'strut',l:'Kronshteyn balandligi',min:10,max:40,step:1,u:'mm',g:'strut'}]},
-  rudder:{t:'Rul (suv)',ic:'servo',g:'rudder',f:[{k:'h',l:'Balandligi',min:20,max:90,step:1,u:'mm'},{k:'c',l:'Kengligi (vatar)',min:12,max:50,step:1,u:'mm'},{k:'pickup',l:'Suv olgich (sovutish uchun)',type:'bool',g:'watercool'}]},
+  rudder:{t:'Rul (suv)',ic:'servo',g:'wrudder',f:[{k:'h',l:'Balandligi',min:20,max:90,step:1,u:'mm'},{k:'c',l:'Kengligi (vatar)',min:12,max:50,step:1,u:'mm'},{k:'pickup',l:'Suv olgich (sovutish uchun)',type:'bool',g:'watercool'}]},
   hatch:{t:'Qopqoq (luk)',ic:'boat',g:'hatch',f:[{k:'mat',l:'Material',type:'sel',o:{lexan:'Polikarbonat (Lexan)',glass:'Shisha tola',wood:'Fanera'},g:'material'},{k:'len',l:'Uzunligi (korpusdan)',min:35,max:75,step:1,u:'%'},{k:'canopy',l:'Kabina oynasi',type:'bool'},{k:'seal',l:'Germetik lenta',type:'bool'}]},
   esc:{t:'ESC',ic:'bolt',g:'esc',f:[{k:'a',l:'Tok',min:20,max:250,step:5,u:'A',g:'escA'},{k:'cells',l:'Maks. batareya',type:'sel',o:{2:'2S',3:'3S',4:'4S',6:'6S'}},{k:'cool',l:'Suv bilan sovutish',type:'bool',g:'watercool'}]},
   servo:{t:'Rul servosi',ic:'servo',g:'servo',f:[{k:'tq',l:'Moment',min:2,max:30,step:.5,u:'kg·sm',g:'servo'},{k:'wp',l:'Suv o\'tkazmaydigan',type:'bool'}]},
@@ -36,7 +36,7 @@ const T={id:'boat',name:'RC kater',ic:'boat',desc:"Tezyurar qayiq: V-korpus, kat
   {id:'battery',t:'Batareya va qopqoq',ic:'battery',cats:['bat','hatch'],slots:()=>['bat','hatch'],intro:"Batareya korpus o'rtasiga, iloji boricha pastga — og'irlik markazi qayiq muvozanatini belgilaydi. Qopqoq lenta bilan germetiklanadi."},
   {id:'paint',kind:'paint',t:'Dizayn va rang',ic:'palette'},{id:'check',kind:'check',t:'Tekshiruv va hisob-kitob',ic:'chart'},{id:'test',kind:'test',t:'Suvda sinov',ic:'flag'},{id:'bom',kind:'bom',t:"Detallar ro'yxati",ic:'list'}],
  req:{mot1:'hull',shaft:'mot1',prop1:'shaft',esc:'hull',servo:'hull',rudder:'servo',rx:'esc',bat:'esc',hatch:'bat'},
- labels:{hull:'hull',mot1:'motor',shaft:'flexshaft',prop1:'boatprop',esc:'esc',servo:'servo',rudder:'rudder',rx:'rx',bat:'battery',hatch:'hatch'}};
+ labels:{hull:'hull',mot1:'motor',shaft:'flexshaft',prop1:'boatprop',esc:'esc',servo:'servo',rudder:'wrudder',rx:'rx',bat:'battery',hatch:'hatch'}};
 
 T.derive=B=>{const p=B.p,h=p.hull,m=p.motor,pr=p.prop,ba=p.bat,H=HULL[h.kind];
  const area=h.len*h.beam*(h.kind==='cat'?1.5:1.25),dens={glass:.16,abs:.2,wood:.22}[h.mat],wHull=area*dens*(1+h.len/300);
@@ -102,8 +102,10 @@ T.simTick=(S,dt,I,{g,soc})=>{const B=S.B,D=S.D,p=B.p,m=D.AUW/1000,sag=.85+.15*so
  const hump=D.planes&&S.spd>0&&S.spd<D.vPlane?m*g*.06*Math.sin(Math.PI*S.spd/D.vPlane):0;
  S.spd+=(F-k*S.spd*Math.abs(S.spd)-hump*Math.sign(S.spd)-.02*m*g*Math.sign(S.spd)*(Math.abs(S.spd)>.05?1:0))/m*dt;if(Math.abs(S.spd)<.05&&Math.abs(S.thr)<.02)S.spd=0;S.spd=clamp(S.spd,-vT*.4,vT*1.05);
  // rul: burilish tezligi suv oqimiga (tezlikka) proporsional
- const L=p.hull.len/100,yawRate=S.steer*D.turn*S.spd/Math.max(.3,L)*.9;S.yaw+=yawRate*dt;
- const latA=Math.abs(S.spd*yawRate);if(latA>D.stab*g*.9&&!S.fail){S.roll=Math.sign(yawRate)*1.2;crash(S,`Keskin burilishda ag'darildi: yon tezlanish ${fmt(latA/g,2)}g, barqarorlik ${fmt(D.stab,2)}. Kengroq korpus yoki katamaran barqarorroq.`)}
+ // rul: burilish radiusi ~3 korpus uzunligi; yuqori tezlikda korpus yon tomonga sirpanadi (yon tezlanish chegaralangan)
+ const L=p.hull.len/100,yr0=S.steer*D.turn*S.spd/Math.max(.3,L*3),latMax=g*Math.min(1.4,.9+.4*D.stab),yawRate=Math.sign(yr0)*Math.min(Math.abs(yr0),latMax/Math.max(.5,Math.abs(S.spd)));S.yaw+=yawRate*dt;
+ const latA=Math.abs(S.spd*yawRate);if(Math.abs(yr0*S.spd)>latMax*1.05&&Math.abs(S.steer)>.3&&!S.slideMsg){S.slideMsg=1;setTimeout(()=>{if(SIM)SIM.slideMsg=0},2500);S.status='Kater yon tomonga sirpanmoqda — rulni yumshoqroq bering.'}
+ if(D.stab<.9&&latA>D.stab*g*.85&&!S.fail){S.roll=Math.sign(yawRate)*1.2;crash(S,`Keskin burilishda ag'darildi: yon tezlanish ${fmt(latA/g,2)}g, barqarorlik ${fmt(D.stab,2)}. Kengroq korpus yoki katamaran barqarorroq.`)}
  const dir=new V3(-Math.sin(S.yaw),0,-Math.cos(S.yaw));S.vel.copy(dir).multiplyScalar(S.spd);S.pos.addScaledVector(S.vel,dt);
  // qirg'oq
  const dx=S.pos.x-LAKE.x,dz=S.pos.z-LAKE.z,dd=Math.hypot(dx,dz);if(dd>LAKE.r-1.2){S.pos.x=LAKE.x+dx/dd*(LAKE.r-1.2);S.pos.z=LAKE.z+dz/dd*(LAKE.r-1.2);if(Math.abs(S.spd)>4&&!S.fail)crash(S,`Qirg'oqqa ${fmt(Math.abs(S.spd)*3.6)} km/soat tezlikda urildi.`);S.spd*=-.2}
@@ -166,7 +168,7 @@ T.build=(B,D,ctx)=>{const p=B.p,h=p.hull,c=B.col,X=!!window.XRAY,L=h.len,Bm=h.be
 T.bom=(B,D)=>{const p=B.p;return[['hull',`Korpus ${HULL[p.hull.kind].n}, ${p.hull.len} sm`,`${p.hull.beam} sm eni, ${p.hull.dead}° tub`,1,D.wHull],['motor',`Cho'tkasiz motor ${p.motor.kv}KV ${p.motor.d}×${p.motor.len}`,p.motor.cool?'Suv sovutish gilzasi bilan':'Havo bilan sovutiladi',1,D.wMot],
  ['flexshaft',`Egiluvchan val Ø${p.shaft.d} mm, qiyalik ${p.shaft.ang}°`,`Kronshteyn ${p.shaft.strut} mm, germetik vtulka`,1,D.wShaft],['boatprop',`Parrak ${p.prop.d} mm, P/D ${p.prop.pr}, ${p.prop.b} qanotli`,'Bronza yoki karbon',1,D.wProp],
  ['esc',`ESC ${p.esc.a}A ${p.esc.cells}S`,p.esc.cool?'Suv sovutish plitasi bilan':'',1,D.wEsc],['servo',`Rul servosi ${p.servo.tq} kg·sm`,p.servo.wp?"Suv o'tkazmaydigan":'',1,D.wServo],['rx',`Qabul qilgich ${p.rx.ch} kanal`,'',1,12],
- ['battery',`Batareya ${p.bat.cells}S ${p.bat.mah}mAh ${p.bat.c}C`,'',1,D.wBat],['rudder',`Rul ${p.rudder.h}×${p.rudder.c} mm`,p.rudder.pickup?'Suv olgich bilan':'',1,D.wRud],
+ ['battery',`Batareya ${p.bat.cells}S ${p.bat.mah}mAh ${p.bat.c}C`,'',1,D.wBat],['wrudder',`Rul ${p.rudder.h}×${p.rudder.c} mm`,p.rudder.pickup?'Suv olgich bilan':'',1,D.wRud],
  ['hatch',`Qopqoq: ${{lexan:'polikarbonat',glass:'shisha tola',wood:'fanera'}[p.hatch.mat]}, ${p.hatch.len}% uzunlik`,p.hatch.seal?'Germetik lenta bilan':'Germetiksiz',1,D.wHatch],
  ['watercool','Silikon trubkalar (sovutish), tortqich, mahkamlagichlar','',1,15]]};
 

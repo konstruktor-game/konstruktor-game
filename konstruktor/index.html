@@ -201,6 +201,23 @@ kbd{display:inline-block;min-width:22px;padding:1px 6px;border:1px solid #39465c
 }
 @media (max-width:420px){.vt span{display:none}.vt{padding:0 8px}}
 @media print{header,#steps,#viewWrap,.nav,.noprint{display:none!important}main{display:block;padding:0}#panel{overflow:visible;background:#fff;color:#000;border:0}.card,.iss,.kv{background:#fff;color:#000;border-color:#ccc}}
+/* ---- sayqal: chuqurlik, urg'u, animatsiya ---- */
+header:after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,176,32,.45) 30%,rgba(74,163,255,.35) 70%,transparent);pointer-events:none}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.028),rgba(255,255,255,0) 46%),var(--p2);box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 1px 2px rgba(0,0,0,.25);transition:border-color .2s}
+.card:hover{border-color:var(--ln2)}
+#view canvas{-webkit-mask-image:radial-gradient(135% 105% at 50% 45%,#000 60%,rgba(0,0,0,.6));mask-image:radial-gradient(135% 105% at 50% 45%,#000 60%,rgba(0,0,0,.6))}
+.st.on:before{content:'';position:absolute;left:-1px;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--ac);box-shadow:0 0 10px rgba(255,176,32,.6)}
+.st.on .n{box-shadow:0 0 0 3px rgba(255,176,32,.18)}
+.mt{transition:transform .15s,border-color .15s}.mt:hover{transform:translateY(-1px);border-color:var(--ln2)}
+#panel>*{animation:pfade .22s ease both}#panel>*:nth-child(2){animation-delay:.03s}#panel>*:nth-child(3){animation-delay:.06s}#panel>*:nth-child(n+4){animation-delay:.09s}
+@keyframes pfade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.btn.pri{position:relative;overflow:hidden}.btn.pri:after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);transition:transform .6s}.btn.pri:hover:after{transform:translateX(120%)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:8px}
+*{scrollbar-width:thin;scrollbar-color:var(--p4) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--p4);border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+.wTypes{grid-template-columns:repeat(4,1fr)!important}@media (max-width:620px){.wTypes{grid-template-columns:repeat(2,1fr)!important}}
+.typeSw button.on i{filter:drop-shadow(0 0 4px rgba(0,0,0,.2))}
+@media (prefers-reduced-motion:reduce){#panel>*,.mt,.btn.pri:after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>

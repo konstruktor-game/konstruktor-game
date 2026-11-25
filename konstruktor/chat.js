@@ -60,7 +60,7 @@ function localAnswer(q){const n=norm(q),c=cur(),out=[];
 
 function add(role,html){const d=document.createElement('div');d.className='cm '+(role==='user'?'u':'a');d.innerHTML=html;log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
 function sugg(){const c=cur(),L=['Loyihamda qanday xato bor?','Keyingi qadam nima?','KV nima?','C reyting nima?'];
- if(c){if(B.type==='robot')L.splice(2,2,'PWM nima?','Umumiy GND nima uchun kerak?');else if(B.type==='plane')L.splice(2,2,"Og'irlik markazi qayerda bo'lishi kerak?",'Dihedral nima?');else if(B.type==='boat')L.splice(2,2,'Glissirlash nima?','Suv bilan sovutish nima uchun kerak?')}
+ if(c){if(B.type==='robot')L.splice(2,2,'PWM nima?','Umumiy GND nima uchun kerak?');else if(B.type==='plane')L.splice(2,2,"Og'irlik markazi qayerda bo'lishi kerak?",'Dihedral nima?');else if(B.type==='boat')L.splice(2,2,'Glissirlash nima?','Suv bilan sovutish nima uchun kerak?');else if(B.type==='rocket')L.splice(2,2,'Barqarorlik zaxirasi nima?','Kechikish nima?');else if(B.type==='heli')L.splice(2,2,'Dum rotori nima uchun kerak?','Swashplate nima?');else if(B.type==='tank')L.splice(2,2,'Gusenitsa nima?','Aralashtirish (mix) nima?')}
  $c('chatSug').innerHTML=L.map(s=>`<button>${esc(s)}</button>`).join('');$c('chatSug').querySelectorAll('button').forEach(b=>b.onclick=()=>ask(b.textContent))}
 function ctxObj(){const c=cur();if(!c)return{};return{tur:c.T.name,loyiha:B.name,bosqich:c.step.t,maqsad:B.purpose,parametrlar:B.p,korsatkichlar:c.T.metrics(B,c.D).map(m=>m.l+': '+m.v),muammolar:c.T.issues(B,c.D).map(i=>i.t)}}
 async function serverAsk(q){if(!NET.base||ai===false)return null;const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),70000);

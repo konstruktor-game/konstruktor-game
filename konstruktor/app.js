@@ -48,7 +48,7 @@ function stepStatus(s){if(s.kind==='wiring'){const W=wcheck(B);return{done:W.tot
 function renderSteps(){const sts=T.steps.map(stepStatus),dn=sts.filter(x=>x.done).length;$('steps').innerHTML=`<div class="stHead">${esc(T.name)}</div><div class="stProg" title="${dn} / ${T.steps.length} bosqich"><i style="width:${dn/T.steps.length*100}%"></i></div>`+T.steps.map((s,i)=>{const st=sts[i];
  return `<button class="st ${i===stepIdx?'on':''} ${st.done?'done':''}" data-i="${i}" title="${esc(s.t)}"><span class="n">${st.done?IC('check'):i+1}</span><span>${IC(s.ic)} ${esc(s.t)}</span><span class="pg">${st.pg}</span></button>`}).join('');
  $('steps').querySelectorAll('.st').forEach(b=>b.onclick=()=>{snd('click');goStep(+b.dataset.i)})}
-function goStep(i,first){if(insp)exitInspect(true);if((window.FORGE&&FORGE.active))FORGE.cancel(true);stepIdx=clamp(i,0,T.steps.length-1);B.step=stepIdx;saveLocal();const s=step();
+function goStep(i,first){if(insp)exitInspect(true);if(window.RULER&&RULER.active)RULER.toggle(false);if((window.FORGE&&FORGE.active))FORGE.cancel(true);stepIdx=clamp(i,0,T.steps.length-1);B.step=stepIdx;saveLocal();const s=step();
  if(s.kind!=='test')simStop();showWireStatus=false;
  $('wires').classList.toggle('hidden',s.kind!=='wiring');$('hud').classList.toggle('hidden',s.kind!=='test');$('vtools').classList.toggle('hidden',s.kind==='wiring');
  rebuild();renderPanel();if(s.kind==='wiring')renderWires();if(s.kind==='test')startSim();else $('simStart').classList.add('hidden');
@@ -150,7 +150,7 @@ function autoInstall(){pushUndo();const L=activeSlots();for(let k=0;k<L.length+1
 function removeStep(){pushUndo();for(const x of activeSlots())delete B.inst[x];cleanup();snd('place');commit();setHint()}
 
 // ---------------- 3D: bosish va sichqoncha ostidagi ma'lumot ----------------
-function onPick(e){if(step().kind==='wiring'||step().kind==='test')return;closePop();if((window.FORGE&&FORGE.active)){FORGE.pick(e);return}
+function onPick(e){if(step().kind==='wiring'||step().kind==='test')return;closePop();if(window.RULER&&RULER.active){RULER.pick(e);return}if((window.FORGE&&FORGE.active)){FORGE.pick(e);return}
  if(insp)return;const o=pickAt(e,model);if(!o)return;const slot=o.userData.slot;
  if(o.userData.ghost){if(window.FORGE)FORGE.start(slot);else install(slot);return}
  if(o.userData.burnt||(B.burnt&&B.burnt[slot])){showBurntCard(e,slot);return}
@@ -358,7 +358,7 @@ function startSim(){simStart(B);$('hudFail').classList.add('hidden');resize();$(
 let hudT=0;function updateHud(force){const S=SIM;if(!S)return;const n=performance.now();if(!force&&n-hudT<150)return;hudT=n;const soc=S.B.p.bat?clamp(1-S.used/S.B.p.bat.mah,0,1):1,sp=S.vel.length()*3.6;
  const MM=(MODES[S.B.type]||[]).find(x=>x[0]===S.mode),mode=MM?`<div class="hm">${esc(MM[1])} rejim</div>`:'';
  $('hudL').innerHTML=`<div class="hs ${S.armed?'on':''}"><i></i>${S.armed?'Ishlayapti':"To'xtagan"}</div>${mode}<div>Tezlik <b>${fmt(sp)}</b> km/soat</div>${!GND(S.B.type)?`<div>Balandlik <b>${fmt(S.pos.y,1)}</b> m</div>`:''}
-  <div>Batareya <b>${fmt(soc*100)}%</b> · ${fmt(S.volt||S.D.V,1)} V</div><div class="batbar"><i style="width:${soc*100}%;background:${soc<.2?'#ff5a5a':soc<.4?'#ffb020':'#2ecc71'}"></i></div><div>Vaqt <b>${mmss(S.t)}</b> · ${fmt(S.amp||0,1)} A</div>`;
+  ${S.B.p.bat?`<div>Batareya <b>${fmt(soc*100)}%</b> · ${fmt(S.volt||S.D.V,1)} V</div><div class="batbar"><i style="width:${soc*100}%;background:${soc<.2?'#ff5a5a':soc<.4?'#ffb020':'#2ecc71'}"></i></div><div>Vaqt <b>${mmss(S.t)}</b> · ${fmt(S.amp||0,1)} A</div>`:`<div>Holat <b>${esc({pad:'Sterjenda',count:'Ortga sanash',burn:'Dvigatel yonmoqda',coast:'Inersiya',chute:'Parashyutda',ballistic:'Erkin tushish',landed:"Qo'ndi"}[S.st]||'—')}</b></div><div>Vaqt <b>${mmss(S.t)}</b></div>`}`;
  $('hudMsg').textContent=S.status;$('hudMsg').classList.toggle('hidden',!S.status);
  const tl=$('telem');if(tl)tl.innerHTML=[['Maks. tezlik',fmt(S.maxV*3.6)+' km/soat'],['Maks. balandlik',fmt(S.maxH,1)+' m'],['Sarflangan',fmt(S.used)+' mAh'],['Min. kuchlanish',S.minV<99?fmt(S.minV,1)+' V':'—']].map(([l,v])=>`<div class="kv"><small>${l}</small><b>${v}</b></div>`).join('');
  if(S.fail&&$('hudFail').classList.contains('hidden')){$('hudFail').innerHTML=`<div><h3><i class=i-explode></i> ${esc(S.fail.t)}</h3><p style="color:#c4cee0;margin-bottom:12px">${esc(S.fail.why)}</p><button class="btn pri" id="bFailR"><i class=i-ccw></i> Qaytadan</button></div>`;$('hudFail').classList.remove('hidden');$('bFailR').onclick=()=>startSim()}

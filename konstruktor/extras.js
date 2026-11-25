@@ -6,14 +6,17 @@
    ===================================================================== */
 'use strict';
 (()=>{
-const TUNE={copter:['motor','prop','esc','bat'],plane:['motor','prop','esc','bat','wing'],car:['motor','gear','esc','bat','wheel'],boat:['motor','prop','shaft','esc','bat'],robot:['motor','wheel','drv','bat']};
+const TUNE={copter:['motor','prop','esc','bat'],plane:['motor','prop','esc','bat','wing'],car:['motor','gear','esc','bat','wheel'],boat:['motor','prop','shaft','esc','bat'],robot:['motor','wheel','drv','bat'],heli:['motor','gear','rotor','tail','bat','esc','servo'],rocket:['nose','fins','motor','recov'],tank:['motor','gear','track','esc','bat']};
 const GOAL={
+ heli:(D,B)=>Math.min(D.tHov,15)*(B.purpose==='scale'?3:1.5)+Math.min(D.twr,3)*(B.purpose==='scale'?3:8)-Math.abs(D.tip-150)*.05,
+ rocket:(D,B)=>(B.purpose==='safe'?Math.min(D.ap,350)/25-Math.abs(D.vDesc-4.5)*3:Math.min(D.ap,1500)/40)-Math.abs(D.stab-1.5)*8-Math.abs(D.vEj)*.25,
+ tank:(D,B)=>Math.min(D.climb,45)*.4+Math.min(D.v*3.6,10)*1.5+Math.min(D.tRun,40)*.3-Math.abs(D.LB-1.5)*8,
  copter:(D,B)=>Math.min(D.tMix,30)*4+Math.min(D.TWR,B.purpose==='race'||B.purpose==='freestyle'?10:6)*3,
  plane:(D)=>Math.min(D.tCruise,45)-D.Vs*1.2+Math.min(D.TWR,1.2)*10,
  car:(D)=>Math.min(D.vTop*3.6,90)*.5+Math.min(D.tRun,30)*.6,
  boat:(D,B)=>Math.min(D.vTop*3.6,100)*(B.purpose==='speed'?.6:.2)+Math.min(D.tRun,40)*(B.purpose==='speed'?.4:1),
  robot:(D,B)=>Math.min(D.tRun,240)*.04-(B.purpose==='line'?Math.abs(D.v-.35)*30:B.purpose==='avoid'?Math.abs(D.v-.45)*20:-D.v*8)};
-const GOALTXT={copter:'parvoz vaqti va tortish zaxirasi',plane:'sayr vaqti va sekin uchish',car:'tezlik va haydash vaqti',boat:'tezlik va suzish vaqti',robot:'ishlash vaqti va maqsadga mos tezlik'};
+const GOALTXT={heli:'muallaq turish va tortish zaxirasi',rocket:"apogey, barqarorlik va xavfsiz qo'nish",tank:'qiyalikka chiqish, tezlik va burilish',copter:'parvoz vaqti va tortish zaxirasi',plane:'sayr vaqti va sekin uchish',car:'tezlik va haydash vaqti',boat:'tezlik va suzish vaqti',robot:'ishlash vaqti va maqsadga mos tezlik'};
 function score(B){const T=TYPES[B.type];let D;try{D=T.derive(B)}catch(e){return null}
  for(const k in D)if(typeof D[k]==='number'&&!isFinite(D[k]))return null;
  const I=T.issues(B,D),bad=I.filter(i=>i.lvl==='bad').length,warn=I.filter(i=>i.lvl==='warn').length;
@@ -69,3 +72,21 @@ function exportSTL(obj,name){obj.updateMatrixWorld(true);const inv=new THREE.Mat
  toast(`<i class=i-download></i> STL saqlandi: ${tris.length} uchburchak, ${fmt(s.x)}×${fmt(s.z)}×${fmt(s.y)} mm`,2600)}
 window.ADV={html,bind,run,score};window.STLX={exportSTL};
 })();
+// ---------- 3D o'lchagich: ikki nuqta orasidagi masofa (mm) ----------
+(()=>{const R={active:false,pts:[],grp:null,lbl:null,raf:0};
+ const btn=document.createElement('button');btn.className='vt';btn.id='tRuler';btn.title="Modelda ikki nuqtani bosing — orasidagi masofa millimetrda";btn.innerHTML=`${IC('ruler')}<span>O'lchash</span>`;
+ const ref=document.getElementById('tXray');if(ref)ref.after(btn);
+ const mk=()=>{R.grp=new THREE.Group();scene.add(R.grp);R.lbl=document.createElement('div');R.lbl.className='fLbls';$('view').appendChild(R.lbl)};
+ function clear(){R.pts=[];if(R.grp){scene.remove(R.grp);R.grp.traverse(o=>{if(o.geometry)o.geometry.dispose()})}R.grp=null;if(R.lbl)R.lbl.remove();R.lbl=null}
+ function toggle(on){R.active=on==null?!R.active:on;btn.classList.toggle('on',R.active);clear();cancelAnimationFrame(R.raf);if(R.active){mk();loop();setHint("O'lchash: modelda birinchi nuqtani bosing")}else setHint()}
+ function pick(e){const r=renderer.domElement.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
+  const root=(window.FORGE&&FORGE.active)?null:model;if(!root)return;const h=ray.intersectObject(root,true).find(x=>x.object.visible&&!(x.object.material&&x.object.material===ghostMat));if(!h)return;
+  if(R.pts.length>=2){clear();mk()}R.pts.push(h.point.clone());snd('click');
+  const dot=new THREE.Mesh(new THREE.SphereGeometry(Math.max(.15,(model.userData.size||20)*.008),12,8),new THREE.MeshBasicMaterial({color:'#ffb020',depthTest:false}));dot.renderOrder=10;dot.position.copy(h.point);R.grp.add(dot);
+  if(R.pts.length===2){const g=new THREE.BufferGeometry().setFromPoints(R.pts),ln=new THREE.Line(g,new THREE.LineBasicMaterial({color:'#ffb020',depthTest:false}));ln.renderOrder=10;R.grp.add(ln);
+   const d=R.pts[0].distanceTo(R.pts[1])*10,dx=Math.abs(R.pts[0].x-R.pts[1].x)*10,dy=Math.abs(R.pts[0].y-R.pts[1].y)*10,dz=Math.abs(R.pts[0].z-R.pts[1].z)*10;setHint(`Masofa: ${fmt(d,1)} mm  (X ${fmt(dx,1)} · Y ${fmt(dy,1)} · Z ${fmt(dz,1)} mm). Yana bosing — yangi o'lchov.`)}
+  else setHint("O'lchash: ikkinchi nuqtani bosing")}
+ function loop(){if(!R.active)return;R.raf=requestAnimationFrame(loop);if(!R.lbl)return;if(R.pts.length<2){R.lbl.innerHTML='';return}
+  const r=$('view').getBoundingClientRect(),v=R.pts[0].clone().add(R.pts[1]).multiplyScalar(.5);if(explode>.01){}v.project(camera);
+  R.lbl.innerHTML=v.z<1?`<div class="fLbl next" style="left:${(v.x+1)/2*r.width}px;top:${(1-v.y)/2*r.height}px">${fmt(R.pts[0].distanceTo(R.pts[1])*10,1)} mm</div>`:''}
+ btn.onclick=()=>{snd('click');toggle()};window.RULER={get active(){return R.active},pick,toggle};})();

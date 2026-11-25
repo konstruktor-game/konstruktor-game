@@ -55,7 +55,7 @@ const T={id:'copter',name:'Multikopter (dron)',ic:'drone',desc:"4, 6 yoki 8 moto
    {k:'a',l:'Doimiy tok (har motor)',min:6,max:120,step:1,u:'A',g:'escA'},{k:'cells',l:'Maks. batareya',type:'sel',o:{4:'4S gacha',6:'6S gacha',8:'8S gacha',12:'12S gacha'}},
    {k:'size',l:"O'lcham",type:'sel',o:{'20':'20×20','30.5':'30.5×30.5'},g:'stack'},{k:'proto',l:'Protokol',type:'sel',o:{dshot600:'DShot600 (raqamli)',dshot300:'DShot300',pwm:'PWM (eski, analog)'},g:'dshot'}]},
   fc:{t:'Parvoz kontrolleri',ic:'cpu',g:'fc',f:[
-   {k:'mcu',l:'Protsessor',type:'sel',o:{F4:'F4 — 4 UART',F7:'F7 — 6 UART',H7:'H7 — 8 UART'},g:'mcu'},{k:'size',l:"O'lcham",type:'sel',o:{'20':'20×20','30.5':'30.5×30.5'},g:'stack'},
+   {k:'mcu',l:'Protsessor',type:'sel',o:{F4:'F4 — 4 UART',F7:'F7 — 6 UART',H7:'H7 — 8 UART'},g:'fcmcu'},{k:'size',l:"O'lcham",type:'sel',o:{'20':'20×20','30.5':'30.5×30.5'},g:'stack'},
    {k:'baro',l:'Barometr (balandlikni ushlash)',type:'bool',g:'baro'},{k:'bb',l:'Blackbox xotira',type:'bool',g:'blackbox'}]},
   vid:{t:'Video tizimi',ic:'camera',g:'vtx',f:[
    {k:'type',l:'Turi',type:'sel',o:{analog:'Analog — kam kechikish, arzon',digital:'Raqamli HD — tiniq tasvir',none:"Yo'q (faqat ko'z bilan boshqarish)"},g:'vtx'},

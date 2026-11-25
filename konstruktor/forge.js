@@ -28,7 +28,7 @@ const st=document.createElement('style');st.textContent=`
 const GEON=[['bell',"Rotor qo'ng'irog'i (ichida magnitlar)"],['tire','Shina'],['pblade','Parrak qanotlari'],['gear',"Tishli g'ildirak"],['spring','Prujina (amortizator)'],['grom','Rezina amortizatorlar'],
  ['hole','Montaj teshiklari (halqalar)'],['spin','Spinner (burun qalpoqchasi)'],['wing','Qanot (profil)'],['bead','Beadlock halqa va boltlar'],['towhook','Tortish ilgaklari'],['flare',"G'ildirak qanoti kengaytmalari"]];
 const MATN=[['burnt','Kuygan qism'],['pcbm','Elektron plata'],['cu',"Mis o'ramlar (chulg'am)"],['au','Oltin qoplamali kontaktlar'],['glass','Shaffof qism (oyna)'],['canopy','Shaffof qopqoq'],['bglass','Shaffof qopqoq'],['carglass','Oynalar'],['acr','Akril plastina'],
- ['gl','Chiroqlar (LED)'],['cf','Karbon tola qism'],['rb','Rezina qism'],['m#','Metall qismlar (vint, val, korpus)'],['pl#','Plastik qism'],['p#',"Bo'yalgan korpus"],['ds','Korpus'],['escshr','Termo-qobiq'],['cgband','Belgi']];
+ ['gl','Chiroqlar (LED)'],['cf',"Karbon tola plastinalar va qo'llar"],['rb','Rezina qismlar (amortizator, qoplama)'],['m#','Metall qismlar (vint, tirgak, val)'],['pl#','Plastik qismlar (ushlagich, qopqoq)'],['p#',"Bo'yalgan korpus qismlari"],['ds','Korpus'],['escshr','Termo-qobiq'],['cgband','Belgi']];
 function pieceName(o){for(let p=o;p;p=p.parent)if(p.userData&&p.userData.n)return p.userData.n;
  if(o.geometry&&o.geometry.type==='TubeGeometry')return'Simlar (kabellar)';
  const gk=o.geometry&&o.geometry.userData&&o.geometry.userData.k||'';for(const[k,n]of GEON)if(gk.startsWith(k))return n;
