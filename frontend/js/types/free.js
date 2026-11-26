@@ -150,6 +150,11 @@ function stickerTex(o){const W=512,H=Math.round(512*stH(o)/o.w),key=['stk',o.st,
 function cellTex(big,alt){return ctex('cell'+big+alt,256,128,(g,w,h)=>{const base=big?'#1565c0':alt?'#b71c1c':'#212121',acc=big?'#90caf9':alt?'#ffcdd2':'#ffb300';g.fillStyle=base;g.fillRect(0,0,w,h);
  g.fillStyle=acc;g.fillRect(0,h*.62,w,h*.12);const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(255,255,255,.25)');gr.addColorStop(.4,'rgba(255,255,255,0)');gr.addColorStop(1,'rgba(0,0,0,.3)');g.fillStyle=gr;g.fillRect(0,0,w,h);
  g.fillStyle='#fff';g.font='900 34px Arial';g.textBaseline='middle';g.fillText(big?'18650':'AA',16,h*.32);g.font='700 22px Arial';g.fillText(big?'3.7 V  Li-ion':'1.5 V  ALKALINE',big?120:72,h*.32);g.font='900 26px Arial';g.fillText('+',w-34,h*.32)})}
+function motorTex(size,vr){return ctex('mot'+size,256,128,(g,w,h)=>{const big=size!=='130';g.fillStyle=big?'#1e3a8a':'#eceff1';g.fillRect(0,0,w,h);const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(255,255,255,.25)');gr.addColorStop(.5,'rgba(255,255,255,0)');gr.addColorStop(1,'rgba(0,0,0,.25)');g.fillStyle=gr;g.fillRect(0,0,w,h);
+ g.fillStyle=big?'#fff':'#1b1b1b';g.font='900 30px Arial';g.textBaseline='middle';g.fillText(`DC ${size}`,14,h*.33);g.font='700 19px Arial';g.fillText(`${vr<4.6?'3-6':'6-12'} V  ·  BRUSHED`,14,h*.66);g.fillStyle='#d32f2f';g.fillRect(w-40,h*.25,22,22)})}
+function chipTex(){return ctex('atm328',512,128,(g,w,h)=>{g.fillStyle='#1b1b1b';g.fillRect(0,0,w,h);g.fillStyle='rgba(235,235,235,.9)';g.font='700 34px Arial';g.textBaseline='middle';g.fillText('ATMEGA328P',70,h*.38);g.font='500 22px Arial';g.fillText('-PU  2026',70,h*.72);
+ g.fillStyle='#0d0d0d';g.beginPath();g.arc(26,h/2,14,-Math.PI/2,Math.PI/2);g.fill();g.beginPath();g.arc(w-30,h*.75,7,0,Math.PI*2);g.fill()})}
+function meshTex(){return ctex('srmesh',128,128,(g,w,h)=>{g.fillStyle='#2b2f35';g.fillRect(0,0,w,h);g.fillStyle='#111317';for(let y=0;y<h;y+=6)for(let x=(y/6)%2?3:0;x<w;x+=6){g.beginPath();g.arc(x,y,2,0,Math.PI*2);g.fill()}})}
 function buzTex(){return ctex('buzlab',256,256,(g,w,h)=>{g.fillStyle='#f2f2f2';g.fillRect(0,0,w,h);g.fillStyle='#111';g.textAlign='center';g.font='700 22px Arial';g.fillText('REMOVE SEAL',w/2,h*.36);g.fillText('AFTER',w/2,h*.47);g.fillText('WASHING',w/2,h*.58);
  g.font='900 40px Arial';g.fillText('+',w*.3,h*.82);g.beginPath();g.arc(w/2,h/2,18,0,Math.PI*2);g.fill()})}
 function ext(o){const h=(x,y,z)=>[-x,-y,-z,x,y,z];switch(o.kind){
@@ -158,7 +163,7 @@ function ext(o){const h=(x,y,z)=>[-x,-y,-z,x,y,z];switch(o.kind){
  case'prop':{const r=o.d*25.4/2;return[-r,-4,-r,r,4,r]}case'wheel':return h(o.w/2,o.d/2,o.d/2);
  case'battery':{if(o.bt.startsWith('lipo')){const c=+o.bt.slice(-1);return h(16,c*3.8,Math.min(70,25+o.mah/40))}const n=o.bt==='aa2'?2:o.bt==='aa4'?4:o.bt==='li1'?1:2,big=o.bt.startsWith('li'),r=big?9.2:7.2,l=big?65:50;return h(n*r+1.5,r+1,l/2+3)}
  case'sw':return[-8.5,-8,-6,8.5,4,6];case'led':{const k=+o.ls/5||1;return[-3*k,-7,-3*k,3*k,3.5+4.25*k,3*k]}case'servo':return o.sk==='std'?[-21,-19,-10,21,22,10]:[-12,-12,-6,12,14,6];case'camera':return h(10,10,10);
- case'sensor':return[-22.5,-10,-19,22.5,10,1];case'mcu':return[-34.3,-1,-26.7,34.3,10,26.7];case'gear':{const r=o.m*(o.zt+2)/2;return h(r,o.t/2,r)}case'axle':return h(o.len/2,o.d/2,o.d/2);
+ case'sensor':return[-22.5,-16,-19,22.5,10,2];case'mcu':return[-40.3,-1,-26.7,34.3,10,26.7];case'gear':{const r=o.m*(o.zt+2)/2;return h(r,o.t/2,r)}case'axle':return h(o.len/2,o.d/2,o.d/2);
  case'bracket':return[-o.w/2,0,0,o.w/2,o.a,o.a];case'sphere':return[-o.d/2,+o.half?0:-o.d/2,-o.d/2,o.d/2,o.d/2,o.d/2];case'solar':{const p=SOL[o.sp];return h(p.a/2,1.5,p.b/2)}
  case'esc':return h(12,4,20);case'buzzer':return h(6,5,6);case'btn':return o.bk==='big'?[-9,-4,-9,9,9,9]:[-6,-4,-6,6,5,6];case'pot':return[-8,-6,-8,8,16,8];case'ldr':return[-3,-1,-3,3,12,3];case'sticker':return[-o.w/2,0,-stH(o)/2,o.w/2,.4,stH(o)/2]}return h(5,5,5)}
 function aabb(o){const e=ext(o),E=new THREE.Euler(o.rx*DEG,o.ry*DEG,o.rz*DEG),mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9],v=new V3();
@@ -243,10 +248,24 @@ T.build=(B,D,ctx)=>{const X=!!window.XRAY;
    case'box':{const w=o.w/10,h=o.h/10,d=o.d/10,t=o.wall/10;g.add(tagP(box(w,t,d,M,0,-h/2+t/2,0),'Tub',1));for(const s of[-1,1]){g.add(tagP(box(t,h,d,M,s*(w/2-t/2),0,0),'Yon devorlar',2));g.add(tagP(box(w,h,t,M,0,0,s*(d/2-t/2)),'Old va orqa devor',2))}g.add(tagP(box(w,t,d,M,0,h/2-t/2,0),'Qopqoq',3));break}
    case'tube':{const tb=new THREE.Mesh(GEO(`ftube${o.d},${o.len}`,()=>new THREE.CylinderGeometry(o.d/20,o.d/20,o.len/10,32,1,true)),M===mm?MAT('ftd'+c+o.mat,()=>{const q=mm.clone();q.side=THREE.DoubleSide;return q}):M);tb.castShadow=true;g.add(tagP(tb,'Truba devori',1));
     for(const s of[-1,1]){const r=new THREE.Mesh(new THREE.RingGeometry(o.d/20-o.wall/10,o.d/20,32),mPlastic('#333',.5));r.rotation.x=s*Math.PI/2;r.position.y=s*o.len/20;r.userData.dispose=true;g.add(tagP(r,"Uchlari (halqa)",2))}break}
-   case'dcmotor':{const d=DCM[o.size],r=d.d/20,l=d.l/10,can=cyl(r,r,l,mMetal('#c4c9cf',.25),0,0,0,28);can.scale.x=.8;g.add(tagP(can,'Motor korpusi (magnitlar va yakor ichida)',1));
-    const lab=cyl(r*1.004,r*1.004,l*.45,mPaint('#1e3a8a','satin'),0,-l*.05,0,28);lab.scale.x=.8;g.add(tagP(lab,'Yorliq',1));g.add(tagP(cyl(r*.32,r*.32,.12,mMetal('#c9a227',.3),0,l/2+.06,0,16),'Latun vtulka (podshipnik)',3));g.add(tagP(cyl(r*.75,r*.75,.25,mPlastic('#222',.5),0,-l/2-.1,0,20),"Cho'tka qopqog'i",2));
-    g.add(tagP(cyl(.1,.1,.8,mMetal('#eee',.2),0,l/2+.4,0,10),'Val',3));if(o.gear>1)g.add(tagP(box(r*2.4,r*1.6,r*2.4,mPlastic('#f2c200',.5),0,-l/2-r*.9,0),`Reduktor ${o.gear}:1`,4));
-    for(const s of[-1,1])g.add(tagP(box(.12,.3,.12,mCopper(),s*r*.5,-l/2-.3,0),'Kontaktlar',5));break}
+   case'dcmotor':{const d=DCM[o.size],r=d.d/20,l=d.l/10,ml=mMetal('#c4c9cf',.22);
+    // korpus: ikki tomoni yassilangan po'lat silindr (haqiqiy 130/280/370 motorlar kabi), bosma yorliq bilan
+    const can=cyl(r,r,l*.86,ml,0,l*.07,0,40);can.scale.x=.8;g.add(tagP(can,"Po'lat korpus (ichida magnitlar va yakor)",1));
+    const lab=new THREE.Mesh(GEO(`dclab${r},${l}`,()=>new THREE.CylinderGeometry(r*1.006,r*1.006,l*.42,40,1,true)),MAT('dclabm'+o.size,()=>new THREE.MeshPhysicalMaterial({map:motorTex(o.size,d.vr),roughness:.4,clearcoat:.5})));lab.scale.x=.8;lab.position.y=l*.05;g.add(tagP(lab,'Yorliq (turi va kuchlanishi)',1));
+    // old qopqoq: latun vtulka, ikki montaj teshigi, ventilyatsiya tirqishlari
+    {const fc=cyl(r*.97,r*.97,.06,ml,0,l/2+.03,0,40);fc.scale.x=.8;g.add(tagP(fc,"Old qopqoq",1))}
+    g.add(tagP(cyl(r*.34,r*.34,.14,mMetal('#c9a227',.28),0,l/2+.1,0,20),'Latun vtulka (podshipnik)',3));
+    for(const sx of[-1,1]){g.add(tagP(cyl(r*.09,r*.09,.08,mPlastic('#0a0a0a',.8),sx*r*.5,l/2+.05,0,12),'Montaj teshiklari (M2)',3));const sl=box(r*.18,.04,r*.5,mPlastic('#0a0a0a',.8),0,l/2+.05,sx*r*.55);g.add(tagP(sl,'Ventilyatsiya tirqishlari',3))}
+    const sh=cyl(.1,.1,.85,mMetal('#eceff1',.15),0,l/2+.5,0,14);g.add(tagP(sh,"Val (yassi kesimli)",3));g.add(tagP(box(.06,.5,.2,mMetal('#cfd8dc',.2),.07,l/2+.7,0),"Val",3));
+    // orqa qopqoq (plastik) cho'tkalar bilan, mis kontakt plastinalari teshigi bilan
+    const eb=cyl(r*.9,r*.9,l*.16,mPlastic(o.size==='130'?'#f5f5f5':'#1c1c1c',.5),0,-l/2+l*.06,0,36);eb.scale.x=.8;g.add(tagP(eb,"Orqa qopqoq (cho'tkalar ichida)",2));
+    g.add(tagP(cyl(r*.3,r*.3,.12,mPlastic(o.size==='130'?'#e0e0e0':'#111',.5),0,-l/2-.04,0,20),"Kollektor qopqog'i",2));
+    for(const sx of[-1,1]){const tb=box(.22,.34,.04,mCopper(),sx*r*.45,-l/2-.12,0);g.add(tagP(tb,'Kontakt plastinalari (+ / −)',5));const hl=cyl(.05,.05,.06,mPlastic('#000',.8),sx*r*.45,-l/2-.2,0,10);hl.rotation.x=Math.PI/2;g.add(tagP(hl,'Kontakt plastinalari (+ / −)',5))}
+    g.add(tagP(box(.12,.12,.04,mPaint('#d32f2f','gloss'),r*.45,-l/2+.12,r*.02),"«+» belgisi (qizil nuqta)",5));
+    // reduktor (sariq TT tipidagi quti): ikki qism korpus, vintlar, oq olti qirrali chiqish vali
+    if(o.gear>1){const gy=-l/2-r*.75,gh=r*1.4,yel=mPlastic('#f2c200',.45);g.add(tagP(rbox(r*2.3,gh*.5,r*2.5,.12,yel,0,gy+gh*.25,0),`Reduktor korpusi (${o.gear}:1)`,4));g.add(tagP(rbox(r*2.3,gh*.5,r*2.5,.12,mPlastic('#e8b800',.5),0,gy-gh*.25,0),`Reduktor korpusi (${o.gear}:1)`,4));
+     for(const[sx,sz]of[[-1,-1],[1,-1],[-1,1],[1,1]])g.add(tagP(cyl(.09,.09,gh*1.02,mMetal('#9aa3ad',.3),sx*r*.95,gy,sz*r*1.05,8),'Reduktor vintlari',4));
+     g.add(tagP(box(r*2.32,.02,r*2.52,mPlastic('#c79a00',.6),0,gy,0),'Qismlar tutashuvi',4));const out=cyl(r*.28,r*.28,r*.32,mPlastic('#f5f5f5',.4),0,gy-gh/2-r*.16,0,6);g.add(tagP(out,"Chiqish vali (olti qirrali)",4))}break}
    case'bldc':{const m=mkMotor(o.d,o.h,c);m.position.y=-.3;g.add(m);break}
    case'prop':{const sp=new THREE.Group(),pr=mkProp(o.d,o.p,+o.b,'pc',c,'CCW');sp.add(pr);sp.userData.fspin=o.id;g.add(sp);if(ctx.inst(o.id))ctx.spin(sp,1);break}
    case'wheel':{const wh=mkWheel(o.d,o.w,'slick',c,'#151515');wh.userData.fwheel=o.id;g.add(wh);break}
@@ -264,8 +283,35 @@ T.build=(B,D,ctx)=>{const X=!!window.XRAY;
     for(const dx of[-.1,.1])g.add(tagP(cyl(.025,.025,.5,mMetal('#cfd8dc',.2),dx,-.2,0,6),'Oyoqchalar',2));break}
    case'servo':{const s=mkServo(o.sk,c);g.add(s);break}
    case'camera':{const cm=mkCamera(19,c,false);g.add(cm);break}
-   case'sensor':{g.add(tagP(box(4.5,2,.16,mPCB('#1565c0','HC-SR04'),0,0,0),'Plata',1));for(const sx of[-1,1]){const tr=cyl(.8,.8,1.2,mMetal('#c4c9cf',.25),sx*1.3,0,-.65,24);tr.rotation.x=Math.PI/2;g.add(tagP(tr,'Ultratovush datchiklari',2))}break}
-   case'mcu':g.add(tagP(box(6.86,.16,5.34,mPCB('#00798c','UNO'),0,0,0),'Plata',1));g.add(tagP(box(3.5,.35,.9,mPlastic('#111',.4),0,.25,0),'Mikrokontroller',2));for(const s of[-1,1])g.add(tagP(box(5.6,.85,.25,mPlastic('#0d0d0d',.4),0,.5,s*2.4),'Ulagich qatorlari',3));break;
+   case'sensor':{const pcb=box(4.5,2,.16,mPCB('#1565c0','HC-SR04'),0,0,0);g.add(tagP(pcb,'Plata (HC-SR04)',1));
+    // ikki ultratovush o'zgartkich: alyuminiy stakan, oldida to'r, ichida pyezo; T — uzatgich, R — qabul qilgich
+    for(const sx of[-1,1]){const can=cyl(.8,.8,1.15,mMetal('#c4c9cf',.22),sx*1.3,0,-.66,36);can.rotation.x=Math.PI/2;g.add(tagP(can,'Ultratovush o\'zgartkichlari (T va R)',2));
+     const rim=new THREE.Mesh(GEO('srrim',()=>new THREE.TorusGeometry(.76,.05,8,36)),mMetal('#aab2bb',.25));rim.position.set(sx*1.3,0,-1.24);g.add(tagP(rim,'Ultratovush o\'zgartkichlari (T va R)',2));
+     const mesh=new THREE.Mesh(GEO('srmesh',()=>new THREE.CircleGeometry(.72,40)),MAT('srmeshm',()=>new THREE.MeshStandardMaterial({map:meshTex(),roughness:.6,metalness:.3,transparent:true})));mesh.position.set(sx*1.3,0,-1.235);mesh.rotation.y=Math.PI;g.add(tagP(mesh,"Himoya to'ri",3));
+     g.add(tagP(box(.28,.28,.02,mPlastic('#ffffff',.4),sx*1.3+(sx<0?.95:-.95),.75,-.09),sx<0?'«T» belgisi':'«R» belgisi',3))}
+    // orqa tomonda: kvars rezonator, 3 ta mikrosxema, kondensatorlar
+    {const xt=cyl(.22,.22,.5,mMetal('#d5d9de',.2),0,.45,.18,20);xt.rotation.z=Math.PI/2;xt.scale.z=.45;g.add(tagP(xt,'Kvars rezonator (4 MHz)',4))}
+    for(const[x,y,w]of[[-1.1,-.2,.6],[0,-.35,.5],[1.1,-.2,.6]])g.add(tagP(box(w,.45,.12,mPlastic('#141414',.4),x,y,.14),'Mikrosxemalar (kuchaytirgich, generator)',4));
+    // 4 pinli ulagich: VCC, Trig, Echo, GND — pastga qaragan
+    g.add(tagP(box(1.05,.25,.25,mPlastic('#111',.5),0,-1.12,.02),'Ulagich (VCC · Trig · Echo · GND)',5));for(let k=0;k<4;k++)g.add(tagP(box(.06,.62,.06,mMetal('#d4af37',.25),-.38+k*.254,-1.3,.02),'Ulagich (VCC · Trig · Echo · GND)',5));break}
+   case'mcu':{g.add(tagP(box(6.86,.16,5.34,mPCB('#00798c','UNO'),0,0,0),'Plata (Arduino UNO, 68,6×53,4 mm)',1));const T0=.08,blk=mPlastic('#121212',.45),met=mMetal('#c9ced4',.2),gold=mMetal('#d4af37',.25);
+    for(const[x,z]of[[-2.9,-2.4],[2.4,-2.4],[-2.9,2.1],[3.0,1.4]]){g.add(tagP(cyl(.16,.16,.18,mPlastic('#0a0a0a',.8),x,0,z,14),'Montaj teshiklari',1));g.add(tagP(cyl(.24,.24,.01,gold,x,T0+.005,z,16),'Montaj teshiklari',1))}
+    // USB-B va quvvat gnezdosi (chap chetda, plata chetidan chiqib turadi)
+    g.add(tagP(box(1.6,1.08,1.2,met,-3.2,T0+.54,-1.3),'USB-B ulagich (dastur yuklash)',2));g.add(tagP(box(.06,.7,.82,mPlastic('#0a0a0a',.6),-4.01,T0+.54,-1.3),'USB-B ulagich (dastur yuklash)',2));
+    g.add(tagP(box(1.4,1.05,.9,blk,-3.05,T0+.52,1.75),'Quvvat gnezdosi (7–12 V)',2));{const hl=cyl(.22,.22,.08,mPlastic('#000',.9),-3.76,T0+.6,1.75,16);hl.rotation.z=Math.PI/2;g.add(tagP(hl,'Quvvat gnezdosi (7–12 V)',2))}
+    // ATmega328P (DIP-28) panelda, 2×14 oyoq
+    g.add(tagP(box(3.6,.08,.95,mPlastic('#1b1b1b',.5),.9,T0+.04,.95),'Mikrosxema paneli',3));{const ch=new THREE.Mesh(GEO('atm',()=>new THREE.BoxGeometry(3.55,.34,.74)),[blk,blk,MAT('atmtop',()=>new THREE.MeshStandardMaterial({map:chipTex(),roughness:.45})),blk,blk,blk]);ch.position.set(.9,T0+.29,.95);ch.castShadow=true;g.add(tagP(ch,'Mikrokontroller ATmega328P (16 MHz)',3))}
+    for(let i=0;i<14;i++)for(const sz of[-1,1])g.add(tagP(box(.05,.2,.08,met,.9-1.65+i*.254,T0+.14,.95+sz*.4),'Mikrokontroller oyoqlari',3));
+    // kvars, stabilizator, kondensatorlar, reset tugmasi, indikator LEDlar, ICSP
+    {const xt=cyl(.2,.2,.3,met,-.6,T0+.15,.95,20);xt.scale.z=.45;g.add(tagP(xt,'Kvars rezonator (16 MHz)',4))}
+    g.add(tagP(box(.65,.45,.25,blk,-2.3,T0+.23,2.15),'Kuchlanish stabilizatori (5 V)',4));g.add(tagP(box(.65,.5,.04,met,-2.3,T0+.3,2.3),'Kuchlanish stabilizatori (5 V)',4));
+    for(const x of[-1.75,-1.25]){g.add(tagP(cyl(.3,.3,.6,mPaint('#1a237e','satin'),x,T0+.3,2.05,24),'Elektrolitik kondensatorlar (47 µF)',4));g.add(tagP(cyl(.29,.29,.02,met,x,T0+.61,2.05,24),'Elektrolitik kondensatorlar (47 µF)',4))}
+    g.add(tagP(box(.6,.3,.6,met,-2.85,T0+.15,-2.25),'Reset tugmasi',4));g.add(tagP(cyl(.17,.17,.12,mPlastic('#c62828',.4),-2.85,T0+.36,-2.25,16),'Reset tugmasi',4));
+    for(const[x,z,c]of[[.15,-1.45,'#ffb300'],[.15,-1.15,'#ffb300'],[.15,-.85,'#ffb300'],[2.2,.0,'#43a047']])g.add(tagP(box(.16,.08,.1,mGlow(c),x,T0+.04,z),'Indikator LEDlar (L, TX, RX, ON)',4));
+    for(let i=0;i<3;i++)for(let j=0;j<2;j++)g.add(tagP(box(.06,.55,.06,gold,3.05+j*.254,T0+.28,.7+i*.254),'ICSP ulagichi',5));g.add(tagP(box(.55,.25,.8,blk,3.18,T0+.12,.95),'ICSP ulagichi',5));
+    // urg'ochi ulagich qatorlari (Dupont simlar uchun): raqamli 0–13 (tepada), quvvat va analog (pastda)
+    const hdr=(x0,n,z,lab)=>{g.add(tagP(box(n*.254,.85,.25,blk,x0+n*.127,T0+.42,z),lab,5));for(let k=0;k<n;k++)g.add(tagP(box(.1,.02,.1,mPlastic('#000',.95),x0+.127+k*.254,T0+.855,z),lab,5))};
+    hdr(-1.3,10,-2.42,'Raqamli pinlar (D8–D13, GND, AREF, SDA, SCL)');hdr(1.35,8,-2.42,'Raqamli pinlar (D0–D7)');hdr(-1.05,8,2.42,'Quvvat pinlari (IOREF, RESET, 3V3, 5V, GND, VIN)');hdr(1.35,6,2.42,'Analog kirishlar (A0–A5)');break}
    case'gear':{const gm=new THREE.Mesh(gearGeo(o.zt,o.m,o.t),M);gm.rotation.x=Math.PI/2;gm.castShadow=true;g.add(tagP(gm,`Tishli gardish (${o.zt} tish, m ${fmt(o.m,1)})`,1));
     const r=o.m*o.zt/20;g.add(tagP(cyl(Math.max(.25,r*.28),Math.max(.25,r*.28),o.t/10+.2,mPlastic('#37474f',.5),0,0,0,24),'Vtulka (val uchun)',2));
     if(r>.9)for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4,hl=cyl(r*.14,r*.14,o.t/10+.02,mPlastic('#0b0b0b',.8),Math.cos(a)*r*.58,0,Math.sin(a)*r*.58,14);g.add(tagP(hl,'Yengillatish teshiklari',1))}
