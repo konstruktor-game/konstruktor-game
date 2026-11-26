@@ -133,17 +133,21 @@ function fitCamera(size){if(!isFinite(size)||size<=0)size=20;orb.tr=clamp(size*1
 // soya kamerasi modelga moslanadi: kichik dronda ham soyalar aniq bo'ladi
 function fitLights(size){const s=Math.max(20,size*.85);Object.assign(key.shadow.camera,{left:-s,right:s,top:s,bottom:-s});key.shadow.camera.updateProjectionMatrix();key.shadow.mapSize.set(4096,4096);if(key.shadow.map){key.shadow.map.dispose();key.shadow.map=null}}
 const ptrs=new Map();let pinch0=0,downAt=null;
+// window.DRAGHOOK = {down(e)→true bo'lsa detal ushlandi, move(e), up(e)→true bo'lsa surildi}: orbit o'rniga detalni sichqoncha bilan surish
+let hookDrag=false;
 function bindOrbit(el,onPick,onHover){
- el.addEventListener('pointerdown',e=>{el.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);downAt=[e.clientX,e.clientY,performance.now()];orb.idle=0;
+ el.addEventListener('pointerdown',e=>{el.setPointerCapture(e.pointerId);
+  if(e.button===0&&!e.shiftKey&&ptrs.size===0&&window.DRAGHOOK&&DRAGHOOK.down(e)){hookDrag=true;downAt=[e.clientX,e.clientY,performance.now()];orb.idle=0;return}
+  ptrs.set(e.pointerId,[e.clientX,e.clientY]);downAt=[e.clientX,e.clientY,performance.now()];orb.idle=0;
   if(ptrs.size===2){const[a,b]=[...ptrs.values()];pinch0=Math.hypot(a[0]-b[0],a[1]-b[1])}});
- el.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(!p){onHover&&onHover(e);return}orb.idle=0;
+ el.addEventListener('pointermove',e=>{if(hookDrag){DRAGHOOK.move(e);return}const p=ptrs.get(e.pointerId);if(!p){onHover&&onHover(e);return}orb.idle=0;
   if(ptrs.size===2){ptrs.set(e.pointerId,[e.clientX,e.clientY]);const[a,b]=[...ptrs.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pinch0&&d>0){orb.tr=clamp(orb.tr*pinch0/d,15,900);pinch0=d}return}
   const dx=e.clientX-p[0],dy=e.clientY-p[1];ptrs.set(e.pointerId,[e.clientX,e.clientY]);
   if(e.buttons===2||e.shiftKey){const r=new V3().subVectors(camera.position,orb.tg).normalize(),right=new V3().crossVectors(r,camera.up).normalize(),up=new V3().crossVectors(right,r);
    orb.tg.addScaledVector(right,dx*orb.r*.0016).addScaledVector(up,dy*orb.r*.0016)}
   else{orb.th+=dx*.007;orb.ph=clamp(orb.ph-dy*.007,.12,1.52)}});
- const up=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch0=0;if(downAt&&Math.hypot(e.clientX-downAt[0],e.clientY-downAt[1])<6&&performance.now()-downAt[2]<600)onPick(e);downAt=null};
- el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);downAt=null});
+ const up=e=>{if(hookDrag){hookDrag=false;const moved=DRAGHOOK.up(e);if(!moved&&downAt&&Math.hypot(e.clientX-downAt[0],e.clientY-downAt[1])<6)onPick(e);downAt=null;return}ptrs.delete(e.pointerId);if(ptrs.size<2)pinch0=0;if(downAt&&Math.hypot(e.clientX-downAt[0],e.clientY-downAt[1])<6&&performance.now()-downAt[2]<600)onPick(e);downAt=null};
+ el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{if(hookDrag){hookDrag=false;DRAGHOOK.up(e)}ptrs.delete(e.pointerId);downAt=null});
  el.addEventListener('pointerleave',e=>{onHover&&onHover(null)});
  el.addEventListener('wheel',e=>{e.preventDefault();orb.idle=0;orb.tr=clamp(orb.tr*(1+e.deltaY*.0012),15,900)},{passive:false});
  el.addEventListener('contextmenu',e=>e.preventDefault())}

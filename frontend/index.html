@@ -190,6 +190,12 @@ kbd{display:inline-block;min-width:22px;padding:1px 6px;border:1px solid #39465c
 .toast{animation:none}
 
 /* ---------- moslashuvchan ---------- */
+/* katta monitorlar: yon panellar kengroq, 3D maydon to'liq qoladi */
+@media (min-width:1600px){main{grid-template-columns:256px 1fr 410px;gap:12px;padding:12px}}
+@media (min-width:1920px){main{grid-template-columns:272px 1fr 440px}body{font-size:14.5px}}
+@media (min-width:2400px){main{grid-template-columns:300px 1fr 480px}}
+/* past ekranlar (noutbuk 768 px): sarlavha va bo'shliqlar ixchamroq */
+@media (max-height:780px) and (min-width:1101px){#app{grid-template-rows:50px 1fr}main{gap:8px;padding:8px}}
 @media (max-width:1300px){.hide-s,.logo small{display:none}.typeSw button span{display:none}main{grid-template-columns:200px 1fr 340px}}
 @media (max-width:1100px){main{grid-template-columns:58px 1fr 330px}.st span,.st .pg,.stHead,.stProg{display:none}.st{justify-content:center;padding:7px 0}.st:after{display:none}}
 @media (max-width:760px){

@@ -6,8 +6,8 @@
      g'ildirak tezligi v = rpm / uzatma · π · d / 60.
    ===================================================================== */
 (()=>{
-const DENS={plastic:1.05,wood:.6,alu:2.7,carbon:1.6,steel:7.85};
-const MATS={plastic:'Plastik',wood:"Yog'och / fanera",alu:'Alyuminiy',carbon:'Karbon',steel:"Po'lat"};
+const DENS={plastic:1.05,card:.7,wood:.6,alu:2.7,carbon:1.6,steel:7.85};
+const MATS={plastic:'Plastik',card:'Karton',wood:"Yog'och / fanera",alu:'Alyuminiy',carbon:'Karbon',steel:"Po'lat"};
 const BAT={aa2:{n:'2×AA (3 V)',v:2.8,imax:1.5,w:50},aa4:{n:'4×AA (6 V)',v:5.6,imax:1.5,w:100},li1:{n:'18650 Li-ion 1S (3,7 V)',v:3.6,imax:8,w:48},li2:{n:'18650 Li-ion 2S (7,4 V)',v:7.2,imax:8,w:96},lipo2:{n:'LiPo 2S (7,4 V)',v:7.4,imax:0,w:0},lipo3:{n:'LiPo 3S (11,1 V)',v:11.1,imax:0,w:0},lipo4:{n:'LiPo 4S (14,8 V)',v:14.8,imax:0,w:0}};
 const DCM={130:{n:'130 (kichik, 3–6 V)',vr:4.5,kv:4000,irun:.25,pm:2,w:18,d:20,l:25},280:{n:'280 (o\'rta)',vr:6,kv:2400,irun:.5,pm:8,w:40,d:24,l:30},370:{n:'370 (kuchli)',vr:6,kv:2200,irun:.8,pm:15,w:60,d:28,l:38}};
 // quyosh paneli: nominal kuchlanish va to'liq quyoshdagi tok (yorug'lik ~1000 W/m²), og'irlik, o'lchami (mm)
@@ -38,16 +38,22 @@ const KIND={
  sphere:{n:'Shar / gumbaz',ic:'dot',g:'fsphere',f:[num('d','Diametri',10,300,1,'mm'),sel('half','Shakli',{0:"To'liq shar",1:'Yarim shar (gumbaz)'}),sel('mat','Material',MATS,'material')],def:{d:60,half:'0',mat:'plastic',col:'#ffb300'}},
  solar:{n:'Quyosh paneli',ic:'sun',g:'fsolar',el:2,f:[sel('sp','Turi',Object.fromEntries(Object.entries(SOL).map(([k,v])=>[k,v.n])))],def:{sp:'s1',col:'#0d47a1'}},
  esc:{n:'ESC (tezlik regulyatori)',ic:'chip',g:'esc',el:1,f:[num('a','Maksimal tok',6,80,1,'A')],def:{a:20,col:'#263238'}},
- buzzer:{n:'Buzzer (ovoz)',ic:'volume',g:'fbuzzer',el:1,f:[],def:{col:'#111111'}}};
+ buzzer:{n:'Buzzer (ovoz)',ic:'volume',g:'fbuzzer',el:1,f:[],def:{col:'#111111'}},
+ btn:{n:'Tugma (knopka)',ic:'pointer',g:'fbtn',f:[sel('bk','Turi',{tact:'Taktil 12 mm',big:'Katta 16 mm (qopqoqli)'})],def:{bk:'tact',col:'#e53935'}},
+ pot:{n:'Potensiometr (rostlagich)',ic:'gauge',g:'fpot',f:[sel('ohm','Qarshiligi',{'1k':'1 kΩ','10k':'10 kΩ','100k':'100 kΩ'})],def:{ohm:'10k',col:'#263238'}},
+ ldr:{n:"Yorug'lik datchigi (LDR)",ic:'sun',g:'fldr',el:1,f:[],def:{col:'#c62828'}}};
 // kutubxona bo'limlari (Tinkercad va robot to'plamlaridagi kabi guruhlash)
-const CATS=[['build','Konstruksiya',['plate','beam','box','tube','bracket','sphere']],['move',"Harakat",['dcmotor','bldc','prop','wheel','gear','axle','servo']],['el','Elektr',['battery','solar','sw','esc','led','buzzer','mcu','sensor','camera']]];
-const EL_I={led:.02,servo:.15,camera:.15,sensor:.015,mcu:.05,esc:.05,buzzer:.03};
+const CATS=[['build','Konstruksiya',['plate','beam','box','tube','bracket','sphere']],['move',"Harakat",['dcmotor','bldc','prop','wheel','gear','axle','servo']],['el','Elektr',['battery','solar','sw','btn','pot','esc','led','buzzer','ldr','mcu','sensor','camera']]];
+const EL_I={led:.02,servo:.15,camera:.15,sensor:.015,mcu:.05,esc:.05,buzzer:.03,ldr:.005};
 Object.assign(GLOSS,{
  fgear:{n:'Shesterna',en:'Gear',w:"Tishli g'ildirak: aylanishni bir valdan boshqasiga uzatadi. Modul — tish o'lchami, diametri = modul × tishlar soni.",y:"Katta va kichik shesterna juftligi tezlikni pasaytirib, kuchni (momentni) oshiradi.",h:"Juftlikdagi ikkala shesterna moduli bir xil bo'lishi shart, aks holda tishlar ilashmaydi."},
  faxle:{n:"Val (o'q)",en:'Axle',w:"Po'lat yoki alyuminiy tayoqcha: g'ildirak, shesterna yoki parrak unga o'rnatiladi.",y:"Aylanuvchi detallarni bir o'qda ushlab turadi.",h:"Yuk ko'p bo'lsa yo'g'onroq val oling; podshipnik yoki vtulka ishqalanishni kamaytiradi."},
  fbracket:{n:'Burchak (L-kronshteyn)',en:'L-bracket',w:"90° egilgan metall yoki plastik plastinka, teshiklari bilan.",y:"Ikki detalni to'g'ri burchak ostida vint bilan mahkamlaydi: masalan, motorni plastinaga.",h:"Qalinroq burchak — qattiqroq birikma."},
  fsphere:{n:'Shar / gumbaz',en:'Sphere / dome',w:"Shar yoki yarim shar shaklidagi qobiq.",y:"Kuzov, burun qismi, robot boshi yoki dekor uchun.",h:"Yarim shar — qopqoq va gumbaz uchun qulay."},
  fsolar:{n:'Quyosh paneli',en:'Solar panel',w:"Yorug'likni elektr tokiga aylantiradi (kremniy elementlar).",y:"Batareyasiz ishlaydigan o'yinchoq va stansiyalar uchun manba.",h:"Tok yorug'likka bog'liq: soyada 5–10 baravar kamayadi. Motor ko'p tok olsa — panel kuchlanishi tushib ketadi."},
+ fbtn:{n:'Tugma (knopka)',en:'Push button',w:"Bosib turilganda zanjirni ulaydigan kalit; qo'yib yuborilsa — uziladi.",y:"Qo'ng'iroq, o'yin boshqaruvi, Arduino ga buyruq berish.",h:"O'chirgichdan farqi: holatini eslab qolmaydi (faqat bosilganda ishlaydi)."},
+ fpot:{n:'Potensiometr',en:'Potentiometer',w:"Burab o'zgartiriladigan qarshilik (rostlagich).",y:"LED yorqinligi, motor tezligi yoki ovoz balandligini qo'lda sozlash.",h:"Arduino da o'rta oyog'i analog kirishga (A0) ulanadi — 0…1023 qiymat beradi."},
+ fldr:{n:"Yorug'lik datchigi (LDR)",en:'Photoresistor',w:"Yorug'lik tushsa qarshiligi kamayadigan element.",y:"Qorong'ida avtomatik yonadigan chiroq, quyoshni kuzatish.",h:"10 kΩ rezistor bilan kuchlanish bo'luvchi qilib, Arduino analog kirishiga ulanadi."},
  fbuzzer:{n:'Buzzer',en:'Buzzer',w:"Kichik ovoz chiqargich (pyezo yoki elektromagnit).",y:"Signal, ogohlantirish yoki ovozli indikator.",h:"Faol (active) buzzer o'zi ovoz chiqaradi; passiv buzzerga Arduino chastota beradi."}});
 const items=B=>(B.p.free&&B.p.free.items)||[];
 const it=(kind,x,y,z,o={})=>Object.assign({kind,x,y,z,rx:0,ry:0,rz:0},KIND[kind].def,o);
@@ -69,6 +75,23 @@ const T={id:'free',name:'Erkin konstruktor',ic:'tools',desc:"Alohida detallardan
   alarm:{name:'Signalizatsiya',desc:"Arduino, masofa sensori, buzzer, LED, 4×AA korpusda",purpose:'free',p:{free:tpl([
    it('box',0,15,0,{w:120,h:30,d:80,col:'#37474f'}),it('battery',0,15,0,{bt:'aa4'}),it('mcu',0,31,0),it('sensor',0,52,-28),
    it('buzzer',40,35,20),it('led',-40,37,20,{c:'red'}),it('sw',50,34,-30)])}},
+  lamp:{name:'Stol lampasi',desc:"Asos, tirgak, abajur, kuchli LED, 4×AA, o'chirgich",purpose:'free',p:{free:tpl([
+   it('box',0,10,0,{w:80,h:20,d:80,col:'#37474f'}),it('battery',0,10,0,{bt:'aa4'}),it('tube',0,110,0,{d:12,len:180,mat:'alu',col:'#b0b6bf'}),
+   it('sphere',0,180,0,{d:70,half:'1',col:'#f5f5f5'}),it('led',0,180,0,{pw:'w1',c:'white',rx:180}),it('sw',28,24,25,{})])}},
+  bell:{name:"Eshik qo'ng'irog'i",desc:"Tugma bosilganda buzzer chalinadi, 2×AA",purpose:'free',p:{free:tpl([
+   it('box',0,12.5,0,{w:70,h:25,d:50,mat:'wood',col:'#a1887f'}),it('battery',0,12.5,0,{bt:'aa2'}),it('btn',-15,29,0,{bk:'big'}),it('buzzer',15,30,0)])}},
+  traffic:{name:'Svetofor',desc:"Arduino, 3 ta LED (qizil, sariq, yashil), tirgak",purpose:'free',p:{free:tpl([
+   it('box',0,12.5,0,{w:90,h:25,d:80,col:'#455a64'}),it('battery',0,12.5,0,{bt:'aa4'}),it('mcu',0,26,0),it('beam',0,97,25,{len:150,w:12,rz:90,col:'#263238'}),
+   it('box',0,207,25,{w:40,h:110,d:30,col:'#212121'}),it('led',0,240,8,{c:'red',rx:-90}),it('led',0,207,8,{c:'yellow',rx:-90}),it('led',0,174,8,{c:'green',rx:-90}),it('sw',35,29,-30,{})])}},
+  night:{name:'Tungi chiroq',desc:"Qorong'ida yonadi: LDR datchigi, Arduino, LED, gumbaz",purpose:'free',p:{free:tpl([
+   it('box',0,12.5,0,{w:80,h:25,d:80,mat:'card',col:'#eceff1'}),it('battery',0,12.5,0,{bt:'aa4'}),it('mcu',0,26,0),it('ldr',32,26,-32),it('led',0,43,0,{c:'yellow'}),
+   it('sphere',0,36,0,{d:80,half:'1',col:'#fff8e1'}),it('sw',-35,29,-30,{})])}},
+  carousel:{name:'Karusel',desc:"Reduktorli motor platformani sekin aylantiradi, potensiometr bilan",purpose:'free',p:{free:tpl([
+   it('box',0,20,0,{w:80,h:40,d:80,mat:'wood',col:'#8d6e63'}),it('battery',0,20,0,{bt:'aa4'}),it('dcmotor',0,50,0,{size:'130',gear:120}),it('plate',0,74,0,{w:120,d:120,t:3,col:'#e53935'}),
+   it('sphere',0,74,0,{d:30,half:'1',col:'#ffd54f'}),it('sw',-30,44,-38,{}),it('pot',30,46,-30,{})])}},
+  arm:{name:"Robot qo'l",desc:"2 ta servo, profillar, Arduino — qo'lni burish va ko'tarish",purpose:'free',p:{free:tpl([
+   it('box',0,10,0,{w:80,h:20,d:80,mat:'alu',col:'#607d8b'}),it('servo',0,39,0,{sk:'std'}),it('beam',50,66,0,{len:120,w:10}),it('servo',100,83,0,{sk:'micro'}),
+   it('beam',130,102,0,{len:80,w:10,col:'#ff7043',mat:'plastic'}),it('mcu',-90,1,0),it('battery',-90,9.2,65,{bt:'aa4'}),it('sw',-40,24,30,{})])}},
   empty:{name:"Bo'sh loyiha",desc:"Noldan o'zingiz yasang",purpose:'free',p:{free:{items:[]}}}},
  steps:[
   {id:'design',kind:'custom',t:'Detallar va loyiha',ic:'tools',slots:B=>items(B).map(o=>o.id),intro:"Kutubxonadan detal qo'shing, o'lchami va joyini belgilang. Yangi detal avval yasash stolida qismlardan yig'iladi. Modeldagi detalni bosing — uni tanlab tahrirlaysiz."},
@@ -86,7 +109,8 @@ function weight(o){const m=o.mat&&DENS[o.mat]||1;switch(o.kind){
  case'wheel':return o.d*o.w*.012+3;case'battery':{const b=BAT[o.bt];return b.w?b.w*(o.bt.startsWith('li')?o.mah/2600*.7+.3:1):(+o.bt.slice(-1))*o.mah*.026+10}
  case'sw':return 4;case'led':return 1;case'servo':return o.sk==='std'?40:9;case'camera':return 12;case'sensor':return 9;case'mcu':return 25;
  case'gear':{const r=o.m*o.zt/2;return Math.PI*r*r*o.t*.75/1000*m}case'axle':return Math.PI*(o.d/2)**2*o.len/1000*m;case'bracket':return 2*o.a*o.w*o.t/1000*m;
- case'sphere':{const r=o.d/2,sh=Math.min(3,Math.max(1,o.d*.02));return 4*Math.PI*r*r*sh/1000*m*(+o.half?.5:1)}case'solar':return SOL[o.sp].w;case'esc':return 8+o.a*.6;case'buzzer':return 3}return 0}
+ case'sphere':{const r=o.d/2,sh=Math.min(3,Math.max(1,o.d*.02));return 4*Math.PI*r*r*sh/1000*m*(+o.half?.5:1)}case'solar':return SOL[o.sp].w;case'esc':return 8+o.a*.6;case'buzzer':return 3;
+ case'btn':return o.bk==='big'?5:1.5;case'pot':return 6;case'ldr':return .5}return 0}
 function axisUp(o){const e=new THREE.Euler(o.rx*DEG,o.ry*DEG,o.rz*DEG);return new V3(0,1,0).applyEuler(e)}
 const runTxt=D=>D.solar?'quyosh bor ekan':D.tRun?fmt(D.tRun)+' daq':'—';
 // ---------- geometriya: har detalning mahalliy chegaralari (mm) va dunyodagi qutisi (AABB) ----------
@@ -99,7 +123,7 @@ function ext(o){const h=(x,y,z)=>[-x,-y,-z,x,y,z];switch(o.kind){
  case'sw':return[-8.5,-8,-6,8.5,4,6];case'led':return[-3,-7,-3,3,7,3];case'servo':return o.sk==='std'?[-21,-19,-10,21,22,10]:[-12,-12,-6,12,14,6];case'camera':return h(10,10,10);
  case'sensor':return[-22.5,-10,-19,22.5,10,1];case'mcu':return[-34.3,-1,-26.7,34.3,10,26.7];case'gear':{const r=o.m*(o.zt+2)/2;return h(r,o.t/2,r)}case'axle':return h(o.len/2,o.d/2,o.d/2);
  case'bracket':return[-o.w/2,0,0,o.w/2,o.a,o.a];case'sphere':return[-o.d/2,+o.half?0:-o.d/2,-o.d/2,o.d/2,o.d/2,o.d/2];case'solar':{const p=SOL[o.sp];return h(p.a/2,1.5,p.b/2)}
- case'esc':return h(12,4,20);case'buzzer':return h(6,5,6)}return h(5,5,5)}
+ case'esc':return h(12,4,20);case'buzzer':return h(6,5,6);case'btn':return o.bk==='big'?[-9,-4,-9,9,9,9]:[-6,-4,-6,6,5,6];case'pot':return[-8,-6,-8,8,16,8];case'ldr':return[-3,-1,-3,3,12,3]}return h(5,5,5)}
 function aabb(o){const e=ext(o),E=new THREE.Euler(o.rx*DEG,o.ry*DEG,o.rz*DEG),mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9],v=new V3();
  for(let i=0;i<8;i++){v.set(i&1?e[3]:e[0],i&2?e[4]:e[1],i&4?e[5]:e[2]).applyEuler(E);const p=[v.x+o.x,v.y+o.y,v.z+o.z];for(let k=0;k<3;k++){mn[k]=Math.min(mn[k],p[k]);mx[k]=Math.max(mx[k],p[k])}}return{mn,mx}}
 const touch=(a,b,g=1.5)=>[0,1,2].every(k=>a.mn[k]-g<=b.mx[k]&&b.mn[k]-g<=a.mx[k]);
@@ -151,7 +175,7 @@ T.issues=(B,D)=>{const L=items(B),out=[],add=(l,t,y)=>out.push({lvl:l,t,why:y});
  if(D.canFly&&D.cgOff>15)add('warn',`Og'irlik markazi ${fmt(D.cgOff)} mm siljigan`,"Parraklar markazi og'irlik markazi ustida bo'lishi kerak — aks holda qurilma bir tomonga ag'dariladi.");
  const w=D.wheels;if(w.length&&!D.driven)add('info',"G'ildiraklar aylantirilmaydi","G'ildirakni motor yoniga (45 mm ichida) qo'ying — shunda u yetaklovchi bo'ladi.");
  if(D.driven&&D.vWheel>6)add('warn',`Juda tez (${fmt(D.vWheel*3.6)} km/soat)`,"Motorga reduktor qo'shing (masalan 1:48) — tezlik pasayadi, kuch oshadi.");
- if(L.length&&!L.some(o=>o.kind==='sw')&&D.bat)add('info',"O'chirgich yo'q","Batareyani uzmasdan o'chirish uchun o'chirgich qo'shing.");
+ if(L.length&&!L.some(o=>o.kind==='sw'||o.kind==='btn')&&D.bat)add('info',"O'chirgich yo'q","Batareyani uzmasdan o'chirish uchun o'chirgich qo'shing.");
  return out};
 T.catInfo=(cat,d,p,a)=>{a("Og'irlik",fmt(d.AUW)+' g');a('Tok',fmt(d.I,2)+' A')};
 T.ext=D=>[['Og\'irlik markazi',`${fmt(D.cg.x)}, ${fmt(D.cg.y)}, ${fmt(D.cg.z)} mm`],['Yuqoriga tortish',fmt(D.lift)+' g'],['Barcha parraklar',fmt(D.thrustAll)+' g'],['Motorlar quvvati',fmt(D.Ptot,1)+' W'],["Yetakchi g'ildiraklar",D.driven+' ta'],['Batareya toki (maks.)',D.imax?fmt(D.imax,1)+' A':'—']];
@@ -226,7 +250,16 @@ T.build=(B,D,ctx)=>{const X=!!window.XRAY;
     for(const[s2,cl]of[[.4,'#d32f2f'],[-.4,'#1b1b1b']])g.add(tagP(wireMesh([[s2,0,-2],[s2*1.2,0,-3.2],[s2*1.3,0,-4.4]],cl,.1),'Quvvat simlari',5));
     g.add(tagP(wireMesh([[.9,.2,-2],[1.2,.3,-3],[1.5,.3,-3.8]],'#f9a825',.04),'Signal simi (PWM)',5));break}
    case'buzzer':{g.add(tagP(cyl(.6,.6,.9,mPlastic('#141414',.45),0,0,0,32),'Korpus',1));g.add(tagP(cyl(.12,.12,.04,mPlastic('#000',.8),0,.46,0,12),"Ovoz teshigi",1));
-    g.add(tagP(box(.12,.02,.04,mPlastic('#ffffff',.4),-.32,.46,-.3),"«+» belgisi",2));for(const dx of[-.2,.2])g.add(tagP(cyl(.025,.025,.6,mMetal('#cfd8dc',.2),dx,-.75,0,6),'Oyoqchalar',3));break}}
+    g.add(tagP(box(.12,.02,.04,mPlastic('#ffffff',.4),-.32,.46,-.3),"«+» belgisi",2));for(const dx of[-.2,.2])g.add(tagP(cyl(.025,.025,.6,mMetal('#cfd8dc',.2),dx,-.75,0,6),'Oyoqchalar',3));break}
+   case'btn':{const big=o.bk==='big',w=big?1.6:1.2;g.add(tagP(box(w,.35,w,mPlastic('#1b1b1b',.5),0,-.2,0),'Korpus',1));for(const sx of[-1,1])for(const sz of[-1,1])g.add(tagP(box(.06,.4,.12,mMetal('#cfd8dc',.2),sx*w*.42,-.4,sz*w*.42),'Oyoqchalar (4 ta)',2));
+    const cap=cyl(w*.3,w*.3,big?.5:.35,mPlastic(c,.4),0,big?.25:.15,0,24);g.add(tagP(cap,'Bosiladigan qopqoq',3));if(big)g.add(tagP(cyl(w*.42,w*.42,.12,mPlastic('#111',.5),0,-.02,0,24),'Gardish',2));break}
+   case'pot':{g.add(tagP(cyl(.8,.8,.5,mMetal('#9aa3ad',.3),0,-.35,0,28),'Korpus',1));g.add(tagP(cyl(.35,.35,.5,mMetal('#c9a227',.3),0,.15,0,16),'Rezbali vtulka',2));g.add(tagP(cyl(.12,.12,.4,mMetal('#cfd8dc',.2),0,.55,0,10),'Val',3));
+    const kn=cyl(.55,.6,.75,mPlastic(c,.45),0,.95,0,28);g.add(tagP(kn,'Dastak (ruchka)',4));g.add(tagP(box(.06,.04,.4,mPlastic('#ffffff',.4),0,1.33,-.2),'Ko\'rsatkich chizig\'i',4));
+    for(const dx of[-.35,0,.35])g.add(tagP(box(.08,.04,.5,mMetal('#cfd8dc',.2),dx,-.55,-.9),'Uchta oyoq (1 · signal · 3)',5));break}
+   case'ldr':{const hd=cyl(.25,.25,.1,mPlastic('#efe6c8',.4),0,1.05,0,20);g.add(tagP(hd,"Sezgir yuza (kadmiy sulfid)",1));
+    const zz=[];for(let k=0;k<7;k++)zz.push(new V3(-.14+.28*(k%2),1.11,-.18+k*.06));g.add(tagP(new THREE.Line(new THREE.BufferGeometry().setFromPoints(zz),new THREE.LineBasicMaterial({color:c})),"Ilon izi (o'tkazgich yo'li)",1));
+    g.add(tagP(cyl(.27,.27,.25,MAT('ldrcl',()=>new THREE.MeshPhysicalMaterial({color:'#ffffff',transparent:true,opacity:.35,roughness:.05})),0,1.12,0,20),'Shaffof qoplama',2));
+    for(const dx of[-.1,.1])g.add(tagP(cyl(.025,.025,1,mMetal('#cfd8dc',.2),dx,.5,0,6),'Oyoqchalar',3));break}}
   g.position.set(o.x/10,o.y/10,o.z/10);g.rotation.set(o.rx*DEG,o.ry*DEG,o.rz*DEG);ctx.add(o.id,g,[0,3,0])}};
 T.bom=(B,D)=>items(B).map(o=>{const K=KIND[o.kind],ps=K.f.map(f=>f.type==='sel'?f.o[o[f.k]]:fmt(o[f.k],f.step<1?1:0)+' '+(f.u||'')).join(', ');return[K.g,`${K.n} (${o.id})`,ps+(o.mat?'':''),1,weight(o)]});
 
@@ -280,7 +313,15 @@ T.bindPanel=P=>{const L=()=>items(B);
  g('fDup').onclick=()=>{pushUndo();const id=nextId(B),o=Object.assign({},s,{id,x:s.x+30});B.p.free.items.push(o);B.inst[id]=!!B.inst[s.id];SEL=id;commit();snd('click')};
  g('fDel').onclick=()=>{pushUndo();B.p.free.items=L().filter(o=>o.id!==s.id);delete B.inst[s.id];for(const k of[s.id+'+',s.id+'-'])delete B.wires[k];SEL=null;commit();snd('place')}};
 T.pick=slot=>{SEL=slot;snd('click');renderPanel()};
-addEventListener('keydown',e=>{if(!B||B.type!=='free'||typeof step!=='function'||step().kind!=='custom'||!SEL)return;const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable||e.ctrlKey||e.metaKey||e.altKey)return;
+let CLIP=null;
+addEventListener('keydown',e=>{if(!B||B.type!=='free'||typeof step!=='function'||step().kind!=='custom')return;const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable||e.altKey)return;
+ // Ctrl+C / Ctrl+V / Ctrl+D — nusxa olish, qo'yish, takrorlash (Tinkercad dagi kabi)
+ if(e.ctrlKey||e.metaKey){const cur=SEL&&items(B).find(o=>o.id===SEL);
+  if(e.code==='KeyC'&&cur){CLIP=JSON.parse(JSON.stringify(cur));if(typeof toast==='function')toast(`${IC('clipboard')} Nusxa olindi: ${esc(KIND[cur.kind].n)}`,1400);return}
+  if((e.code==='KeyV'&&CLIP)||(e.code==='KeyD'&&cur)){e.preventDefault();const src=e.code==='KeyV'?CLIP:cur;pushUndo();const id=nextId(B),o=Object.assign({},src,{id,x:clamp(src.x+20,-400,400),z:clamp(src.z+20,-400,400)});
+   B.p.free.items.push(o);B.inst[id]=src===CLIP?true:!!B.inst[cur.id];SEL=id;if(e.code==='KeyV')CLIP=Object.assign({},o);commit();snd('click');return}
+  if(e.code==='KeyA'){e.preventDefault();return}return}
+ if(e.key==='Escape'&&SEL){SEL=null;renderPanel();return}if(!SEL)return;
  const s=items(B).find(o=>o.id===SEL);if(!s)return;const st=(snapOf(B)||1)*(e.shiftKey?10:1),M={ArrowLeft:['x',-st],ArrowRight:['x',st],ArrowUp:['z',-st],ArrowDown:['z',st],PageUp:['y',st],PageDown:['y',-st]}[e.key];
  if(M){e.preventDefault();pushUndo();s[M[0]]=clamp(+(s[M[0]]+M[1]).toFixed(1),M[0]==='y'?-50:-400,M[0]==='y'?500:400);commit();return}
  if(e.key==='Delete'){e.preventDefault();const b=document.getElementById('fDel');if(b)b.click()}});
@@ -317,5 +358,45 @@ T.simTick=(S,dt,I)=>{const D=S.D,B=S.B,g=9.81,soc=D.solar?1:D.mah?Math.max(0,1-S
  else S.vel.set(S.vh?S.vh.x:0,S.vy||0,S.vh?S.vh.z:0);
  const I_A=on?D.I:0;S.amp=I_A;S.used+=I_A*dt/3.6*(window.SIM_FAST||1);S.volt=D.V;if(S.armed&&soc<=0){S.armed=false;S.status='Batareya tugadi.'}
  humSet(on&&D.motors.length>0,.6)};
+// ---------- Tinkercad uslubida: 3D'da tanlash, sichqoncha bilan surish, ko'tarish konusi ----------
+// Detalni bosib ushlab suring — u yer tekisligi bo'ylab (to'r qadami bilan) siljiydi. Tepadagi konusni tortsangiz — balandligi o'zgaradi.
+// Tanlangan detal atrofida punktir quti, burchak tutqichlari va yerdagi izi ko'rinadi.
+const SV={grp:null,line:null,hs:[],lift:null,foot:null,lbl:null,key:'',drag:null};
+const selActive=()=>B&&B.type==='free'&&typeof step==='function'&&step().kind==='custom'&&!(window.FORGE&&FORGE.active)&&!insp&&explode<.01&&!(window.RULER&&RULER.active);
+function svEnsure(){if(SV.grp)return;const g=new THREE.Group();SV.grp=g;scene.add(g);
+ const hm=new THREE.MeshBasicMaterial({color:'#ffffff',depthTest:false}),he=new THREE.LineBasicMaterial({color:'#11151c',depthTest:false});
+ for(let i=0;i<8;i++){const h=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),hm);h.renderOrder=22;const e=new THREE.LineSegments(new THREE.EdgesGeometry(h.geometry),he);e.renderOrder=23;h.add(e);g.add(h);SV.hs.push(h)}
+ const lf=new THREE.Group(),cone=new THREE.Mesh(new THREE.ConeGeometry(.5,1.1,24),new THREE.MeshBasicMaterial({color:'#1b1f26',depthTest:false}));cone.renderOrder=22;cone.position.y=.55;
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(.5,.07,8,24),new THREE.MeshBasicMaterial({color:'#ffb020',depthTest:false}));ring.rotation.x=Math.PI/2;ring.renderOrder=23;lf.add(cone,ring);lf.userData.lift=true;g.add(lf);SV.lift=lf;
+ const ft=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({color:'#ffb020',transparent:true,opacity:.16,depthWrite:false}));ft.rotation.x=-Math.PI/2;ft.renderOrder=2;g.add(ft);SV.foot=ft;
+ SV.lbl=document.createElement('div');SV.lbl.className='fLbls';const v=$('view');if(v)v.appendChild(SV.lbl)}
+function svBox(o){const a=aabb(o),dy=model?model.position.y:0;return{mn:new V3(a.mn[0]/10,a.mn[1]/10+dy,a.mn[2]/10),mx:new V3(a.mx[0]/10,a.mx[1]/10+dy,a.mx[2]/10)}}
+function svTick(t){requestAnimationFrame(svTick);const o=SEL&&selActive()&&items(B).find(x=>x.id===SEL);
+ if(!o){if(SV.grp)SV.grp.visible=false;if(SV.lbl)SV.lbl.innerHTML='';return}svEnsure();if(SV.lbl&&!SV.lbl.isConnected&&$('view'))$('view').appendChild(SV.lbl);
+ const{mn,mx}=svBox(o),sz=mx.clone().sub(mn),c=mn.clone().add(mx).multiplyScalar(.5),key=sz.toArray().map(v=>v.toFixed(2)).join(',');SV.grp.visible=true;
+ if(key!==SV.key){SV.key=key;if(SV.line){SV.grp.remove(SV.line);SV.line.geometry.dispose()}const pad=.15,geo=new THREE.EdgesGeometry(new THREE.BoxGeometry(sz.x+pad,sz.y+pad,sz.z+pad)),
+   ln=new THREE.LineSegments(geo,SV.lm||(SV.lm=new THREE.LineDashedMaterial({color:'#ffb020',dashSize:.5,gapSize:.35,depthTest:false,transparent:true})));ln.computeLineDistances();ln.renderOrder=21;SV.grp.add(ln);SV.line=ln}
+ SV.line.position.copy(c);SV.lm.opacity=.65+.35*Math.sin(t/180);
+ const k=Math.max(.15,camera.position.distanceTo(c)*.011);let i=0;for(const sx of[-1,1])for(const sy of[-1,1])for(const sz2 of[-1,1]){const h=SV.hs[i++];h.position.set(c.x+sx*(sz.x/2+.07),c.y+sy*(sz.y/2+.07),c.z+sz2*(sz.z/2+.07));h.scale.setScalar(k*.55)}
+ SV.lift.position.set(c.x,mx.y+k*1.6,c.z);SV.lift.scale.setScalar(k*1.3);
+ SV.foot.visible=mn.y>.25;SV.foot.position.set(c.x,.02,c.z);SV.foot.scale.set(sz.x,sz.z,1);
+ // yorliq: surish paytida — koordinatalar, aks holda — o'lcham
+ const p=new V3(c.x,mx.y,c.z).project(camera),r=$('view').getBoundingClientRect(),d=SV.drag;
+ SV.lbl.innerHTML=p.z<1?`<div class="fLbl ${d?'next':''} svL" style="left:${(p.x+1)/2*r.width}px;top:${(1-p.y)/2*r.height-k*48}px">${d?(d.mode==='lift'?`Y ${fmt(o.y)} mm · yerdan ${fmt(Math.max(0,aabb(o).mn[1]))} mm`:`X ${fmt(o.x)} · Z ${fmt(o.z)} mm`):`${esc(KIND[o.kind].n)} · ${sizeTxt(o)}`}</div>`:''}
+requestAnimationFrame(svTick);
+function rayFrom(e){const r=renderer.domElement.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);return ray}
+window.DRAGHOOK={
+ down(e){if(!selActive()||!model)return false;const R=rayFrom(e);let mode=null,o=null;
+  if(SV.grp&&SV.grp.visible&&SEL&&R.intersectObject(SV.lift,true).length){mode='lift';o=items(B).find(x=>x.id===SEL)}
+  else{const hit=pickAt(e,model),id=hit&&hit.userData.slot;o=id&&items(B).find(x=>x.id===id);if(o&&!hit.userData.ghost)mode='move'}
+  if(!o||!mode)return false;if(SEL!==o.id){SEL=o.id;renderPanel()}
+  const dy=model.position.y,pl=new THREE.Plane(new V3(0,1,0),-(o.y/10+dy)),pt=new V3();if(!R.ray.intersectPlane(pl,pt))return false;
+  pushUndo();SV.drag={mode,o,pl,off:new V3(o.x/10-pt.x,0,o.z/10-pt.z),y0:e.clientY,start:{x:o.x,y:o.y,z:o.z},moved:false};renderer.domElement.style.cursor=mode==='lift'?'ns-resize':'grabbing';return true},
+ move(e){const d=SV.drag;if(!d)return;const o=d.o;
+  if(d.mode==='lift'){const v=d.start.y+(d.y0-e.clientY)*orb.r*.016;o.y=clamp(+snapV(v).toFixed(1),-50,500)}
+  else{const pt=new V3();if(!rayFrom(e).ray.intersectPlane(d.pl,pt))return;o.x=clamp(+snapV((pt.x+d.off.x)*10).toFixed(1),-400,400);o.z=clamp(+snapV((pt.z+d.off.z)*10).toFixed(1),-400,400)}
+  if(o.x!==d.start.x||o.y!==d.start.y||o.z!==d.start.z)d.moved=true;
+  const ob=modelObjs[o.id];if(ob){ob.userData.base.set(o.x/10,o.y/10,o.z/10)}},
+ up(e){const d=SV.drag;SV.drag=null;renderer.domElement.style.cursor='';if(!d)return false;if(!d.moved){undoStack.pop();return false}commit();snd('place');return true}};
 regType(T);
 })();

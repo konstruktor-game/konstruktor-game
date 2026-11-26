@@ -129,3 +129,19 @@ function objSize(o){const bb=new THREE.Box3();o.updateMatrixWorld(true);o.traver
   if(typeof SIM!=='undefined'&&SIM&&SIM.on)return;if(e.key==='?'){e.preventDefault();help();return}
   const k=KEYS.find(x=>x[0]===e.code);if(!k)return;const b=document.getElementById(k[1]);if(b&&!b.disabled&&b.offsetParent!==null){e.preventDefault();b.click()}});
  const hb=document.createElement('button');hb.className='hb';hb.id='bKeys';hb.title='Tugmalar va klaviatura yorliqlari (?)';hb.innerHTML=`${IC('keyboard')}<span>Tugmalar</span>`;const m=document.getElementById('bMute');if(m)m.before(hb);hb.onclick=()=>{snd('click');help()};window.KEYHELP=help})();
+// ---------- Ko'rinish tugmalari (Tinkercad ViewCube kabi): old, orqa, chap, o'ng, tepa, 3D — yumshoq o'tish bilan ----------
+(()=>{const V=[['front','Old',-Math.PI/2,1.5,'1'],['right',"O'ng",0,1.5,'2'],['back','Orqa',Math.PI/2,1.5,'3'],['left','Chap',Math.PI,1.5,'4'],['top','Tepa',-Math.PI/2,.13,'5'],['iso','3D',-Math.PI/4,1.05,'0']];
+ const box=document.createElement('div');box.className='vcube';box.innerHTML=V.map(([id,n,,,k])=>`<button data-vc="${id}" title="${n} tomondan ko'rish (${k})">${n}</button>`).join('');
+ const view=document.getElementById('view');if(view)view.appendChild(box);let anim=null;
+ function go(id){const v=V.find(x=>x[0]===id);if(!v)return;orb.auto=false;const t=document.getElementById('tAuto');if(t)t.classList.remove('on');
+  let th=v[2];const cur=orb.th;while(th-cur>Math.PI)th-=Math.PI*2;while(cur-th>Math.PI)th+=Math.PI*2;anim={th0:cur,ph0:orb.ph,th,ph:v[3],t:0};
+  box.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.vc===id));snd('click')}
+ (function tick(){requestAnimationFrame(tick);if(!anim)return;anim.t=Math.min(1,anim.t+.06);const e=1-Math.pow(1-anim.t,3);orb.th=anim.th0+(anim.th-anim.th0)*e;orb.ph=anim.ph0+(anim.ph-anim.ph0)*e;orb.idle=0;if(anim.t>=1)anim=null})();
+ box.addEventListener('click',e=>{const b=e.target.closest('[data-vc]');if(b)go(b.dataset.vc)});
+ addEventListener('keydown',e=>{const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||e.ctrlKey||e.metaKey||e.altKey)return;if(typeof SIM!=='undefined'&&SIM&&SIM.on)return;
+  const v=V.find(x=>x[4]===e.key);if(v){e.preventDefault();go(v[0])}});
+ // tanlov bekor bo'lsin — foydalanuvchi o'zi aylantirganda
+ if(view)view.addEventListener('pointerdown',()=>{if(!anim)box.querySelectorAll('button.on').forEach(b=>b.classList.remove('on'))});
+ const st=document.createElement('style');st.textContent=`.vcube{position:absolute;left:12px;bottom:12px;z-index:5;display:flex;gap:2px;padding:3px;border-radius:10px;background:rgba(12,16,22,.72);border:1px solid var(--ln);backdrop-filter:blur(8px)}
+ .vcube button{padding:5px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:var(--tx2);transition:background .15s,color .15s}.vcube button:hover{background:var(--p3);color:var(--tx)}.vcube button.on{background:var(--ac-soft);color:var(--ac)}
+ @media (max-width:760px){.vcube{left:8px;bottom:8px}.vcube button{padding:4px 6px;font-size:10.5px}}`;document.head.appendChild(st);window.VCUBE={go}})();
