@@ -61,7 +61,7 @@ Object.assign(GLOSS,{
  fbuzzer:{n:'Buzzer',en:'Buzzer',w:"Kichik ovoz chiqargich (pyezo yoki elektromagnit).",y:"Signal, ogohlantirish yoki ovozli indikator.",h:"Faol (active) buzzer o'zi ovoz chiqaradi; passiv buzzerga Arduino chastota beradi."}});
 const items=B=>(B.p.free&&B.p.free.items)||[];
 const it=(kind,x,y,z,o={})=>Object.assign({kind,x,y,z,rx:0,ry:0,rz:0},KIND[kind].def,o);
-const tpl=L=>{let n=0;return{items:L.map(o=>Object.assign({id:'i'+(++n)},o,{goal:{x:o.x,y:o.y,z:o.z,rx:o.rx,ry:o.ry,rz:o.rz},placed:false}))}};
+const r360=v=>((+v||0)%360+360)%360,tpl=L=>{let n=0;return{items:L.map(o=>{o.rx=r360(o.rx);o.ry=r360(o.ry);o.rz=r360(o.rz);return Object.assign({id:'i'+(++n)},o,{goal:{x:o.x,y:o.y,z:o.z,rx:o.rx,ry:o.ry,rz:o.rz},placed:false})})}};
 const T={id:'free',name:'Erkin konstruktor',ic:'tools',desc:"Alohida detallardan istalgan narsa: ventilyator, fonar, mashina, tegirmon yoki o'z g'oyangiz.",defPreset:'fan',defPurpose:'free',
  purposes:{free:{t:'Erkin',note:"O'z g'oyangiz"}},colors:{},paint:[],
  spec:{free:{t:'Loyiha',ic:'tools',f:[]}},
@@ -322,7 +322,7 @@ T.panel=(B,D)=>{const L=items(B);if(SEL&&!L.find(o=>o.id===SEL))SEL=null;const s
  <div class="flib">${kinds.length?kinds.map(k=>{const K=KIND[k];return`<button data-fadd="${k}" title="${esc(K.n)} — ${esc((GLOSS[K.g]||{}).w||'')}">${IC(K.ic)}<span>${esc(K.n)}</span></button>`}).join(''):'<p class="note" style="grid-column:1/-1">Hech narsa topilmadi.</p>'}</div></div>`;
  const G=L.filter(o=>o.goal),gp=G.filter(o=>o.placed).length,gb=G.filter(o=>B.inst[o.id]).length;
  const asm=G.length?`<div class="card fasm"><h3>${IC('wrench')} Yig'ish · ${gp}/${G.length}</h3><div class="fbar"><i style="width:${G.length?gp/G.length*100:0}%"></i><b style="width:${G.length?(gb-gp)/G.length*100:0}%"></b></div>
-  <ol class="fsteps"><li class="${gb===G.length?'ok':''}"><b>1.</b> Har bir detalni <b>yasang</b> (yasash stolida qismlardan) — ${gb}/${G.length}</li><li class="${gp===G.length?'ok':''}"><b>2.</b> Stoldagi detalni <b>sudrab</b>, sariq sharpa joyiga olib boring — ${gp}/${G.length}</li><li><b>3.</b> «Simlar» bosqichida ulang va <b>shu yerda sinang</b></li></ol>
+  <ol class="fsteps"><li class="${gb===G.length?'ok':''}"><b>1.</b> Har bir detalni <b>yasang</b> (yasash stolida qismlardan) — ${gb}/${G.length}</li><li class="${gp===G.length?'ok':''}"><b>2.</b> Stoldagi detalni sharpadek <b>burang</b> va <b>sudrab</b> joyiga olib boring — ${gp}/${G.length}</li><li><b>3.</b> «Simlar» bosqichida ulang va <b>shu yerda sinang</b></li></ol>
   <button class="btn ${PV.on?'on':''} pri" id="fPower" style="width:100%;margin-top:6px">${PV.on?`${IC('x')} Quvvatni o'chirish`:`${IC('bolt')} Shu yerda sinash`}</button></div>`:`<div class="card fasm"><button class="btn pri" id="fPower" style="width:100%">${PV.on?`${IC('x')} Quvvatni o'chirish`:`${IC('bolt')} Shu yerda sinash`}</button><p class="note" style="margin:6px 0 0">Quvvat yoqiladi: simi to'g'ri ulangan motorlar aylanadi, LEDlar yonadi.</p></div>`;
  const list=`<div class="card"><h3>${IC('layers')} Loyihadagi detallar · ${L.length}</h3>${L.length?`<div class="flist">${L.map(o=>`<button data-fsel="${o.id}" class="${o.id===SEL?'on':''}">${IC(KIND[o.kind].ic)}<span>${esc(KIND[o.kind].n)}</span><small class="${!B.inst[o.id]?'st0':o.goal&&!o.placed?'st1':'st2'}">${o.id} · ${!B.inst[o.id]?'yasalmagan':o.goal&&!o.placed?'stolda':o.goal?'o\'rnatilgan':'tayyor'}</small></button>`).join('')}</div>`:'<p class="note">Hali detal yo\'q. Yuqoridan qo\'shing.</p>'}</div>`;
  let ed='';if(s){const K=KIND[s.kind];
@@ -335,7 +335,8 @@ T.panel=(B,D)=>{const L=items(B);if(SEL&&!L.find(o=>o.id===SEL))SEL=null;const s
   ${AX.map(([a,l])=>`<div class="fld"><div class="fl"><span>${l}</span><b><input class="fnum" type="number" data-fn="${a}" min="${a==='y'?-50:-400}" max="${a==='y'?500:400}" step="${snapOf(B)||1}" value="${+(+s[a]).toFixed(1)}"> mm</b></div><input type="range" data-fk="${a}" min="${a==='y'?-50:-400}" max="${a==='y'?500:400}" step="${snapOf(B)||1}" value="${s[a]}"></div>`).join('')}
   <div class="ftools"><button class="btn sm" id="fGround" title="Detalning eng past nuqtasini yerga (Y = 0) tushiradi">${IC('down')} Yerga qo'yish</button><button class="btn sm" id="fStack" title="Ostidagi eng baland detal ustiga qo'yadi">${IC('layers')} Ustiga qo'yish</button><button class="btn sm" id="fCenter" title="X va Z ni 0 ga — modelning o'rtasiga">${IC('target')} O'rtaga</button></div>
   <p class="note" style="margin:4px 0 0">Klaviatura: strelkalar — X/Z bo'yicha, PgUp/PgDn — Y bo'yicha surish (Shift — 10 baravar), Delete — o'chirish.</p>
-  <h3 style="margin-top:8px">${IC('cw')} Burilish</h3><div class="grid2" style="grid-template-columns:repeat(3,1fr)">${['rx','ry','rz'].map((a,i)=>`<div class="fld"><div class="fl"><span>${'XYZ'[i]} o'qi</span></div><select data-fk="${a}">${Object.entries(ROT).map(([v,l])=>`<option value="${v}" ${+s[a]===+v?'selected':''}>${l}</option>`).join('')}</select></div>`).join('')}</div>
+  <h3 style="margin-top:8px;display:flex;align-items:center;gap:6px">${IC('cw')} Burilish${s.goal&&!s.placed&&B.inst[s.id]?`<span class="frot ${sameRot(s,s.goal)?'ok':''}">${sameRot(s,s.goal)?'to\'g\'ri':'sharpadek emas'}</span>`:''}</h3>
+  <div class="ftools" style="margin:0 0 6px">${['x','y','z'].map(a=>`<button class="btn sm" data-rot="r${a}" title="${a.toUpperCase()} o'qi atrofida 90° burish (klaviatura: ${({x:'Shift+X',y:'Shift+Y',z:'Shift+Z'})[a]})">${IC('cw')} ${a.toUpperCase()} +90°</button>`).join('')}</div><div class="grid2" style="grid-template-columns:repeat(3,1fr)">${['rx','ry','rz'].map((a,i)=>`<div class="fld"><div class="fl"><span>${'XYZ'[i]} o'qi</span></div><select data-fk="${a}">${Object.entries(ROT).map(([v,l])=>`<option value="${v}" ${+s[a]===+v?'selected':''}>${l}</option>`).join('')}</select></div>`).join('')}</div>
   <div class="row" style="margin:10px 0 4px;flex-wrap:wrap">${B.inst[s.id]?'':`<button class="btn pri" id="fForge">${IC('wrench')} Yasash</button>`}${s.goal&&!s.placed&&B.inst[s.id]?`<button class="btn" id="fGoal" title="Kamerani bu detal o'rnatiladigan joyga buradi">${IC('target')} Joyini ko'rsat</button>`:''}<button class="btn" id="fDup" title="Yonma-yon nusxa">${IC('layers')} Nusxa</button><button class="btn" id="fMirX" title="X o'qiga nisbatan ko'zgu nusxa: chapdagi detal o'ngda paydo bo'ladi">${IC('explode')} Ko'zgu (X)</button><button class="btn" id="fMirZ" title="Z o'qiga nisbatan ko'zgu nusxa: oldidagi detal orqada paydo bo'ladi">${IC('explode')} Ko'zgu (Z)</button><button class="btn danger" id="fDel">${IC('x')} O'chirish</button></div></div>`}
  const sum=`<div class="card"><h3>${IC('chart')} Hisob</h3><div class="info" style="border:0"><span>Og'irlik</span><b>${fmt(D.AUW)} g</b><span>Kuchlanish</span><b>${D.V?fmt(D.V,1)+' V':'—'}</b><span>Tok</span><b>${fmt(D.I,2)} A</b><span>Ishlash vaqti</span><b>${runTxt(D)}</b>${D.lift?`<span>Tortish/og'irlik</span><b>${fmt(D.twr,2)} : 1 ${D.canFly?IC('ok'):''}</b>`:''}${D.driven?`<span>Tezlik</span><b>${fmt(D.vWheel*3.6,1)} km/soat</b>`:''}</div></div>`;
  return (G.length&&gp<G.length?asm+lib:lib+asm)+list+ed+sum+`<h3 style="font-size:13px;font-weight:600;margin:6px 0 6px"><i class=i-warn></i> Tekshiruv natijasi</h3><div id="stepIssues">${issuesHTML(true)}</div>`};
@@ -351,7 +352,7 @@ T.bindPanel=P=>{const L=()=>items(B);
   if(inp.type==='range'){inp.oninput=()=>{s[k]=AX.some(x=>x[0]===k)?snapV(+inp.value):+inp.value;const v=P.querySelector(`[data-fn="${k}"]`);if(v)v.value=s[k];scheduleRebuild(false)};inp.onchange=()=>{saveLocal();renderPanel()}}
   else if(inp.type==='color'){inp.oninput=()=>{s[k]=inp.value;scheduleRebuild(false)};inp.onchange=()=>saveLocal()}
   else if(inp.type==='text'){inp.oninput=()=>{s[k]=inp.value.slice(0,24);scheduleRebuild(false)};inp.onchange=()=>{pushUndo();saveLocal();renderPanel()}}
-  else inp.onchange=()=>{pushUndo();const v=inp.value;s[k]=['rx','ry','rz'].includes(k)?+v:(typeof KIND[s.kind].def[k]==='number'?+v:v);cleanup();commit()}});
+  else inp.onchange=()=>{pushUndo();const v=inp.value;s[k]=['rx','ry','rz'].includes(k)?+v:(typeof KIND[s.kind].def[k]==='number'?+v:v);if(['rx','ry','rz'].includes(k)&&s.goal&&!s.placed){ground(s);trySnap(s)}cleanup();commit()}});
  P.querySelectorAll('[data-fn]').forEach(inp=>{inp.onchange=()=>{const k=inp.dataset.fn,v=+inp.value;if(!isFinite(v))return;pushUndo();s[k]=clamp(v,+inp.min,+inp.max);if(AX.some(x=>x[0]===k))trySnap(s);cleanup();commit()};inp.onkeydown=e=>{if(e.key==='Enter')inp.blur()}});
  const g=id=>P.querySelector('#'+id);
  g('fSnap').onchange=()=>{B.p.free.snap=+g('fSnap').value;saveLocal();renderPanel()};
@@ -360,6 +361,8 @@ T.bindPanel=P=>{const L=()=>items(B);
  const mirror=ax=>{pushUndo();const id=nextId(B),o=Object.assign({},s,{id,goal:null,placed:false});o[ax]=-s[ax];if(ax==='x'){o.ry=(360-s.ry)%360;o.rz=(360-s.rz)%360}else{o.rx=(360-s.rx)%360;o.ry=(180-s.ry+360)%360}
   if(Math.abs(o[ax])<1)o[ax]=s[ax]+30;B.p.free.items.push(o);B.inst[id]=!!B.inst[s.id];SEL=id;commit();snd('click')};
  if(g('fGoal'))g('fGoal').onclick=()=>{const a=aabb(Object.assign({},s,s.goal)),dy=model?model.position.y:0;orb.tg.set((a.mn[0]+a.mx[0])/20,(a.mn[1]+a.mx[1])/20+dy,(a.mn[2]+a.mx[2])/20);orb.tr=clamp(Math.max(a.mx[0]-a.mn[0],a.mx[1]-a.mn[1],a.mx[2]-a.mn[2])/10*4+15,20,200);snd('click')};
+ const rot90=k=>{pushUndo();s[k]=((+s[k]||0)+90)%360;if(s.goal&&!s.placed){ground(s);trySnap(s)}commit();snd('flip')};
+ P.querySelectorAll('[data-rot]').forEach(b=>b.onclick=()=>rot90(b.dataset.rot));T._rot90=rot90;
  g('fMirX').onclick=()=>mirror('x');g('fMirZ').onclick=()=>mirror('z');
  if(g('fForge'))g('fForge').onclick=()=>FORGE.start(s.id);
  g('fDup').onclick=()=>{pushUndo();const id=nextId(B),o=Object.assign({},s,{id,x:s.x+30,goal:null,placed:false});B.p.free.items.push(o);B.inst[id]=!!B.inst[s.id];SEL=id;commit();snd('click')};
@@ -370,10 +373,21 @@ const goalBox=L=>{const g=L.filter(o=>o.goal).map(o=>aabb(Object.assign({},o,o.g
 function trayPlace(o){const L=items(B),gb=goalBox(L),x0=gb?gb.mx[0]+45:120;const others=L.filter(q=>q!==o&&B.inst[q.id]&&!(q.goal&&q.placed)).map(aabb).concat(L.filter(q=>q.goal).map(q=>aabb(Object.assign({},q,q.goal))));
  for(let col=0;col<6;col++)for(let row=0;row<8;row++){const t=Object.assign({},o,{x:Math.min(390,x0+col*55),z:-170+row*50});t.y=+(t.y-aabb(t).mn[1]).toFixed(1);const a=aabb(t);
   if(a.mx[0]>400)continue;if(!others.some(b=>touch(a,b,4))){o.x=t.x;o.y=t.y;o.z=t.z;return}}o.x=Math.min(390,x0);o.y=+(o.y-aabb(o).mn[1]).toFixed(1);o.z=-170}
-T.onInstall=slot=>{const o=items(B).find(x=>x.id===slot);if(!o||!o.goal||o.placed)return;Object.assign(o,{rx:o.goal.rx,ry:o.goal.ry,rz:o.goal.rz});trayPlace(o);SEL=o.id;
- setTimeout(()=>{if(typeof toast==='function')toast(`${IC('pointer')} ${esc(KIND[o.kind].n)} stolga qo'yildi — sichqoncha bilan sudrab, sariq sharpa ko'rsatgan joyga olib boring`,3600)},700)};
+// simmetriya: [mahalliy o'q, 2 = ikki tomonlama (teskarisi ham bir xil), 1 = bir tomonlama]; 'all' — har qanday burilish teng
+const SYM={tube:['y',2],axle:['x',2],beam:['x',2],wheel:['x',2],gear:['y',2],prop:['y',1],led:['y',1],buzzer:['y',1],bldc:['y',1],dcmotor:['y',1],btn:['y',1],pot:['y',1],ldr:['y',1]};
+const qOf=r=>new THREE.Quaternion().setFromEuler(new THREE.Euler(r.rx*DEG,r.ry*DEG,r.rz*DEG));
+function sameRot(o,g){const q1=qOf(o),q2=qOf(g);if(Math.abs(q1.dot(q2))>.999)return true;if(o.kind==='sphere'&&!+o.half)return true;const sy=SYM[o.kind];if(!sy)return false;
+ const ax={x:new V3(1,0,0),y:new V3(0,1,0),z:new V3(0,0,1)}[sy[0]],a=ax.clone().applyQuaternion(q1),b=ax.clone().applyQuaternion(q2),d=a.dot(b);return sy[1]===2?Math.abs(d)>.99:d>.99}
+// stoldagi burilish: maqsaddan farqli, lekin 90° li qadamlar bilan topsa bo'ladigan
+function trayRot(o){const g=o.goal,opts=[{rx:0,ry:0,rz:0},{rx:0,ry:90,rz:0},{rx:90,ry:0,rz:0},{rx:0,ry:0,rz:90},{rx:0,ry:180,rz:0},{rx:270,ry:0,rz:0}],start=(o.id.charCodeAt(o.id.length-1)+o.kind.length)%opts.length;
+ for(let k=0;k<opts.length;k++){const r=opts[(start+k)%opts.length];if(!sameRot(Object.assign({},o,r),g))return r}return{rx:g.rx,ry:g.ry,rz:g.rz}}
+const ground=o=>{o.y=+(o.y-aabb(o).mn[1]).toFixed(1)};
+T.onInstall=slot=>{const o=items(B).find(x=>x.id===slot);if(!o||!o.goal||o.placed)return;Object.assign(o,trayRot(o));trayPlace(o);SEL=o.id;
+ setTimeout(()=>{if(typeof toast==='function')toast(`${IC('pointer')} ${esc(KIND[o.kind].n)} stolga qo'yildi. Sharpaga qarab uni to'g'ri <b>buring</b> (X/Y/Z +90°) va sudrab joyiga olib boring`,4200)},700)};
 // sudrab qo'yilganda: maqsadga 12 mm gacha yaqin bo'lsa — joyiga "chiq" etib tushadi (ostidagi detal o'rnatilgan bo'lishi shart)
 function trySnap(o){if(!o.goal||o.placed)return false;const d=Math.hypot(o.x-o.goal.x,o.z-o.goal.z);if(d>12)return false;
+ if(!sameRot(o,o.goal)){const up=axisUp(o),gu=axisUp(Object.assign({},o,o.goal)),dir=v=>Math.abs(v.y)>.7?(v.y>0?'yuqoriga':'pastga'):Math.abs(v.x)>.7?(v.x>0?"o'ngga":'chapga'):(v.z<0?'oldinga':'orqaga');
+  toast(`${IC('warn')} Joyi to'g'ri, lekin <b>burilishi noto'g'ri</b>: hozir ${dir(up)} qaragan, ${dir(gu)}${dir(up)===dir(gu)?' — o\'z o\'qi atrofida ham burish kerak':''} qarashi kerak. «Burilish» tugmalaridan foydalaning`,3800);snd('err');return false}
  const placed=items(B).filter(q=>q.goal&&q.placed&&q!==o),test=Object.assign({},o,o.goal),fl=floating(placed.concat([test]));
  if(fl.includes(test)){const under=items(B).filter(q=>q.goal&&!q.placed&&q!==o&&touch(aabb(test),aabb(Object.assign({},q,q.goal)))).map(q=>KIND[q.kind].n);
   toast(`${IC('warn')} Avval ostidagi detalni o'rnating${under.length?': '+esc(under.slice(0,2).join(', ')):''}`,2600);snd('err');return false}
@@ -408,6 +422,7 @@ addEventListener('keydown',e=>{if(!B||B.type!=='free'||typeof step!=='function'|
    B.p.free.items.push(o);B.inst[id]=src===CLIP?true:!!B.inst[cur.id];SEL=id;if(e.code==='KeyV')CLIP=Object.assign({},o);commit();snd('click');return}
   if(e.code==='KeyA'){e.preventDefault();return}return}
  if(e.key==='Escape'&&SEL){SEL=null;renderPanel();return}if(!SEL)return;
+ if(e.shiftKey&&['KeyX','KeyY','KeyZ'].includes(e.code)&&T._rot90){e.preventDefault();e.stopImmediatePropagation();T._rot90('r'+e.code.slice(3).toLowerCase());return}
  const s=items(B).find(o=>o.id===SEL);if(!s)return;const st=(snapOf(B)||1)*(e.shiftKey?10:1),M={ArrowLeft:['x',-st],ArrowRight:['x',st],ArrowUp:['z',-st],ArrowDown:['z',st],PageUp:['y',st],PageDown:['y',-st]}[e.key];
  if(M){e.preventDefault();pushUndo();s[M[0]]=clamp(+(s[M[0]]+M[1]).toFixed(1),M[0]==='y'?-50:-400,M[0]==='y'?500:400);trySnap(s);commit();return}
  if(e.key==='Delete'){e.preventDefault();const b=document.getElementById('fDel');if(b)b.click()}});
@@ -418,7 +433,7 @@ addEventListener('keydown',e=>{if(!B||B.type!=='free'||typeof step!=='function'|
 .fsize{margin:8px 0 2px;padding:7px 9px;border:1px dashed var(--ln2);border-radius:8px;font-size:12px;color:var(--tx2)}.fsize b{color:#ffd58a}.fsize i{width:13px;height:13px}
 .fsnap{margin-left:auto;font-size:11.5px;font-weight:500;color:var(--mu);display:flex;align-items:center;gap:5px}.fsnap select{padding:2px 4px;font-size:11.5px}
 .ftools{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.ftools .btn{flex:1;min-width:0;font-size:11.5px;padding:6px 6px}
-.fasm h3{margin-bottom:6px}.fbar{position:relative;height:8px;border-radius:5px;background:var(--p3,#151b24);overflow:hidden;display:flex}.fbar i{display:block;height:100%;background:linear-gradient(90deg,#2fcf7a,#7be8a9);transition:width .4s}.fbar b{display:block;height:100%;background:rgba(255,194,74,.55);transition:width .4s}
+.frot{margin-left:auto;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(255,194,74,.16);color:#ffc24a}.frot.ok{background:rgba(47,207,122,.16);color:#7be8a9}.fasm h3{margin-bottom:6px}.fbar{position:relative;height:8px;border-radius:5px;background:var(--p3,#151b24);overflow:hidden;display:flex}.fbar i{display:block;height:100%;background:linear-gradient(90deg,#2fcf7a,#7be8a9);transition:width .4s}.fbar b{display:block;height:100%;background:rgba(255,194,74,.55);transition:width .4s}
 .fsteps{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--tx2)}.fsteps li{padding:6px 8px;border:1px solid var(--ln);border-radius:8px}.fsteps li.ok{border-color:rgba(47,207,122,.45);color:#bff3d6}.fsteps li b{color:var(--tx)}
 #fPower.on{background:#c62828;border-color:#c62828}.flist small.st0{color:var(--mu)}.flist small.st1{color:#ffc24a}.flist small.st2{color:#7be8a9}
 .flist{display:flex;flex-direction:column;gap:4px;max-height:220px;overflow:auto}.flist button{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--ln);border-radius:9px;text-align:left;font-size:12px}.flist button span{flex:1}.flist button small{color:var(--mu);font-size:10.5px}.flist button.on{border-color:var(--ac);background:var(--ac-soft)}.flist i{width:15px;height:15px}`;document.head.appendChild(st)}
