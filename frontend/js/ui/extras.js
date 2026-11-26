@@ -145,3 +145,22 @@ function objSize(o){const bb=new THREE.Box3();o.updateMatrixWorld(true);o.traver
  const st=document.createElement('style');st.textContent=`.vcube{position:absolute;left:12px;bottom:12px;z-index:5;display:flex;gap:2px;padding:3px;border-radius:10px;background:rgba(12,16,22,.72);border:1px solid var(--ln);backdrop-filter:blur(8px)}
  .vcube button{padding:5px 9px;border-radius:7px;font-size:11.5px;font-weight:600;color:var(--tx2);transition:background .15s,color .15s}.vcube button:hover{background:var(--p3);color:var(--tx)}.vcube button.on{background:var(--ac-soft);color:var(--ac)}
  @media (max-width:760px){.vcube{left:8px;bottom:8px}.vcube button{padding:4px 6px;font-size:10.5px}}`;document.head.appendChild(st);window.VCUBE={go}})();
+// ---------- Shablon rasmlari: har bir shablon haqiqiy 3D modeldan chiziladi (bir marta, keyin xotirada) ----------
+(()=>{const cache={},q=[];let busy=false;
+ const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(32,1.6,.1,4000),hl=new THREE.HemisphereLight('#e8eeff','#2a2f36',.9),dl=new THREE.DirectionalLight('#ffffff',2.2);dl.position.set(40,80,-30);sc.add(hl,dl);
+ const fl=new THREE.Mesh(new THREE.CircleGeometry(1,48),new THREE.MeshBasicMaterial({color:'#000',transparent:true,opacity:.28,depthWrite:false}));fl.rotation.x=-Math.PI/2;sc.add(fl);
+ function render(type,pid){const T=TYPES[type];if(!T||!T.presets[pid])return null;const b=newProject(type,pid);for(const s of T.steps)if(s.slots)for(const x of s.slots(b))b.inst[x]=true;
+  if(type==='free')for(const o of (b.p.free&&b.p.free.items)||[])if(o.goal){Object.assign(o,o.goal);o.placed=true}
+  const g=new THREE.Group(),D=T.derive(b),keepB=B;B=b;try{T.build(b,D,{B:b,D,step:'preview',inst:()=>true,add(s,o){g.add(o);return o},deco(o){g.add(o);return o},spin(o){return o}})}catch(e){B=keepB;return null}B=keepB;
+  sc.add(g);const bb=new THREE.Box3().setFromObject(g);if(bb.isEmpty()){sc.remove(g);return null}g.position.y-=Math.min(0,bb.min.y);bb.setFromObject(g);
+  const c=bb.getCenter(new V3()),s=bb.getSize(new V3()),R=Math.max(s.x*.9,s.y*1.25,s.z*.9)*.85+1;fl.scale.setScalar(Math.max(s.x,s.z)*.7);fl.position.set(c.x,.01,c.z);
+  cam.position.set(c.x+R*1.5,c.y+R*.95,c.z-R*1.65);cam.lookAt(c);sc.environment=scene.environment;
+  const W=renderer.domElement.width,H=renderer.domElement.height;cam.aspect=W/H;cam.updateProjectionMatrix();const bg=scene.background;sc.background=new THREE.Color('#161c26');
+  renderer.render(sc,cam);const cv=document.createElement('canvas');cv.width=320;cv.height=200;const x=cv.getContext('2d'),r=Math.max(320/W,200/H),w=W*r,h=H*r;x.drawImage(renderer.domElement,(320-w)/2,(200-h)/2,w,h);
+  sc.remove(g);g.traverse(o=>{if(o.userData&&o.userData.dispose&&o.geometry)o.geometry.dispose()});return cv.toDataURL('image/jpeg',.82)}
+ function pump(){if(busy)return;const el=q.shift();if(!el)return;busy=true;setTimeout(()=>{const k=el.dataset.th;if(!cache[k]){const[t,p]=k.split(':');cache[k]=render(t,p)||'none'}
+  if(cache[k]!=='none'&&el.isConnected){el.style.backgroundImage=`url(${cache[k]})`;el.classList.add('on')}busy=false;setTimeout(pump,10)},0)}
+ function fill(){document.querySelectorAll('[data-th]').forEach(el=>{const k=el.dataset.th;if(cache[k]&&cache[k]!=='none'){el.style.backgroundImage=`url(${cache[k]})`;el.classList.add('on')}else q.push(el)});pump()}
+ const st=document.createElement('style');st.textContent=`.tcard.tpre{padding-top:8px}.tthumb{height:112px;margin:-2px -4px 8px;border-radius:9px;background:#161c26 center/cover no-repeat;position:relative;overflow:hidden;opacity:.35;transition:opacity .35s,transform .35s}
+ .tthumb:after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.07) 50%,transparent 70%);background-size:200% 100%;animation:thsh 1.2s linear infinite}.tthumb.on{opacity:1}.tthumb.on:after{display:none}
+ .tcard.tpre:hover .tthumb{transform:scale(1.04)}@keyframes thsh{from{background-position:120% 0}to{background-position:-80% 0}}`;document.head.appendChild(st);window.PREVIEW={fill,render}})();

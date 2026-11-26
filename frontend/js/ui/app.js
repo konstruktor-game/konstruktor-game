@@ -144,7 +144,7 @@ function cleanup(){const all=new Set();for(const s of T.steps)if(s.slots)for(con
 
 // ---------------- o'rnatish ----------------
 function correctDir(i){const q=D.mot.find(m=>m.i==i);if(!q)return'CW';return B.rev?(q.dir==='CW'?'CCW':'CW'):q.dir}
-function install(slot,quiet){if(B.inst[slot])return;if(!quiet)pushUndo();const m=slot.match(T.propSlot||/^$/);if(m&&B.type==='copter')B.dirs[m[1]]=propTool;B.inst[slot]=true;
+function install(slot,quiet){if(B.inst[slot])return;if(!quiet)pushUndo();const m=slot.match(T.propSlot||/^$/);if(m&&B.type==='copter')B.dirs[m[1]]=propTool;B.inst[slot]=true;if(T.onInstall)T.onInstall(slot);
  if(!quiet){snd('screw');rebuild();animateDrop(slot);saveLocal();renderPanel();setHint();const L=activeSlots();if(L.every(x=>B.inst[x])){snd('ok');toast("<i class=i-ok></i> Bosqich yig'ildi")}}}
 function autoInstall(){pushUndo();const L=activeSlots();for(let k=0;k<L.length+1;k++)for(const x of L)if(!B.inst[x]&&slotAvailable(B,T,x)){const m=x.match(T.propSlot||/^$/);if(m&&B.type==='copter')B.dirs[m[1]]=correctDir(m[1]);B.inst[x]=true}
  snd('screw');commit();setHint();for(const x of L)animateDrop(x)}
@@ -462,10 +462,10 @@ function copyText(t){(navigator.clipboard?navigator.clipboard.writeText(t):Promi
 // ---------------- yangi loyiha, lug'at ----------------
 function newDialog(type){let sel=type||B.type;const draw=()=>{const Tt=TYPES[sel];openModal(`<h2><i class=i-plus></i> Yangi loyiha</h2><p style="color:var(--mu)">Nima yasaymiz? Keyin shablonni tanlang — barcha detallarni o'zingiz o'zgartira olasiz.</p>
  <div class="tcards">${Object.values(TYPES).map(t=>`<button class="tcard ${t.id===sel?'on':''}" data-nt="${t.id}"><div class="ic">${IC(t.ic)}</div><b>${esc(t.name)}</b><span>${esc(t.desc)}</span></button>`).join('')}</div>
- <h3 style="margin-top:6px">${IC(Tt.ic)} Shablon</h3><div class="tcards">${Object.entries(Tt.presets).map(([id,p])=>`<button class="tcard" data-np="${id}"><b>${esc(p.name)}</b><span>${esc(p.desc)}</span></button>`).join('')}</div>
+ <h3 style="margin-top:6px">${IC(Tt.ic)} Shablon</h3><div class="tcards">${Object.entries(Tt.presets).map(([id,p])=>`<button class="tcard tpre" data-np="${id}"><div class="tthumb" data-th="${sel}:${id}"></div><b>${esc(p.name)}</b><span>${esc(p.desc)}</span></button>`).join('')}</div>
  <p style="font-size:12px;color:var(--mu)">Joriy loyiha brauzerda saqlanadi; serverga saqlash uchun «Saqlash / ulashish» dan foydalaning.</p>`,true);
  document.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>{sel=b.dataset.nt;draw()});
- document.querySelectorAll('[data-np]').forEach(b=>b.onclick=()=>{closeModal();setProject(newProject(sel,b.dataset.np));snd('ok')})};draw()}
+ document.querySelectorAll('[data-np]').forEach(b=>b.onclick=()=>{closeModal();setProject(newProject(sel,b.dataset.np));snd('ok')});if(window.PREVIEW)PREVIEW.fill()};draw()}
 $('bNew').onclick=()=>newDialog();
 $('bGloss').onclick=()=>{const draw=q=>{q=(q||'').toLowerCase();const L=Object.entries(GLOSS).filter(([k,g])=>!q||(g.n+g.en+g.w).toLowerCase().includes(q));
  $('glList').innerHTML=L.map(([k,g])=>`<div class="gl"><b>${esc(g.n)}</b> <small>${esc(g.en)}</small><p><i class=i-pin></i> ${esc(g.w)}</p><p><i class=i-help></i> ${esc(g.y)}</p><p><i class=i-ok></i> ${esc(g.h)}</p></div>`).join('')||'<p>Topilmadi</p>'};
