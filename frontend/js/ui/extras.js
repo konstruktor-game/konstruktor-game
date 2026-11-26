@@ -119,7 +119,7 @@ function objSize(o){const bb=new THREE.Box3();o.updateMatrixWorld(true);o.traver
 (()=>{const KEYS=[['KeyE','tExplode','E','Ajratish — detallarni bir-biridan uzoqlashtiradi'],['KeyL','tLabels','L','Nomlar — har detal ustida nomi'],['KeyX','tXray','X',"Ichini ko'rish — kuzov shaffof bo'ladi"],
   ['KeyM','tRuler','M',"O'lchash — ikki nuqta orasidagi masofa"],['KeyD','tDims','D',"O'lchamlar — eni, uzunligi, balandligi (m / sm)"],['KeyF','tFit','F','Markazlash — modelni ekranga sig\'diradi'],['KeyR','tAuto','R','Aylanish — model sekin aylanadi'],['KeyS','tShot','S','Rasm — PNG sifatida saqlash'],
   ['BracketRight','bNext',']','Keyingi bosqich'],['BracketLeft','bPrev','[','Oldingi bosqich']],
-  OTHER=[['Ctrl + Z','Bekor qilish'],['Ctrl + Y','Qaytarish'],['Esc',"Oynani yopish / 360° ko'rishdan chiqish"],['Sichqoncha chap','Aylantirish, detalni tanlash'],['Sichqoncha o\'ng / Shift','Surish'],['G\'ildirakcha','Yaqinlashtirish'],['?','Shu ro\'yxat']];
+  OTHER=[['Ctrl + Z','Bekor qilish'],['Ctrl + Y','Qaytarish'],['Esc',"Oynani yopish / 360° ko'rishdan chiqish"],['Sichqoncha chap','Aylantirish, detalni tanlash'],['Sichqoncha o\'ng / Shift','Surish'],['G\'ildirakcha','Yaqinlashtirish'],['?','Shu ro\'yxat'],['G / R / S','Erkin konstruktor (Blender kabi): surish / burish / o\'lcham'],['X / Y / Z (G, R, S dan keyin)','Faqat shu o\'q bo\'yicha; raqam yozsangiz — aniq qiymat'],['Enter / Esc','Tasdiqlash / bekor qilish'],['Shift + D','Nusxa olib, darhol surish'],['Numpad 1 / 3 / 7','Old / o\'ng / tepa (Ctrl bilan — orqa / chap)'],['Numpad .','Tanlangan detalga yaqinlashish'],['F12','Yuqori sifatli render (PNG)']];
  for(const[,id,k]of KEYS){const b=document.getElementById(id);if(b&&b.classList.contains('vt')&&!b.querySelector('kbd'))b.insertAdjacentHTML('beforeend',`<kbd class="vk">${k}</kbd>`);if(b&&!/\(/.test(b.title||''))b.title=(b.title||'')+` (${k})`}
  const st=document.createElement('style');st.textContent=`.vt{position:relative}.vk{margin-left:auto;padding:0 5px;min-width:16px;height:16px;line-height:16px;border-radius:4px;border:1px solid var(--ln2);color:var(--mu);font:600 10px/16px ui-monospace,Consolas,monospace;text-align:center;opacity:.8}
  .vt.on .vk{color:inherit;border-color:currentColor}.kbList{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;align-items:center;font-size:13px}.kbList kbd{justify-self:start;padding:2px 8px;border-radius:6px;border:1px solid var(--ln2);background:var(--bg2,#11161e);font:600 12px ui-monospace,Consolas,monospace;color:var(--tx);white-space:nowrap}
@@ -138,7 +138,8 @@ function objSize(o){const bb=new THREE.Box3();o.updateMatrixWorld(true);o.traver
   box.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.vc===id));snd('click')}
  (function tick(){requestAnimationFrame(tick);if(!anim)return;anim.t=Math.min(1,anim.t+.06);const e=1-Math.pow(1-anim.t,3);orb.th=anim.th0+(anim.th-anim.th0)*e;orb.ph=anim.ph0+(anim.ph-anim.ph0)*e;orb.idle=0;if(anim.t>=1)anim=null})();
  box.addEventListener('click',e=>{const b=e.target.closest('[data-vc]');if(b)go(b.dataset.vc)});
- addEventListener('keydown',e=>{const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||e.ctrlKey||e.metaKey||e.altKey)return;if(typeof SIM!=='undefined'&&SIM&&SIM.on)return;
+ addEventListener('keydown',e=>{const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||e.metaKey||e.altKey)return;if(typeof SIM!=='undefined'&&SIM&&SIM.on)return;
+  if(e.ctrlKey&&!/^Numpad/.test(e.code))return;if(/^Numpad[0137]$/.test(e.code)){const id={Numpad1:'front',Numpad3:'right',Numpad7:'top',Numpad0:'iso'}[e.code],alt={front:'back',right:'left'}[id];e.preventDefault();go(e.ctrlKey&&alt?alt:id);return}
   const v=V.find(x=>x[4]===e.key);if(v){e.preventDefault();go(v[0])}});
  // tanlov bekor bo'lsin — foydalanuvchi o'zi aylantirganda
  if(view)view.addEventListener('pointerdown',()=>{if(!anim)box.querySelectorAll('button.on').forEach(b=>b.classList.remove('on'))});
@@ -164,3 +165,13 @@ function objSize(o){const bb=new THREE.Box3();o.updateMatrixWorld(true);o.traver
  const st=document.createElement('style');st.textContent=`.tcard.tpre{padding-top:8px}.tthumb{height:112px;margin:-2px -4px 8px;border-radius:9px;background:#161c26 center/cover no-repeat;position:relative;overflow:hidden;opacity:.35;transition:opacity .35s,transform .35s}
  .tthumb:after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.07) 50%,transparent 70%);background-size:200% 100%;animation:thsh 1.2s linear infinite}.tthumb.on{opacity:1}.tthumb.on:after{display:none}
  .tcard.tpre:hover .tthumb{transform:scale(1.04)}@keyframes thsh{from{background-position:120% 0}to{background-position:-80% 0}}`;document.head.appendChild(st);window.PREVIEW={fill,render}})();
+
+// ---------- F12 — yuqori sifatli render (Blender dagi kabi): 2,5 baravar aniqlik, yordamchi chiziqlarsiz, PNG ---------
+(()=>{function render(){const pr=renderer.getPixelRatio(),hid=[];scene.traverse(o=>{if(o.visible&&o.renderOrder>=11&&o.renderOrder<=25){o.visible=false;hid.push(o)}});
+  const lb=document.querySelectorAll('.fLbls');lb.forEach(e=>e.style.visibility='hidden');
+  try{const el=$('view'),w=el.clientWidth,h=el.clientHeight,k=Math.min(3,4096/Math.max(w,h));renderer.setPixelRatio(k);renderer.setSize(w,h,false);renderFrame();
+   const c=renderer.domElement,o=document.createElement('canvas');o.width=c.width;o.height=c.height;const g=o.getContext('2d');g.drawImage(c,0,0);
+   const fs=Math.round(o.height*.022);g.font=`600 ${fs}px Inter,Segoe UI,Arial`;g.fillStyle='rgba(255,255,255,.55)';g.textAlign='right';g.fillText(`Konstruktor · ${(B&&B.name)||(TYPES[B.type]||{}).name||''}`,o.width-fs,o.height-fs);
+   o.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='konstruktor-render.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);toast(`${IC('image')} Render saqlandi: ${o.width}×${o.height} px`,2400)},'image/png')}
+  finally{renderer.setPixelRatio(pr);resize();hid.forEach(o=>o.visible=true);lb.forEach(e=>e.style.visibility='')}snd('ok')}
+ addEventListener('keydown',e=>{if(e.key==='F12'&&!e.ctrlKey&&!e.shiftKey){const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA')return;e.preventDefault();render()}});window.HIRENDER=render})();

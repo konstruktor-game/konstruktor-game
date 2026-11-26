@@ -334,7 +334,7 @@ T.panel=(B,D)=>{const L=items(B);if(SEL&&!L.find(o=>o.id===SEL))SEL=null;const s
   <h3 style="margin-top:8px;display:flex;align-items:center;gap:6px">${IC('pin')} Joyi (mm)<label class="fsnap" title="Surganda joy shu qadamga yaxlitlanadi (Tinkercad dagi kabi)">To'r <select id="fSnap">${[0,1,5,10].map(v=>`<option value="${v}" ${snapOf(B)===v?'selected':''}>${v?v+' mm':"o'chiq"}</option>`).join('')}</select></label></h3>
   ${AX.map(([a,l])=>`<div class="fld"><div class="fl"><span>${l}</span><b><input class="fnum" type="number" data-fn="${a}" min="${a==='y'?-50:-400}" max="${a==='y'?500:400}" step="${snapOf(B)||1}" value="${+(+s[a]).toFixed(1)}"> mm</b></div><input type="range" data-fk="${a}" min="${a==='y'?-50:-400}" max="${a==='y'?500:400}" step="${snapOf(B)||1}" value="${s[a]}"></div>`).join('')}
   <div class="ftools"><button class="btn sm" id="fGround" title="Detalning eng past nuqtasini yerga (Y = 0) tushiradi">${IC('down')} Yerga qo'yish</button><button class="btn sm" id="fStack" title="Ostidagi eng baland detal ustiga qo'yadi">${IC('layers')} Ustiga qo'yish</button><button class="btn sm" id="fCenter" title="X va Z ni 0 ga — modelning o'rtasiga">${IC('target')} O'rtaga</button></div>
-  <p class="note" style="margin:4px 0 0">Klaviatura: strelkalar — X/Z bo'yicha, PgUp/PgDn — Y bo'yicha surish (Shift — 10 baravar), Delete — o'chirish.</p>
+  <p class="note" style="margin:4px 0 0">Blender kabi: <b>G</b> — surish, <b>R</b> — burish, <b>S</b> — o'lcham, keyin <b>X/Y/Z</b> va raqam, <b>Enter</b>. Shift+D — nusxa. Strelkalar, PgUp/PgDn — surish, Delete — o'chirish.</p>
   <h3 style="margin-top:8px;display:flex;align-items:center;gap:6px">${IC('cw')} Burilish${s.goal&&!s.placed&&B.inst[s.id]?`<span class="frot ${sameRot(s,s.goal)?'ok':''}">${sameRot(s,s.goal)?'to\'g\'ri':'sharpadek emas'}</span>`:''}</h3>
   <div class="ftools" style="margin:0 0 6px">${['x','y','z'].map(a=>`<button class="btn sm" data-rot="r${a}" title="${a.toUpperCase()} o'qi atrofida 90° burish (klaviatura: ${({x:'Shift+X',y:'Shift+Y',z:'Shift+Z'})[a]})">${IC('cw')} ${a.toUpperCase()} +90°</button>`).join('')}</div><div class="grid2" style="grid-template-columns:repeat(3,1fr)">${['rx','ry','rz'].map((a,i)=>`<div class="fld"><div class="fl"><span>${'XYZ'[i]} o'qi</span></div><select data-fk="${a}">${Object.entries(ROT).map(([v,l])=>`<option value="${v}" ${+s[a]===+v?'selected':''}>${l}</option>`).join('')}</select></div>`).join('')}</div>
   <div class="row" style="margin:10px 0 4px;flex-wrap:wrap">${B.inst[s.id]?'':`<button class="btn pri" id="fForge">${IC('wrench')} Yasash</button>`}${s.goal&&!s.placed&&B.inst[s.id]?`<button class="btn" id="fGoal" title="Kamerani bu detal o'rnatiladigan joyga buradi">${IC('target')} Joyini ko'rsat</button>`:''}<button class="btn" id="fDup" title="Yonma-yon nusxa">${IC('layers')} Nusxa</button><button class="btn" id="fMirX" title="X o'qiga nisbatan ko'zgu nusxa: chapdagi detal o'ngda paydo bo'ladi">${IC('explode')} Ko'zgu (X)</button><button class="btn" id="fMirZ" title="Z o'qiga nisbatan ko'zgu nusxa: oldidagi detal orqada paydo bo'ladi">${IC('explode')} Ko'zgu (Z)</button><button class="btn danger" id="fDel">${IC('x')} O'chirish</button></div></div>`}
@@ -414,7 +414,7 @@ function pvTick(dt){if(!PV.on||!model)return;if(!selActive()){pvToggle(false);re
   for(const o of items(B)){if(o===q.o)continue;const a=aabb(o),cx=(a.mn[0]+a.mx[0])/2,cz=(a.mn[2]+a.mx[2])/2;if(Math.hypot(cx-q.o.x,cz-q.o.z)>15)continue;if(up.y>0?a.mn[1]<top-2:a.mx[1]>top+2)continue;const ob=modelObjs[o.id];if(ob)ob.rotation.y+=dt*w*Math.sign(up.y)}}
  if(items(B).some(o=>o.kind==='buzzer'&&PV.ok[o.id])){PV.beep-=dt;if(PV.beep<=0){PV.beep=.8;snd('ok',.35)}}}
 let CLIP=null;
-addEventListener('keydown',e=>{if(!B||B.type!=='free'||typeof step!=='function'||step().kind!=='custom')return;const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable||e.altKey)return;
+addEventListener('keydown',e=>{if(!B||B.type!=='free'||typeof step!=='function'||step().kind!=='custom'||(typeof modOn==='function'&&modOn()))return;const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable||e.altKey)return;
  // Ctrl+C / Ctrl+V / Ctrl+D — nusxa olish, qo'yish, takrorlash (Tinkercad dagi kabi)
  if(e.ctrlKey||e.metaKey){const cur=SEL&&items(B).find(o=>o.id===SEL);
   if(e.code==='KeyC'&&cur){CLIP=JSON.parse(JSON.stringify(cur));if(typeof toast==='function')toast(`${IC('clipboard')} Nusxa olindi: ${esc(KIND[cur.kind].n)}`,1400);return}
@@ -508,5 +508,48 @@ window.DRAGHOOK={
   if(o.x!==d.start.x||o.y!==d.start.y||o.z!==d.start.z)d.moved=true;
   const ob=modelObjs[o.id];if(ob){ob.userData.base.set(o.x/10,o.y/10,o.z/10)}},
  up(e){const d=SV.drag;SV.drag=null;renderer.domElement.style.cursor='';if(!d)return false;if(!d.moved){undoStack.pop();return false}if(!trySnap(d.o))snd('place');commit();return true}};
+// ---------- Blender uslubidagi tahrirlash: G — surish, R — burish, S — o'lcham; X/Y/Z — o'q; raqam — aniq qiymat ----------
+// Enter yoki sichqoncha chap tugmasi — tasdiqlash, Esc yoki o'ng tugma — bekor qilish. Shift+D — nusxa olib surish. Numpad . — tanlanganga yaqinlashish.
+const MOD={m:null,mx:0,my:0,hud:null};
+const modOn=()=>!!MOD.m;
+function modHud(){if(!MOD.hud){MOD.hud=document.createElement('div');MOD.hud.className='bhud';}const v=$('view');if(v&&!MOD.hud.isConnected)v.appendChild(MOD.hud);const m=MOD.m;if(!m){MOD.hud.style.display='none';return}
+ const o=m.o,ax=m.ax?`<b class="ax ax${m.ax}">${m.ax.toUpperCase()}</b>`:'<i>erkin</i>',num=m.num?`<span class="num">${esc(m.num)}</span>`:'';
+ const val=m.kind==='g'?`X ${fmt(o.x)} · Y ${fmt(o.y)} · Z ${fmt(o.z)} mm`:m.kind==='r'?`X ${o.rx}° · Y ${o.ry}° · Z ${o.rz}°`:`× ${fmt(m.f||1,2)}`;
+ MOD.hud.style.display='';MOD.hud.innerHTML=`<b>${({g:'Surish (G)',r:'Burish (R)',s:"O'lcham (S)"})[m.kind]}</b> · o'q: ${ax} ${num}<span class="v">${val}</span><small>X / Y / Z — o'q · raqam — aniq qiymat${m.kind==='g'?' (mm)':m.kind==='r'?' (gradus, 90° qadam)':' (marta)'} · Enter — tasdiqlash · Esc — bekor</small>`}
+function modStart(kind){const o=SEL&&items(B).find(x=>x.id===SEL);if(!o||!selActive()||MOD.m||SV.drag)return false;pushUndo();
+ const m={kind,o,start:JSON.parse(JSON.stringify(o)),ax:null,num:'',mx:MOD.mx,my:MOD.my,f:1};
+ if(kind==='g'){const dy=model?model.position.y:0;m.pl=new THREE.Plane(new V3(0,1,0),-(o.y/10+dy));const pt=new V3();const r=renderer.domElement.getBoundingClientRect();
+  if(rayFrom({clientX:MOD.mx||r.left+r.width/2,clientY:MOD.my||r.top+r.height/2}).ray.intersectPlane(m.pl,pt))m.hit0=pt.clone()}
+ if(kind==='s'){const a=svBox(o),c=a.mn.clone().add(a.mx).multiplyScalar(.5).project(camera),r=renderer.domElement.getBoundingClientRect();m.cx=r.left+(c.x+1)/2*r.width;m.cy=r.top+(1-c.y)/2*r.height;m.d0=Math.max(20,Math.hypot(MOD.mx-m.cx,MOD.my-m.cy))}
+ MOD.m=m;renderer.domElement.style.cursor=kind==='g'?'move':kind==='r'?'alias':'nwse-resize';snd('click');modHud();return true}
+const SZK=o=>KIND[o.kind].f.filter(f=>!f.type&&f.u==='mm');
+function modApply(e){const m=MOD.m;if(!m)return;const o=m.o,s0=m.start,n=m.num&&m.num!=='-'&&m.num!=='.'?+m.num:null;
+ if(m.kind==='g'){for(const k of['x','y','z'])o[k]=s0[k];
+  if(n!=null&&isFinite(n)){const a=m.ax||'x';o[a]=s0[a]+n}
+  else if(e){if(m.ax==='y'){o.y=s0.y+(m.my-e.clientY)*orb.r*.016}else{const pt=new V3();if(m.hit0&&rayFrom(e).ray.intersectPlane(m.pl,pt)){const dx=(pt.x-m.hit0.x)*10,dz=(pt.z-m.hit0.z)*10;if(m.ax!=='z')o.x=s0.x+dx;if(m.ax!=='x')o.z=s0.z+dz}}}
+  o.x=clamp(+snapV(o.x).toFixed(1),-400,400);o.y=clamp(+snapV(o.y).toFixed(1),-50,500);o.z=clamp(+snapV(o.z).toFixed(1),-400,400);const ob=modelObjs[o.id];if(ob)ob.userData.base.set(o.x/10,o.y/10,o.z/10)}
+ else if(m.kind==='r'){const k='r'+(m.ax||'y');for(const a of['rx','ry','rz'])o[a]=s0[a];let deg=n!=null&&isFinite(n)?n:e?Math.round((e.clientX-m.mx)/70)*90:0;deg=Math.round(deg/90)*90;o[k]=((s0[k]+deg)%360+360)%360;scheduleRebuild(false)}
+ else{let f=n!=null&&isFinite(n)&&n>0?n:e?Math.hypot(e.clientX-m.cx,e.clientY-m.cy)/m.d0:1;f=clamp(f,.1,10);m.f=f;
+  for(const fd of SZK(o)){const ax=m.ax,map={x:['w','len','a','d'],y:['h','t'],z:['d']}[ax]||null;if(map&&!map.includes(fd.k))continue;o[fd.k]=clamp(+(Math.round(s0[fd.k]*f/fd.step)*fd.step).toFixed(2),fd.min,fd.max)}scheduleRebuild(false)}
+ modHud()}
+function modEnd(ok){const m=MOD.m;if(!m)return;MOD.m=null;renderer.domElement.style.cursor='';modHud();
+ if(!ok){Object.assign(m.o,m.start);undoStack.pop();rebuild();snd('flip');return}
+ const o=m.o;if(o.goal&&!o.placed){if(m.kind!=='g')ground(o);if(!trySnap(o))snd('place')}else snd('place');commit()}
+addEventListener('pointermove',e=>{MOD.mx=e.clientX;MOD.my=e.clientY;if(MOD.m&&!MOD.m.num)modApply(e)},true);
+renderer.domElement.addEventListener('pointerdown',e=>{if(!MOD.m)return;e.stopImmediatePropagation();e.preventDefault();modEnd(e.button===0)},true);
+addEventListener('keydown',e=>{const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)return;
+ const m=MOD.m;
+ if(m){e.preventDefault();e.stopImmediatePropagation();const k=e.key;
+  if(k==='Escape')return modEnd(false);if(k==='Enter'||k===' ')return modEnd(true);
+  if(/^[xyzXYZ]$/.test(k)){const a=k.toLowerCase();m.ax=m.ax===a?null:a;modApply({clientX:MOD.mx,clientY:MOD.my});return}
+  if(/^[0-9]$/.test(k)||k==='.'||k===','||k==='-'){m.num=(k==='-'?(m.num.startsWith('-')?m.num.slice(1):'-'+m.num):m.num+(k===','?'.':k));modApply(null);return}
+  if(k==='Backspace'){m.num=m.num.slice(0,-1);modApply(m.num?null:{clientX:MOD.mx,clientY:MOD.my});return}
+  if(/^[gGrRsS]$/.test(k)&&k.toLowerCase()!==m.kind){modEnd(true);modStart(k.toLowerCase())}return}
+ if(!B||B.type!=='free'||!SEL||!selActive()||e.ctrlKey||e.metaKey||e.altKey)return;
+ if(e.shiftKey&&e.code==='KeyD'){e.preventDefault();e.stopImmediatePropagation();const cur=items(B).find(o=>o.id===SEL);if(!cur)return;pushUndo();const id=nextId(B),o=Object.assign({},cur,{id,goal:null,placed:false});B.p.free.items.push(o);B.inst[id]=!!B.inst[cur.id];SEL=id;commit();undoStack.pop();modStart('g');return}
+ if(e.shiftKey)return;const c={KeyG:'g',KeyR:'r',KeyS:'s'}[e.code];if(c){e.preventDefault();e.stopImmediatePropagation();modStart(c);return}
+ if(e.code==='NumpadDecimal'){e.preventDefault();e.stopImmediatePropagation();const o=items(B).find(x=>x.id===SEL),a=svBox(o),sz=a.mx.clone().sub(a.mn);orb.tg.copy(a.mn.clone().add(a.mx).multiplyScalar(.5));orb.tr=clamp(Math.max(sz.x,sz.y,sz.z)*3+12,15,300);snd('click')}});
+{const st=document.createElement('style');st.textContent=`.bhud{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);z-index:6;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;max-width:min(92%,720px);padding:8px 14px;border-radius:12px;background:rgba(10,13,18,.9);border:1px solid rgba(255,176,32,.45);box-shadow:0 8px 30px rgba(0,0,0,.45);font-size:12.5px;color:var(--tx2);pointer-events:none}
+.bhud>b{color:#ffb020}.bhud .ax{padding:1px 7px;border-radius:5px;color:#fff}.bhud .axx{background:#e53935}.bhud .axy{background:#43a047}.bhud .axz{background:#1e88e5}.bhud .num{font:700 13px ui-monospace,Consolas,monospace;color:#fff;background:#222a35;padding:1px 7px;border-radius:5px}.bhud .v{color:var(--tx);font-variant-numeric:tabular-nums}.bhud small{flex-basis:100%;color:var(--mu);font-size:11px}`;document.head.appendChild(st)}
 regType(T);
 })();
