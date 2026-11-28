@@ -13,9 +13,9 @@ const LAKE={x:-62,z:72,r:38},ARENA={x:40,z:-30,s:5,line:1.6,obs:[]};
 (()=>{ // ochiq maydon
  simScene.fog=new THREE.Fog('#c9d9e6',120,900);
  const sky=new THREE.Mesh(new THREE.SphereGeometry(1500,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,
-  uniforms:{top:{value:new THREE.Color('#3b78c4')},bot:{value:new THREE.Color('#cfe0ee')},sd:{value:new V3(.4,.75,.3).normalize()}},
+  uniforms:{top:{value:new THREE.Color('#2a64b4')},mid:{value:new THREE.Color('#6fa6dc')},bot:{value:new THREE.Color('#c9d9e6')},sd:{value:new V3(.4,.75,.3).normalize()}},
   vertexShader:'varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-  fragmentShader:`uniform vec3 top;uniform vec3 bot;uniform vec3 sd;varying vec3 vP;void main(){vec3 d=normalize(vP);float h=max(d.y,0.);vec3 c=mix(bot,top,pow(h,.5));float s=max(dot(d,sd),0.);c+=vec3(1.,.95,.85)*(pow(s,600.)*4.+pow(s,12.)*.25);gl_FragColor=vec4(c,1.);
+  fragmentShader:`uniform vec3 top;uniform vec3 mid;uniform vec3 bot;uniform vec3 sd;varying vec3 vP;void main(){vec3 d=normalize(vP);float h=max(d.y,0.);vec3 c=mix(bot,mid,smoothstep(0.,.32,h));c=mix(c,top,smoothstep(.22,1.,h));float s=max(dot(d,sd),0.);c=mix(c,vec3(1.,.92,.78),pow(s,4.)*.22);c+=vec3(1.,.95,.85)*(pow(s,600.)*4.+pow(s,12.)*.25);gl_FragColor=vec4(c,1.);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
   }`}));sky.userData.sky=true;simScene.add(sky);
@@ -64,10 +64,6 @@ const LAKE={x:-62,z:72,r:38},ARENA={x:40,z:-30,s:5,line:1.6,obs:[]};
   const bm=new THREE.MeshStandardMaterial({color:'#a77b4f',roughness:.85});for(const[x,z,w,d]of[[-.4,-.9,.3,.3],[.9,.6,.25,.4],[-1.75,1.6,.4,.2],[.2,-2,.5,.2]]){const m=new THREE.Mesh(new THREE.BoxGeometry(w,.2,d),bm);m.position.set(x,.11,z);m.castShadow=m.receiveShadow=true;g.add(m);ARENA.obs.push({x:ARENA.x+x,z:ARENA.z+z,hw:w/2,hd:d/2})}
   for(const[w,d,x,z]of[[s,.03,0,-s/2],[s,.03,0,s/2],[.03,s,-s/2,0],[.03,s,s/2,0]])ARENA.obs.push({x:ARENA.x+x,z:ARENA.z+z,hw:w/2,hd:d/2});
   simScene.add(g)}
- // daraxtlar
- const N=220,tm=new THREE.MeshStandardMaterial({color:'#2a4227',roughness:.92}),tiers=[[2.6,3.6,3.4],[2.1,3.2,5.3],[1.4,2.8,7.1]].map(([r,h,y])=>new THREE.InstancedMesh(new THREE.ConeGeometry(r,h,12).translate(0,y,0),tm,N)),iK=new THREE.InstancedMesh(new THREE.CylinderGeometry(.22,.32,2.2,8).translate(0,1.1,0),new THREE.MeshStandardMaterial({color:'#4a3a2c',roughness:.9}),N),mx=new THREE.Matrix4(),tc=new THREE.Color();
- for(let i=0;i<N;i++){const a=Math.random()*Math.PI*2,s=rnd(.8,1.9);let r=rnd(90,420);if(Math.hypot(Math.cos(a)*r-LAKE.x,Math.sin(a)*r-LAKE.z)<LAKE.r+8)r+=LAKE.r*2+20;mx.makeScale(s,s*rnd(.9,1.3),s).setPosition(Math.cos(a)*r,0,Math.sin(a)*r);iK.setMatrixAt(i,mx);tc.setHSL(rnd(.27,.33),rnd(.25,.4),rnd(.16,.24));for(const t of tiers){t.setMatrixAt(i,mx);t.setColorAt(i,tc)}}
- for(const t of tiers){t.castShadow=true;simScene.add(t)}simScene.add(iK);
 })();
 
 // Modelni faqat o'rnatilgan detallar bilan qurish (sinov uchun)
@@ -88,7 +84,7 @@ function preflight(B){const T=TYPES[B.type],D=T.derive(B),WC=wcheck(B),miss=[];
  if(WC.comps.some(c=>c.id==='xt60')&&!WC.works.xt60&&!r.fatal.length){r.ok=false;r.block="Batareya kabeli ESC ga to'g'ri ulanmagan — quvvat yo'q.";return r}
  return r}
 
-function simStart(B){const pf=preflight(B);simStop();
+function simStart(B){const pf=preflight(B);simStop();if(window.buildWorld)buildWorld(simScene);
  const{g,D}=buildStatic(B);const S={B,T:pf.T,D,pf,on:true,obj:new THREE.Group(),pos:new V3(),vel:new V3(),q:new THREE.Quaternion(),yaw:0,pitch:0,roll:0,w:new V3(),thr:0,armed:false,
   used:0,t:0,maxV:0,maxH:0,minV:99,status:'',fail:null,cam:'chase',mode:window.SIM_MODE||'easy',burnT:0,heat:0,smoke:[],log:[],flipT:0,landed:true,steer:0,spd:0};
  g.scale.setScalar(.01);S.obj.add(g);S.model=g;simScene.add(S.obj);SIM=S;
@@ -126,7 +122,7 @@ function crash(S,why){if(S.fail)return;S.fail={t:'Halokat!',why};S.armed=false;s
 function inputs(){const k=KEYS;return{thrUp:k.KeyW||k.ShiftLeft,thrDn:k.KeyS||k.ControlLeft,yaw:(k.KeyA?1:0)-(k.KeyD?1:0)+(-STK.l.x),pitch:(k.ArrowUp?1:0)-(k.ArrowDown?1:0)+(-STK.r.y),roll:(k.ArrowRight?1:0)-(k.ArrowLeft?1:0)+STK.r.x,stickThr:STK.l.y}}
 
 function T_pitch(S){return Math.max(5,S.D.rpm*S.B.p.prop.p*.0254/60*Math.max(S.thr,.05))}
-function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D=S.D,I=inputs(),rho=airDensity(B.env.alt,B.env.temp);
+function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);if(window.worldTick)worldTick(dt);const B=S.B,D=S.D,I=inputs(),rho=airDensity(B.env.alt,B.env.temp);
  for(let i=S.smoke.length-1;i>=0;i--){const s=S.smoke[i];s.t-=dt;s.m.position.addScaledVector(s.v,dt);s.m.scale.multiplyScalar(1+dt*.5);s.m.material.opacity=Math.max(0,s.t/3*.7);if(s.t<=0){simScene.remove(s.m);S.smoke.splice(i,1)}}
  if(S.fail&&S.burnT<3){S.burnT+=dt;if(Math.random()<.3)puff(S,1,'#333')}
  const g=9.81;
@@ -208,6 +204,7 @@ function simTick(dt){const S=SIM;if(!S)return;dt=Math.min(dt,.033);const B=S.B,D
   humSet(S.armed&&Math.abs(S.spd)>.1,Math.min(1,Math.abs(S.spd)/Math.max(1,D.vTop)));S.thrIn=Math.abs(thr);
   const wr=p.wheel.d/2000,da=S.spd*dt/wr;for(const w of S.wheels){w.o.rotation.x+=w.left?da:-da;if(w.front)w.o.rotation.y=w.base+S.steer}
   }
+ if(window.worldCollide)worldCollide(S);
  S.t+=dt;const sp=S.vel.length();S.maxV=Math.max(S.maxV,sp);S.maxH=Math.max(S.maxH,S.pos.y);if(S.volt)S.minV=Math.min(S.minV,S.volt);
  if(Math.hypot(S.pos.x,S.pos.z)>600){S.pos.multiplyScalar(600/Math.hypot(S.pos.x,S.pos.z))}
  if(B.type!=='plane'){S.obj.position.copy(S.pos);S.obj.position.y+=S.groundOff;S.obj.quaternion.setFromEuler(new THREE.Euler(S.pitch,S.yaw,S.roll,'YXZ'))}

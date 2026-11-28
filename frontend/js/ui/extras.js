@@ -175,3 +175,53 @@ function objSize(o){const bb=new THREE.Box3();o.updateMatrixWorld(true);o.traver
    o.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='konstruktor-render.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);toast(`${IC('image')} Render saqlandi: ${o.width}×${o.height} px`,2400)},'image/png')}
   finally{renderer.setPixelRatio(pr);resize();hid.forEach(o=>o.visible=true);lb.forEach(e=>e.style.visibility='')}snd('ok')}
  addEventListener('keydown',e=>{if(e.key==='F12'&&!e.ctrlKey&&!e.shiftKey){const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA')return;e.preventDefault();render()}});window.HIRENDER=render})();
+// ---------- Dizayn uslublari: Klassik / Glass / Studio / Neon — sayt ichida almashtirib ko'rish ----------
+// Uslub <html data-ui="..."> orqali; ranglar CSS o'zgaruvchilari bilan, 3D sahna foni va stol ham moslashadi. Tanlov brauzerda saqlanadi.
+(()=>{const LIST=[
+ {id:'classic',n:'Klassik',d:"To'q grafit va sariq urg'u (avvalgi)",sw:['#0d121a','#161d28','#ffb020'],bg:'#0e1219'},
+ {id:'glass',n:'Glass',d:"Shaffof xira shisha panellar, orqada rangli nur",sw:['#1a2440','#3b2a5c','#ffb020'],bg:'#101626'},
+ {id:'studio',n:'Studio',d:"Yorug' va toza — Onshape / Figma uslubi, ko'k urg'u",sw:['#e9edf2','#ffffff','#2563eb'],bg:'#e6eaf0',light:true},
+ {id:'neon',n:'Neon',d:"To'q kosmik fon, moviy va binafsha nur (asosiy)",sw:['#05060d','#111427','#22d3ee'],bg:'#06070f'}];
+ const css=`
+ /* ---- GLASS ---- */
+ :root[data-ui=glass]{--p1:rgba(22,28,44,.52);--p2:rgba(255,255,255,.055);--p3:rgba(255,255,255,.085);--p4:rgba(255,255,255,.14);--ln:rgba(255,255,255,.1);--ln2:rgba(255,255,255,.18);--bg2:rgba(8,11,20,.55)}
+ :root[data-ui=glass] body,:root[data-ui=glass]{background:radial-gradient(900px 600px at 12% 8%,rgba(255,176,32,.22),transparent 60%),radial-gradient(1000px 700px at 88% 20%,rgba(74,163,255,.25),transparent 60%),radial-gradient(900px 700px at 60% 100%,rgba(156,89,255,.22),transparent 60%),#070a12 fixed}
+ :root[data-ui=glass] #steps,:root[data-ui=glass] #panel,:root[data-ui=glass] .mt,:root[data-ui=glass] header,:root[data-ui=glass] #mbox{background:var(--p1)!important;backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 12px 40px rgba(0,0,0,.35)}
+ :root[data-ui=glass] .card{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.12);backdrop-filter:blur(10px)}
+ :root[data-ui=glass] #view{border-color:rgba(255,255,255,.16)}
+ :root[data-ui=glass] .vt,:root[data-ui=glass] #hint,:root[data-ui=glass] .vcube{background:rgba(20,26,42,.45);backdrop-filter:blur(14px) saturate(160%);border-color:rgba(255,255,255,.16)}
+ /* ---- STUDIO (yorug') ---- */
+ :root[data-ui=studio]{--bg:#e9edf2;--bg2:#ffffff;--p1:#ffffff;--p2:#f6f8fb;--p3:#edf0f5;--p4:#dde3eb;--ln:rgba(15,23,42,.09);--ln2:rgba(15,23,42,.16);--tx:#0f172a;--tx2:#334155;--mu:#64748b;--ac:#2563eb;--ac-d:#1d4ed8;--ac-soft:rgba(37,99,235,.1);--ac2:#2563eb;--warn:#d97706;--ok:#16a34a;--bad:#dc2626;--sh:0 8px 24px rgba(15,23,42,.08);--sh-s:0 1px 3px rgba(15,23,42,.08);color-scheme:light}
+ :root[data-ui=studio] body,:root[data-ui=studio]{background:#e9edf2 fixed}
+ :root[data-ui=studio] header{background:rgba(255,255,255,.88)}:root[data-ui=studio] header:after{background:linear-gradient(90deg,transparent,rgba(37,99,235,.35),transparent)}
+ :root[data-ui=studio] #steps,:root[data-ui=studio] #panel,:root[data-ui=studio] .card,:root[data-ui=studio] .mt{box-shadow:var(--sh-s)!important;background:var(--p1)}
+ :root[data-ui=studio] .card{background:var(--p2)}
+ :root[data-ui=studio] .vt,:root[data-ui=studio] #hint,:root[data-ui=studio] #tip,:root[data-ui=studio] .vcube,:root[data-ui=studio] .lbl,:root[data-ui=studio] .fLbl,:root[data-ui=studio] #hudMsg,:root[data-ui=studio] .hudL,:root[data-ui=studio] .wzoom button,:root[data-ui=studio] .bhud{background:rgba(255,255,255,.92);color:var(--tx2);border-color:var(--ln2);box-shadow:var(--sh-s)}
+ :root[data-ui=studio] .lbl{color:var(--tx)}:root[data-ui=studio] .vt.on{background:rgba(37,99,235,.1);color:var(--ac);border-color:rgba(37,99,235,.5)}
+ :root[data-ui=studio] .btn.pri{background:var(--ac);color:#fff;box-shadow:0 6px 16px rgba(37,99,235,.25)}:root[data-ui=studio] .typeSw button.on{background:var(--ac);color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.3)}
+ :root[data-ui=studio] .st.on:before{background:var(--ac);box-shadow:0 0 10px rgba(37,99,235,.6)}:root[data-ui=studio] .st.on .n{color:#fff}
+ :root[data-ui=studio] .tthumb,:root[data-ui=studio] .w3Ic.w3Th{background-color:#dfe5ec}
+ :root[data-ui=studio] ::selection{background:var(--ac);color:#fff}
+ /* ---- NEON ---- */
+ :root[data-ui=neon]{--bg:#05060d;--bg2:#080a16;--p1:#0b0d1a;--p2:#10132a;--p3:#171b38;--p4:#212647;--ln:rgba(120,140,255,.12);--ln2:rgba(120,140,255,.22);--tx:#e6ebff;--tx2:#b8c0e6;--mu:#7a84b3;--ac:#22d3ee;--ac-d:#06b6d4;--ac-soft:rgba(34,211,238,.12);--ac2:#a78bfa}
+ :root[data-ui=neon] body,:root[data-ui=neon]{background:radial-gradient(800px 500px at 80% -10%,rgba(167,139,250,.18),transparent 60%),radial-gradient(700px 500px at 0% 100%,rgba(34,211,238,.12),transparent 60%),#05060d fixed}
+ :root[data-ui=neon] #steps,:root[data-ui=neon] #panel{border-color:rgba(34,211,238,.2);box-shadow:0 0 0 1px rgba(167,139,250,.08),0 0 40px rgba(34,211,238,.07),inset 0 1px 0 rgba(255,255,255,.04)}
+ :root[data-ui=neon] #view{border-color:rgba(167,139,250,.3);box-shadow:0 0 50px rgba(167,139,250,.12)}
+ :root[data-ui=neon] .btn.pri{background:linear-gradient(90deg,#22d3ee,#a78bfa);color:#04121a;box-shadow:0 0 22px rgba(34,211,238,.35)}:root[data-ui=neon] .typeSw button.on{background:linear-gradient(90deg,#22d3ee,#a78bfa);color:#04121a;box-shadow:0 0 18px rgba(34,211,238,.4)}
+ :root[data-ui=neon] .st.on:before{background:#22d3ee;box-shadow:0 0 14px #22d3ee}:root[data-ui=neon] header:after{background:linear-gradient(90deg,transparent,#22d3ee 30%,#a78bfa 70%,transparent)}
+ :root[data-ui=neon] .vt.on{background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.6);color:#22d3ee}
+ /* ---- tanlagich ---- */
+ .uiPick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}.uiPick button{text-align:left;padding:10px;border-radius:12px;border:1px solid var(--ln);background:var(--p2);transition:transform .12s,border-color .15s}
+ .uiPick button:hover{transform:translateY(-2px);border-color:var(--ln2)}.uiPick button.on{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
+ .uiPick .pv{height:74px;border-radius:9px;margin-bottom:8px;position:relative;overflow:hidden;border:1px solid rgba(128,128,128,.25)}.uiPick .pv i{position:absolute;border-radius:5px}
+ .uiPick b{display:block;font-size:13.5px}.uiPick small{color:var(--mu);font-size:11.5px}`;
+ const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+ let lightGrid=null;const origMap=typeof table!=='undefined'?table.material.map:null;
+ function apply(id,quiet){const t=LIST.find(x=>x.id===id)||LIST[0];document.documentElement.dataset.ui=t.id;try{localStorage.setItem('konstruktor.ui',t.id)}catch(e){}
+  if(typeof scene!=='undefined'){scene.background.set(t.bg);if(scene.fog)scene.fog.color.set(t.bg)}const v=document.getElementById('view');if(v)v.style.background=t.bg;
+  if(typeof table!=='undefined'){if(t.light){lightGrid=lightGrid||ctex('lightgrid',512,512,(g,w,h)=>{g.fillStyle='#f4f6f9';g.fillRect(0,0,w,h);g.strokeStyle='#dde3ea';g.lineWidth=1;for(let i=0;i<=w;i+=16){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.moveTo(0,i);g.lineTo(w,i);g.stroke()}g.strokeStyle='#c7d0db';g.lineWidth=2;for(let i=0;i<=w;i+=128){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.moveTo(0,i);g.lineTo(w,i);g.stroke()}},origMap?[origMap.repeat.x,origMap.repeat.y]:[60,60]);table.material.map=lightGrid}else if(origMap)table.material.map=origMap;table.material.needsUpdate=true}
+  if(!quiet&&typeof snd==='function')snd('click')}
+ function pick(){const cur=document.documentElement.dataset.ui||'classic';openModal(`<h2>${IC('palette')} Sayt uslubi</h2><p class="note">Har birini bosib, saytning o'zida ko'ring. Tanlovingiz shu brauzerda saqlanadi.</p><div class="uiPick">${LIST.map(t=>`<button data-ui="${t.id}" class="${t.id===cur?'on':''}"><div class="pv" style="background:${t.sw[0]}"><i style="left:8px;top:8px;width:28%;bottom:8px;background:${t.sw[1]}"></i><i style="right:8px;top:8px;width:30%;bottom:8px;background:${t.sw[1]}"></i><i style="left:36%;top:14px;width:24%;height:10px;background:${t.sw[2]}"></i><i style="left:36%;bottom:14px;width:24%;height:22px;background:${t.sw[1]};opacity:.7"></i></div><b>${t.n}</b><small>${t.d}</small></button>`).join('')}</div>`);
+  document.querySelectorAll('.uiPick [data-ui]').forEach(b=>b.onclick=()=>{apply(b.dataset.ui);document.querySelectorAll('.uiPick [data-ui]').forEach(x=>x.classList.toggle('on',x===b))})}
+ const hb=document.createElement('button');hb.className='hb';hb.id='bUi';hb.title="Sayt uslubi: Klassik, Glass, Studio, Neon";hb.innerHTML=`${IC('palette')}<span>Uslub</span>`;const ref=document.getElementById('bKeys')||document.getElementById('bMute');if(ref)ref.before(hb);hb.onclick=pick;
+ let saved='neon';try{saved=localStorage.getItem('konstruktor.ui')||'neon'}catch(e){}apply(saved,true);window.UISTYLE={apply,pick,LIST}})();
