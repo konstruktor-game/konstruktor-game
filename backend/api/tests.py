@@ -1,5 +1,6 @@
 import json
 
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.test import TestCase
 
@@ -48,6 +49,73 @@ class ApiTests(TestCase):
         self.assertEqual(self.call('get', '/api/me', token=tok).json()['user']['username'], 'Quruvchi_1')
         self.assertEqual(self.call('post', '/api/logout', token=tok).status_code, 200)
         self.assertEqual(self.call('get', '/api/me', token=tok).status_code, 401)
+
+    def test_me_extra_fields(self):
+        tok = self.register()
+        self.call('post', '/api/builds', {'name': 'A', 'type': 'copter', 'data': project(), 'public': True}, tok)
+        self.call('post', '/api/builds', {'name': 'B', 'type': 'copter', 'data': project(), 'public': False}, tok)
+        u = self.call('get', '/api/me', token=tok).json()['user']
+        self.assertEqual((u['builds'], u['public']), (2, 1))
+        self.assertTrue(u['joined'])
+        self.assertIsNone(u['last_login'])
+        self.call('post', '/api/login', {'username': 'Quruvchi_1', 'password': 'MustahkamParol77'})
+        tok2 = self.call('post', '/api/login', {'username': 'Quruvchi_1', 'password': 'MustahkamParol77'}).json()['token']
+        self.assertTrue(self.call('get', '/api/me', token=tok2).json()['user']['last_login'])
+
+    def test_change_password(self):
+        old_tok = self.register()
+        r = self.call('post', '/api/password', {'old': 'MustahkamParol77', 'new': 'YangiParol2025x'}, old_tok)
+        self.assertEqual(r.status_code, 200, r.content)
+        new_tok = r.json()['token']
+        self.assertEqual(self.call('get', '/api/me', token=old_tok).status_code, 401)
+        self.assertEqual(self.call('get', '/api/me', token=new_tok).status_code, 200)
+        self.assertEqual(self.call('post', '/api/login', {'username': 'Quruvchi_1', 'password': 'MustahkamParol77'}).status_code, 401)
+        self.assertEqual(self.call('post', '/api/login', {'username': 'Quruvchi_1', 'password': 'YangiParol2025x'}).status_code, 200)
+
+    def test_change_password_errors(self):
+        tok = self.register()
+        url = '/api/password'
+        self.assertEqual(self.call('post', url, {'old': 'MustahkamParol77', 'new': 'YangiParol2025x'}).status_code, 401)
+        self.assertEqual(self.call('post', url, {'old': 'xato', 'new': 'YangiParol2025x'}, tok).status_code, 403)
+        self.assertEqual(self.call('post', url, {'old': 'MustahkamParol77', 'new': '12345678'}, tok).status_code, 400)
+        self.assertEqual(self.call('post', url, {'old': 'MustahkamParol77', 'new': 'MustahkamParol77'}, tok).status_code, 400)
+        self.assertEqual(self.call('post', url, {'old': 'MustahkamParol77', 'new': 'a' * 200}, tok).status_code, 400)
+        # hech narsa o'zgarmagan: eski token va eski parol ishlaydi
+        self.assertEqual(self.call('get', '/api/me', token=tok).status_code, 200)
+
+    def test_change_password_throttle(self):
+        tok = self.register()
+        for _ in range(10):
+            self.assertEqual(self.call('post', '/api/password', {'old': 'xato', 'new': 'YangiParol2025x'}, tok).status_code, 403)
+        self.assertEqual(self.call('post', '/api/password', {'old': 'MustahkamParol77', 'new': 'YangiParol2025x'}, tok).status_code, 429)
+
+    def test_delete_account(self):
+        tok = self.register()
+        self.call('post', '/api/builds', {'name': 'A', 'type': 'copter', 'data': project()}, tok)
+        self.assertEqual(self.call('post', '/api/account/delete', {'password': 'xato'}, tok).status_code, 403)
+        self.assertEqual(Build.objects.count(), 1)
+        self.assertEqual(self.call('post', '/api/account/delete', {'password': 'MustahkamParol77'}).status_code, 401)
+        r = self.call('post', '/api/account/delete', {'password': 'MustahkamParol77'}, tok)
+        self.assertEqual(r.status_code, 200, r.content)
+        self.assertFalse(User.objects.filter(username='Quruvchi_1').exists())
+        self.assertEqual(Build.objects.count(), 0)
+        self.assertEqual(self.call('get', '/api/me', token=tok).status_code, 401)
+
+    def test_delete_account_staff_refused(self):
+        tok = self.register()
+        User.objects.filter(username='Quruvchi_1').update(is_staff=True)
+        self.assertEqual(self.call('post', '/api/account/delete', {'password': 'MustahkamParol77'}, tok).status_code, 403)
+        self.assertTrue(User.objects.filter(username='Quruvchi_1').exists())
+
+    def test_logout_all(self):
+        t1 = self.register()
+        t2 = self.call('post', '/api/login', {'username': 'Quruvchi_1', 'password': 'MustahkamParol77'}).json()['token']
+        other = self.register('Ikkinchi', 'BoshqaParol99')
+        r = self.call('post', '/api/logout-all', token=t1)
+        self.assertEqual((r.status_code, r.json()['count']), (200, 2))
+        self.assertEqual(self.call('get', '/api/me', token=t1).status_code, 401)
+        self.assertEqual(self.call('get', '/api/me', token=t2).status_code, 401)
+        self.assertEqual(self.call('get', '/api/me', token=other).status_code, 200)
 
     def test_login_throttle(self):
         self.register()

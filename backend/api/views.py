@@ -16,6 +16,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.http import FileResponse, Http404, JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
@@ -72,7 +73,13 @@ def login_required_api(view):
 
 
 def user_json(u):
-    return {'username': u.username, 'builds': u.builds.count()}
+    return {
+        'username': u.username,
+        'builds': u.builds.count(),
+        'public': u.builds.filter(public=True).count(),
+        'joined': u.date_joined.isoformat(),
+        'last_login': u.last_login.isoformat() if u.last_login else None,
+    }
 
 
 # ---------------- sayt fayllari ----------------
@@ -134,6 +141,8 @@ def login(request):
         cache.set(key, cache.get(key, 0) + 1, 600)
         return err("Foydalanuvchi nomi yoki parol noto'g'ri", 401)
     cache.delete(key)
+    user.last_login = timezone.now()
+    user.save(update_fields=['last_login'])
     return JsonResponse({'ok': True, 'token': AuthToken.issue(user).key, 'user': user_json(user)})
 
 
@@ -143,6 +152,73 @@ def login(request):
 def logout(request):
     request.api_token.delete()
     return JsonResponse({'ok': True})
+
+
+def _password_check(request, pwd, scope):
+    """Joriy parolni tekshiradi; xato urinishlar foydalanuvchi bo'yicha cache bilan cheklanadi.
+    None qaytsa — parol to'g'ri, aks holda tayyor javob (403/429)."""
+    user = request.api_user
+    key = f'kons-{scope}-fail:{user.pk}'
+    if cache.get(key, 0) >= LOGIN_FAIL_LIMIT:
+        return err("Juda ko'p urinish. 10 daqiqadan keyin qayta urinib ko'ring.", 429)
+    if len(pwd) > MAX_PASSWORD or not user.check_password(pwd):
+        cache.set(key, cache.get(key, 0) + 1, 600)
+        return err("Joriy parol noto'g'ri", 403)
+    cache.delete(key)
+    return None
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+@login_required_api
+def change_password(request):
+    data = body_json(request)
+    if data is None:
+        return err("Noto'g'ri so'rov")
+    old, new = str(data.get('old', '')), str(data.get('new', ''))
+    bad = _password_check(request, old, 'pwd')
+    if bad:
+        return bad
+    user = request.api_user
+    if len(new) > MAX_PASSWORD:
+        return err(f'Parol {MAX_PASSWORD} belgidan oshmasin')
+    if new == old:
+        return err('Yangi parol eskisidan farq qilsin')
+    try:
+        validate_password(new, user)
+    except ValidationError as e:
+        return err(' '.join(e.messages))
+    with transaction.atomic():
+        user.set_password(new)
+        user.save(update_fields=['password'])
+        user.api_tokens.all().delete()
+        token = AuthToken.issue(user).key
+    return JsonResponse({'ok': True, 'token': token, 'user': user_json(user)})
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+@login_required_api
+def delete_account(request):
+    data = body_json(request)
+    if data is None:
+        return err("Noto'g'ri so'rov")
+    user = request.api_user
+    if user.is_superuser or user.is_staff:
+        return err("Bu akkauntni shu yo'l bilan o'chirib bo'lmaydi", 403)
+    bad = _password_check(request, str(data.get('password', '')), 'del')
+    if bad:
+        return bad
+    user.delete()  # loyihalar va tokenlar CASCADE bilan o'chadi
+    return JsonResponse({'ok': True})
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+@login_required_api
+def logout_all(request):
+    count, _ = request.api_user.api_tokens.all().delete()
+    return JsonResponse({'ok': True, 'count': count})
 
 
 @require_http_methods(['GET'])
