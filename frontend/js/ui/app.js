@@ -461,7 +461,7 @@ function copyText(t){(navigator.clipboard?navigator.clipboard.writeText(t):Promi
 
 // ---------------- yangi loyiha, lug'at ----------------
 function newDialog(type){let sel=type||B.type;const draw=()=>{const Tt=TYPES[sel];openModal(`<h2><i class=i-plus></i> Yangi loyiha</h2><p style="color:var(--mu)">Nima yasaymiz? Keyin shablonni tanlang — barcha detallarni o'zingiz o'zgartira olasiz.</p>
- <div class="tcards">${Object.values(TYPES).map(t=>`<button class="tcard ${t.id===sel?'on':''}" data-nt="${t.id}"><div class="ic">${IC(t.ic)}</div><b>${esc(t.name)}</b><span>${esc(t.desc)}</span></button>`).join('')}</div>
+ <div class="tcards">${Object.values(TYPES).map(t=>`<button class="tcard tpre ${t.id===sel?'on':''}" data-nt="${t.id}"><div class="tthumb sm" data-th="${t.id}:${t.defPreset}"><span class="tic">${IC(t.ic)}</span></div><b>${esc(t.name)}</b><span>${esc(t.desc)}</span></button>`).join('')}</div>
  <h3 style="margin-top:6px">${IC(Tt.ic)} Shablon</h3><div class="tcards">${Object.entries(Tt.presets).map(([id,p])=>`<button class="tcard tpre" data-np="${id}"><div class="tthumb" data-th="${sel}:${id}"></div><b>${esc(p.name)}</b><span>${esc(p.desc)}</span></button>`).join('')}</div>
  <p style="font-size:12px;color:var(--mu)">Joriy loyiha brauzerda saqlanadi; serverga saqlash uchun «Saqlash / ulashish» dan foydalaning.</p>`,true);
  document.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>{sel=b.dataset.nt;draw()});
