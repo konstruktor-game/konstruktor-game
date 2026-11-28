@@ -267,8 +267,8 @@ T.build=(B,D,ctx)=>{const X=!!window.XRAY;
      for(const[sx,sz]of[[-1,-1],[1,-1],[-1,1],[1,1]])g.add(tagP(cyl(.09,.09,gh*1.02,mMetal('#9aa3ad',.3),sx*r*.95,gy,sz*r*1.05,8),'Reduktor vintlari',4));
      g.add(tagP(box(r*2.32,.02,r*2.52,mPlastic('#c79a00',.6),0,gy,0),'Qismlar tutashuvi',4));const out=cyl(r*.28,r*.28,r*.32,mPlastic('#f5f5f5',.4),0,gy-gh/2-r*.16,0,6);g.add(tagP(out,"Chiqish vali (olti qirrali)",4))}break}
    case'bldc':{const m=mkMotor(o.d,o.h,c);m.position.y=-.3;g.add(m);break}
-   case'prop':{const sp=new THREE.Group(),pr=mkProp(o.d,o.p,+o.b,'pc',c,'CCW');sp.add(pr);sp.userData.fspin=o.id;g.add(sp);if(ctx.inst(o.id))ctx.spin(sp,1);break}
-   case'wheel':{const wh=mkWheel(o.d,o.w,'slick',c,'#151515');wh.userData.fwheel=o.id;g.add(wh);break}
+   case'prop':{const sp=new THREE.Group(),D=o.d*2.54,ba=window.ASSETS&&ASSETS.get('prop'+(+o.b===3?3:2),{Qanot:c,Vtulka:c});let pr;if(ba){ba.scale.set(D,D*.9,D);pr=ba}else pr=mkProp(o.d,o.p,+o.b,'pc',c,'CCW');sp.add(pr);sp.userData.fspin=o.id;g.add(sp);if(ctx.inst(o.id))ctx.spin(sp,1);break}
+   case'wheel':{const bw=window.ASSETS&&ASSETS.get('wheel',{'Disk gardishi':c,Kegaylar:c});let wh;if(bw){bw.scale.set(o.w/10/.42,o.d/10,o.d/10);wh=new THREE.Group();wh.add(bw)}else wh=mkWheel(o.d,o.w,'slick',c,'#151515');wh.userData.fwheel=o.id;g.add(wh);break}
    case'battery':{const b=BAT[o.bt];if(o.bt.startsWith('lipo')){const bb=mkBattery(+o.bt.slice(-1),o.mah,'lipo',c,[b.n,`${o.mah} mAh`,'']);bb.position.y=-bb.userData.dims.h/2;g.add(bb)}
     else{const n=o.bt==='aa2'?2:o.bt==='aa4'?4:o.bt==='li1'?1:2,big=o.bt.startsWith('li'),r=big?.92:.72,l=big?6.5:5;g.add(tagP(box(n*r*2+.3,r*2+.2,l+.6,mPlastic('#111',.5),0,0,0),'Ushlagich (prujinali)',1));
      for(let k=0;k<n;k++){const x=(k-(n-1)/2)*r*2,cy=cyl(r,r,l,MAT('cellw'+big+(k%2),()=>new THREE.MeshPhysicalMaterial({map:cellTex(big,k%2),roughness:.35,metalness:.25,clearcoat:.6})),x,.15,0,20);cy.rotation.x=Math.PI/2;g.add(tagP(cy,big?'18650 elementlar':'AA elementlar',2));
