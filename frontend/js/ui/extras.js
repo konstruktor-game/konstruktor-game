@@ -95,7 +95,7 @@ window.ADV={html,bind,run,score};window.STLX={exportSTL};
 const fmtLen=mm=>mm>=1000?`${fmt(mm/1000,2)} m`:mm>=100?`${fmt(mm/10,1)} sm`:`${fmt(mm,0)} mm`;
 function objSize(o){const bb=new THREE.Box3();o.updateMatrixWorld(true);o.traverse(m=>{if(m.isMesh&&m.visible&&!(m.material&&(m.material===ghostMat||(m.material.transparent&&m.material.opacity<.3))))bb.expandByObject(m)});return bb}
 (()=>{const D={on:false,grp:null,lbl:null,raf:0,bb:null,k:0};
- const btn=document.createElement('button');btn.className='vt';btn.id='tDims';btn.title="Modelning eni, uzunligi va balandligini chizmadagidek ko'rsatadi (m / sm)";btn.innerHTML=`${IC('ruler')}<span>O'lchamlar</span>`;
+ const btn=document.createElement('button');btn.className='vt';btn.id='tDims';btn.title="Modelning eni, uzunligi va balandligini chizmadagidek ko'rsatadi (m / sm)";btn.innerHTML=`${IC('scale')}<span>O'lchamlar</span>`;
  const ref=document.getElementById('tRuler')||document.getElementById('tXray');if(ref)ref.after(btn);
  const names=()=>({plane:['Qanot yoyilishi','Uzunligi'],copter:['Eni (parraklar bilan)','Uzunligi'],heli:['Eni','Rotor bilan uzunligi'],rocket:['Diametri','Diametri']}[B.type]||['Eni','Uzunligi']);
  function clear(){if(D.grp){scene.remove(D.grp);D.grp.traverse(o=>{if(o.geometry)o.geometry.dispose()})}D.grp=null;if(D.lbl)D.lbl.remove();D.lbl=null;D.bb=null}

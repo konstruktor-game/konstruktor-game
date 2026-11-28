@@ -32,6 +32,7 @@ def mat(name, col, metal=0.0, rough=0.5):
 
 def obj_from_bm(name, bm, material, smooth=True, subdiv=0, bevel=0.0):
     me = bpy.data.meshes.new(name)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)   # normallar tashqariga (aks holda sirt ichidan ko'rinadi)
     bm.to_mesh(me)
     bm.free()
     ob = bpy.data.objects.new(name, me)
@@ -62,7 +63,7 @@ def airfoil(chord, thick, n=10):
 def blade(pitch_ratio=0.6):
     """Qanot: o'qdan uchigacha 14 ta kesim; har birida vatar, qalinlik va burilish (qadamdan) hisoblanadi."""
     bm = bmesh.new()
-    R, r0, N = 0.5, 0.075, 14
+    R, r0, N = 0.5, 0.05, 14
     rings = []
     for k in range(N + 1):
         s = k / N
@@ -95,11 +96,11 @@ def make_prop(blades):
         ob = obj_from_bm('Qanot', blade(), plastic, subdiv=1)
         ob.rotation_euler = (0, 0, 2 * math.pi * i / blades)
         obs.append(ob)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=40, radius=0.085, depth=0.11, location=(0, 0, 0.005))
+    bpy.ops.mesh.primitive_cylinder_add(vertices=40, radius=0.046, depth=0.085, location=(0, 0, 0.005))
     hub = bpy.context.active_object; hub.name = 'Vtulka'; hub.data.materials.append(plastic)
-    md = hub.modifiers.new('bev', 'BEVEL'); md.width = 0.012; md.segments = 3
+    md = hub.modifiers.new('bev', 'BEVEL'); md.width = 0.009; md.segments = 3
     for p in hub.data.polygons: p.use_smooth = True
-    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.03, depth=0.13, location=(0, 0, 0.01))
+    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.02, depth=0.1, location=(0, 0, 0.01))
     hole = bpy.context.active_object; hole.name = 'Val teshigi'; hole.data.materials.append(hubm)
     export(f'prop{blades}', [(o, 'Qanot', 1) for o in obs] + [(hub, 'Vtulka', 2), (hole, 'Val teshigi', 3)])
 
@@ -177,7 +178,7 @@ def export(name, parts, axis='y'):
         k = mt.get('kons') if mt else None
         info = dict(k) if k else {'col': [0.6, 0.6, 0.6], 'metal': 0, 'rough': .5}
         key = (label, mt.name if mt else '-')
-        g = groups.setdefault(key, {'name': label, 'ord': order, 'col': list(info['col']), 'metal': info['metal'], 'rough': info['rough'], 'p': [], 'n': [], 'i': [], 'map': {}})
+        g = groups.setdefault(key, {'mat': mt.name if mt else '', 'name': label, 'ord': order, 'col': list(info['col']), 'metal': info['metal'], 'rough': info['rough'], 'p': [], 'n': [], 'i': [], 'map': {}})
         cn = me.corner_normals
         for tri in me.loop_triangles:
             for li in tri.loops:
@@ -203,7 +204,7 @@ def export(name, parts, axis='y'):
         nv = len(g['p']) // 3
         big = nv > 65535
         tris += len(g['i']) // 3
-        out.append({'name': g['name'], 'ord': g['ord'], 'col': [round(c, 4) for c in g['col']], 'metal': g['metal'], 'rough': g['rough'],
+        out.append({'name': g['name'], 'mat': g['mat'], 'ord': g['ord'], 'col': [round(c, 4) for c in g['col']], 'metal': g['metal'], 'rough': g['rough'],
                     'pos': base64.b64encode(struct.pack(f'<{len(g["p"])}h', *[max(-32767, min(32767, round(v / Q))) for v in g['p']])).decode(), 'q': Q,
                     'nrm': base64.b64encode(struct.pack(f'<{len(g["n"])}b', *[max(-127, min(127, round(v * 127))) for v in g['n']])).decode(),
                     'idx': base64.b64encode(struct.pack(f'<{len(g["i"])}{"I" if big else "H"}', *g['i'])).decode(), 'i32': big})
@@ -213,7 +214,73 @@ def export(name, parts, axis='y'):
     print(f'[kons] {name}: {tris} uchburchak, {os.path.getsize(path) // 1024} KB')
 
 
+# ---------------------------------------------------------------- cho'tkasiz motor (FPV, 2207 tipidagi)
+def cyl(name, r, d, z, mt, verts=48, bev=0.0, smooth=True):
+    bpy.ops.mesh.primitive_cylinder_add(vertices=verts, radius=r, depth=d, location=(0, 0, z))
+    o = bpy.context.active_object; o.name = name; o.data.materials.append(mt)
+    if bev:
+        md = o.modifiers.new('bev', 'BEVEL'); md.width = bev; md.segments = 2; md.limit_method = 'ANGLE'
+    for p in o.data.polygons: p.use_smooth = smooth
+    return o
+
+
+def box_obj(name, sx, sy, sz, loc, rot_z, mt, bev=0.0):
+    bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1)
+    for v in bm.verts: v.co.x *= sx; v.co.y *= sy; v.co.z *= sz
+    bmesh.ops.translate(bm, verts=bm.verts, vec=loc)
+    bmesh.ops.rotate(bm, verts=bm.verts, cent=(0, 0, 0), matrix=Matrix.Rotation(rot_z, 3, 'Z'))
+    return obj_from_bm(name, bm, mt, smooth=False, bevel=bev)
+
+
+def make_motor():
+    clear()
+    bellm = mat('qongiroq', (0.75, 0.05, 0.04), 0.4, 0.3)
+    alu = mat('alyuminiy', (0.16, 0.17, 0.19), 0.85, 0.35)
+    copper = mat('mis', (0.85, 0.42, 0.18), 1.0, 0.3)
+    core = mat('ozak', (0.08, 0.08, 0.09), 0.6, 0.5)
+    steel = mat('polat', (0.8, 0.82, 0.85), 1.0, 0.18)
+    wire = mat('sim', (0.03, 0.03, 0.03), 0.0, 0.6)
+    magnet = mat('magnit', (0.1, 0.1, 0.11), 0.5, 0.4)
+    P = []
+    # taglik: alyuminiy disk, pastida 4 ta montaj teshigi (M2/M3)
+    P.append((cyl('Taglik', 0.47, 0.1, 0.05, alu, bev=0.015), 'Taglik (montaj)', 1))
+    for k in range(4):
+        a = math.pi / 4 + k * math.pi / 2
+        bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.035, depth=0.012, location=(math.cos(a) * 0.28, math.sin(a) * 0.28, -0.001))
+        h = bpy.context.active_object; h.name = 'Teshik'; h.data.materials.append(core); P.append((h, 'Taglik (montaj)', 1))
+    # stator: qora o'zak va 12 ta mis o'ram (tish) — qo'ng'iroq tirqishlaridan va pastdan ko'rinadi
+    P.append((cyl('Stator', 0.25, 0.74, 0.47, core, 36), "Stator (mis o'ramlar)", 2))
+    for k in range(12):
+        a = 2 * math.pi * k / 12
+        P.append((box_obj('Oram', 0.13, 0.07, 0.72, (0.32, 0, 0.47), a, copper, bev=0.018), "Stator (mis o'ramlar)", 2))
+    # qo'ng'iroq (rotor): yon devor, ichki magnit halqasi, tepasida 6 ta shamollatish tirqishi orasidagi kegaylar
+    bm = bmesh.new()
+    prof = [(0.43, 0.2), (0.5, 0.2), (0.505, 0.24), (0.505, 0.9), (0.49, 0.95), (0.45, 0.96), (0.45, 0.9), (0.43, 0.9)]
+    vs = [bm.verts.new((r, 0, z)) for (r, z) in prof]
+    for a, b in zip(vs, vs[1:] + vs[:1]): bm.edges.new((a, b))
+    bmesh.ops.spin(bm, geom=bm.verts[:] + bm.edges[:], cent=(0, 0, 0), axis=(0, 0, 1), angle=2 * math.pi, steps=64, use_duplicate=False)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
+    P.append((obj_from_bm('Qongiroq', bm, bellm), "Qo'ng'iroq (rotor)", 3))
+    P.append((cyl('Magnit', 0.425, 0.66, 0.55, magnet, 48), "Qo'ng'iroq (rotor)", 3))
+    for k in range(6):
+        a = 2 * math.pi * k / 6
+        P.append((box_obj('Kegay', 0.3, 0.07, 0.05, (0.31, 0, 0.94), a, bellm, bev=0.015), "Qo'ng'iroq (rotor)", 3))
+    P.append((cyl('Markaz', 0.17, 0.07, 0.95, bellm, 40, bev=0.02), "Qo'ng'iroq (rotor)", 3))
+    # yon tomondagi chiziqlar (dekor) va val
+    for z in (0.34, 0.8):
+        P.append((cyl('Chiziq', 0.508, 0.012, z, core, 64), "Qo'ng'iroq (rotor)", 3))
+    P.append((cyl('Val', 0.04, 0.12, 1.0, steel, 20), 'Val (5 mm)', 4))
+    # 3 faza simi: tagligi yonidan chiqadi
+    for i, dy in enumerate((-0.07, 0, 0.07)):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.028, depth=0.45, location=(-0.62, dy, 0.07), rotation=(0, math.pi / 2, 0))
+        w = bpy.context.active_object; w.name = 'Sim'; w.data.materials.append(wire)
+        for p in w.data.polygons: p.use_smooth = True
+        P.append((w, 'Faza simlari (3 ta)', 5))
+    export('motor', P)
+
+
 make_prop(2)
 make_prop(3)
 make_wheel()
+make_motor()
 print('[kons] tayyor')

@@ -7,6 +7,9 @@
    Koeffitsientlar ommabop 3"/5"/7" sinov natijalariga moslangan.
    ===================================================================== */
 (()=>{
+// batareya tasmasi: to'qilgan neylon + velcro qatori, qizil chiziq; rezina tagligi: olti burchakli g'adir-budur naqsh
+const strapTex=()=>ctex('strapv',256,64,(g,w,h)=>{g.fillStyle='#161616';g.fillRect(0,0,w,h);for(let x=0;x<w;x+=4){g.fillStyle=x%8?'#1f1f1f':'#121212';g.fillRect(x,0,2,h)}g.fillStyle='rgba(255,255,255,.05)';for(let y=0;y<h;y+=3)g.fillRect(0,y,w,1);g.fillStyle='#b71c1c';g.fillRect(0,h*.44,w,h*.12)},[3,1]);
+const padTex=()=>ctex('padgrip',128,128,(g,w,h)=>{g.fillStyle='#1c1c1c';g.fillRect(0,0,w,h);g.fillStyle='#2a2a2a';for(let y=0;y<h;y+=10)for(let x=(y/10)%2?5:0;x<w;x+=10){g.beginPath();g.arc(x,y,3.2,0,Math.PI*2);g.fill()}},[4,4]);
 const NOM={lipo:3.7,lihv:3.8,liion:3.6,life:3.2},FULL={lipo:4.2,lihv:4.35,liion:4.2,life:3.6},DENS={lipo:.026,lihv:.025,liion:.0145,life:.034},CMAX={lipo:150,lihv:150,liion:15,life:30};
 const CHEM={lipo:'LiPo',lihv:'LiHV',liion:'Li-ion',life:'LiFePO4'};
 const KB={2:.82,3:1,4:1.12},KP={2:.8,3:1,4:1.15};
@@ -219,7 +222,13 @@ T.build=(B,D,ctx)=>{const p=B.p,f=p.frame,c=B.col,u=v=>v/10;
  {const b=mkBoard(stk,'#0d2a4a',`FC ${p.fc.mcu}`,'fc',{baro:p.fc.baro});b.position.y=at+1.5;ctx.add('fc',b,[0,4,0])}
  // video
  if(p.vid.type!=='none'){const cm=mkCamera(camS*10,c.cam,p.vid.type==='digital');const g=new THREE.Group();g.position.set(0,at+u(f.sh)/2+.1,-u(f.bl)/2+1.5);g.rotation.x=p.vid.tilt*DEG;g.add(cm);ctx.add('cam',g,[0,0,-5]);
-  const v=new THREE.Group(),antM=mPlastic(c.ant,.45),lolli=(x,z,tilt)=>{const a=new THREE.Group();a.position.set(x,topY+.2,z);a.rotation.x=tilt;a.add(cyl(.12,.12,3.6,mPlastic('#1a1a1a',.5),0,1.8,0,10));const h=sph(.85,antM,0,3.9,0);h.scale.set(1,.42,1);a.add(h);return a};
+  const v=new THREE.Group(),antM=mPlastic(c.ant,.45),lolli=(x,z,tilt)=>{const a=new THREE.Group();a.position.set(x,topY+.2,z);a.rotation.x=tilt;
+   // SMA ulagich: oltin rangli olti qirrali gayka va rezba, keyin qora koaksial kabel (termo-qisqartma bilan)
+   a.add(cyl(.24,.24,.32,mMetal('#d4af37',.25),0,.16,0,6));a.add(cyl(.16,.16,.35,mMetal('#c9a227',.3),0,.48,0,16));a.add(cyl(.13,.13,.9,mPlastic('#202020',.55),0,1.1,0,12));
+   a.add(cyl(.1,.1,2.4,mPlastic('#141414',.45),0,2.7,0,10));
+   // qopqoq: TPU dan quyilgan yumaloq "lollipop" (ichida ikki qutbli element)
+   const pr=[[0,0],[.42,.02],[.7,.12],[.82,.32],[.84,.52],[.74,.72],[.48,.84],[0,.88]].map(([r,y])=>new THREE.Vector2(r,y)),h=new THREE.Mesh(GEO('lolli',()=>new THREE.LatheGeometry(pr,32)),antM);h.position.y=3.85;h.rotation.x=Math.PI/2;h.position.z=-.44;h.castShadow=true;a.add(h);
+   a.add(cyl(.86,.86,.08,mPlastic('#111',.5),0,3.85,0,32).rotateX(Math.PI/2));return a};
   if(p.vid.type==='digital'){const ax=new THREE.Group();ax.position.y=at+2.6;ax.add(rbox(stk*.95,.75,stk*.95,.3,mMetal('#4a4f56',.45),0,0,0));for(let k=-5;k<=5;k++)ax.add(box(.07,.5,stk*.8,mMetal('#5d636b',.4),k*.3,.6,0));ax.add(cyl(.9,.9,.2,mPlastic('#111',.5),0,.95,0,24));v.add(ax);
    for(const s of[-1,1]){const a=lolli(s*1.1,u(f.bl)/2+.3,.6);a.rotation.z=s*.35;v.add(a)}}
   else{const vb=mkBoard(2,'#1b1b1b','VTX','vtx');vb.position.set(0,at+.35,u(f.bl)/2-1.6);v.add(vb);v.add(lolli(0,u(f.bl)/2+.3,.7))}
@@ -234,7 +243,7 @@ T.build=(B,D,ctx)=>{const p=B.p,f=p.frame,c=B.col,u=v=>v/10;
  if(p.extra.gps){const g=new THREE.Group(),gz=u(f.bl)/2+.9,mh=u(f.sh)+5;g.add(box(1.4,.5,1.4,mPlastic('#333',.6),0,at+.25,gz-.3));g.add(cyl(.18,.18,mh,mPlastic('#2b2b2b',.5),0,at+mh/2,gz,10));
   g.add(rbox(2.5,.75,2.5,.4,mPlastic('#1c1c1c',.4),0,at+mh+.4,gz));g.add(box(1.8,.4,1.8,mPlastic('#d7c9a7',.6),0,at+mh+.85,gz));g.add(box(1.1,.06,1.1,mMetal('#c0a050',.3),0,at+mh+1.06,gz));ctx.add('gps',g,[0,10,2])}
  const bd=realBat(p.bat.cells,p.bat.mah,p.bat.chem),bh=bd.kind==='cyl'?bd.h:bd.h,bw=bd.w,bl=bd.kind==='cyl'?7.2:bd.l;
- {const g=new THREE.Group(),mt=B.p.mount||{sw:'20',pad:true},swc=(+mt.sw)/10;if(mt.pad)g.add(box(bw*.9,.12,bl*.9,mRubber('#202020'),0,topY+.26,0));for(const z of[-bl*.22,bl*.22]){g.add(box(bw+.3,.1,swc,mPlastic('#1d1d1d',.7),0,topY+.24,z));g.add(box(.35,.4,swc+.1,mMetal('#9aa',.4),bw/2+.35,topY+.3,z))}ctx.add('strap',g,[0,10,0])}
+ {const g=new THREE.Group(),mt=B.p.mount||{sw:'20',pad:true},swc=(+mt.sw)/10;if(mt.pad)g.add(box(bw*.9,.12,bl*.9,MAT('padgrip',()=>new THREE.MeshStandardMaterial({map:padTex(),roughness:.95,color:'#ffffff'})),0,topY+.26,0));for(const z of[-bl*.22,bl*.22]){g.add(box(bw+.3,.1,swc,MAT('strapv',()=>new THREE.MeshStandardMaterial({map:strapTex(),roughness:.9,color:'#ffffff'})),0,topY+.24,z));g.add(box(.35,.4,swc+.1,mMetal('#9aa',.4),bw/2+.35,topY+.3,z))}ctx.add('strap',g,[0,10,0])}
  {const g=mkBattery(p.bat.cells,p.bat.mah,p.bat.chem,c.bat,[`${p.bat.cells}S ${p.bat.mah}mAh`,`${p.bat.c}C · ${CHEM[p.bat.chem]}`,`${fmt(D.Vn,1)} V nominal`],{awg:p.frame.wb>=200?12:14});g.position.y=topY+.32;
   for(const z of[-bl*.22,bl*.22])g.add(box(bw+.12,.1,2,mPlastic('#1d1d1d',.7),0,bh+.05,z));ctx.add('bat',g,[0,14,0])}
  // ulangan simlar (3D)

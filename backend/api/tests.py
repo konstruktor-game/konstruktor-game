@@ -111,3 +111,27 @@ class ApiTests(TestCase):
         r = self.call('post', '/api/chat', {'q': 'KV nima?', 'ctx': {'tur': 'Dron'}})
         self.assertEqual(r.json(), {'ok': False, 'offline': True})
         self.assertEqual(self.call('post', '/api/chat', {'q': '  '}).status_code, 400)
+
+    def test_malformed_input_gives_400_not_500(self):
+        tok = self.register()
+        raw = lambda body: self.client.post('/api/builds', body, content_type='application/json', HTTP_AUTHORIZATION='Token ' + tok)
+        self.assertEqual(raw('{"type":"car","data":' + '[' * 5000 + ']' * 5000 + '}').status_code, 400)   # RecursionError
+        self.assertEqual(raw('{"type":"car","data":{"v":2,"type":"car","x":NaN}}').status_code, 400)    # NaN bazani buzardi
+        self.assertEqual(raw(json.dumps({'type': ['car'], 'data': project('car')})).status_code, 400)   # unhashable tur
+        self.assertEqual(raw(json.dumps({'type': 'car', 'data': project('car', x='a\x00b')})).status_code, 400)
+        ok = raw(json.dumps({'type': 'car', 'data': project('car'), 'name': None, 'summary': {'a': 1}}))
+        self.assertEqual(ok.status_code, 201, ok.content)
+        # juda uzun parol / NUL belgili login 500 bermaydi
+        self.assertEqual(self.call('post', '/api/register', {'username': 'Uzun_1', 'password': 'a' * 5000}).status_code, 400)
+        self.assertEqual(self.call('post', '/api/login', {'username': 'x\x00y', 'password': 'p'}).status_code, 401)
+
+    def test_expired_token_rejected_and_listing_has_no_data(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        from .models import AuthToken
+        tok = self.register()
+        self.call('post', '/api/builds', {'type': 'car', 'data': project('car')}, tok)
+        row = self.call('get', '/api/builds', token=tok).json()['builds'][0]
+        self.assertNotIn('data', row)
+        AuthToken.objects.update(created_at=timezone.now() - timedelta(days=400))
+        self.assertEqual(self.call('get', '/api/builds', token=tok).status_code, 401)

@@ -17,6 +17,8 @@ class AuthToken(models.Model):
 
     @classmethod
     def issue(cls, user):
+        # muddati o'tgan eski tokenlar jadvalda yig'ilib qolmasligi uchun shu foydalanuvchiniki tozalanadi
+        cls.objects.filter(user=user, created_at__lt=timezone.now() - timedelta(days=settings.KONS_TOKEN_DAYS)).delete()
         return cls.objects.create(key=secrets.token_hex(32), user=user)
 
     @property

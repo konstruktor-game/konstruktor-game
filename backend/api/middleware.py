@@ -14,12 +14,14 @@ class SimpleCorsMiddleware:
 
     def __call__(self, request):
         origin = request.headers.get('Origin')
-        allowed = request.path.startswith('/api/') and origin in settings.CORS_ALLOWED_ORIGINS
+        is_api = request.path.startswith('/api/')
+        allowed = is_api and origin in settings.CORS_ALLOWED_ORIGINS
         response = HttpResponse(status=204) if allowed and request.method == 'OPTIONS' else self.get_response(request)
         if allowed:
             response['Access-Control-Allow-Origin'] = origin
             response['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
             response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
             response['Access-Control-Max-Age'] = '600'
-            response['Vary'] = 'Origin'
+        if is_api:
+            response['Vary'] = 'Origin'  # kesh (CDN/brauzer) manbaga qarab javobni aralashtirib yubormasligi uchun
         return response

@@ -478,7 +478,7 @@ $('tLabels').onclick=()=>{showLabels=!showLabels;$('tLabels').classList.toggle('
 $('tXray').onclick=()=>{window.XRAY=!window.XRAY;$('tXray').classList.toggle('on',window.XRAY);rebuild()};
 $('tFit').onclick=()=>{if(insp){orb.tg.set(0,insp.turn.position.y,0);orb.tr=insp.size*2.6}else fitCamera(model.userData.size)};
 $('tAuto').onclick=()=>{orb.auto=!orb.auto;$('tAuto').classList.toggle('on',orb.auto)};
-$('tShot').onclick=()=>{renderFrame();const a=document.createElement('a');a.href=renderer.domElement.toDataURL('image/png');a.download=(B.name||'konstruktor').replace(/[\\/:*?"<>|]/g,'_')+'.png';a.click()};
+$('tShot').onclick=()=>{if(window.HIRENDER){HIRENDER();return}renderFrame();const a=document.createElement('a');a.href=renderer.domElement.toDataURL('image/png');a.download=(B.name||'konstruktor').replace(/[\\/:*?"<>|]/g,'_')+'.png';a.click()};
 
 // ---------------- server (Django): akkaunt, saqlash, ulashish, galereya ----------------
 const NET={base:null,token:null,user:null,online:false,

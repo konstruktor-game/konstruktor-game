@@ -75,7 +75,10 @@ async function open(){box.classList.remove('hidden');fab.classList.add('hidden')
  if(!log.children.length)add('a',"Salom! Detal, tushuncha yoki loyihangiz haqida so'rang. Masalan: «ESC nima?», «nega sinovda ag'darildi?», «keyingi qadam nima?»");
  if(ai===null&&NET.base){try{const r=await fetch(NET.base+'/api/chat');const j=await r.json();ai=!!j.ai}catch(e){ai=false}setMode()}
  setTimeout(()=>$c('chatQ').focus(),50)}
-fab.onclick=open;$c('chatX').onclick=()=>{box.classList.add('hidden');fab.classList.remove('hidden')};
+fab.onclick=open;
+// kompyuterda: sarlavhadagi tugma (suzuvchi tugma o'ng paneldagi «Keyingi» ni yopib qo'ymasin); telefonda — suzuvchi
+{const hb=document.createElement('button');hb.className='hb hbChat';hb.id='bChat';hb.title='Savol berish — yordamchi';hb.innerHTML=`${IC('help')}<span>Savol berish</span>`;hb.onclick=open;const m=document.getElementById('bKeys')||document.getElementById('bMute');if(m)m.before(hb);
+ const st=document.createElement('style');st.textContent='@media (min-width:761px){.chatFab{display:none!important}}@media (max-width:760px){.hbChat{display:none}}.hbChat{color:var(--ac)!important}';document.head.appendChild(st)}$c('chatX').onclick=()=>{box.classList.add('hidden');fab.classList.remove('hidden')};
 $c('chatClr').onclick=()=>{log.innerHTML='';hist.length=0;open()};
 $c('chatSend').onclick=()=>ask($c('chatQ').value);
 $c('chatQ').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask($c('chatQ').value)}});

@@ -106,7 +106,12 @@ function rbox(w,h,d,r,mat,x=0,y=0,z=0){r=Math.max(.01,Math.min(r,w/2-.01,d/2-.01
   const bv=Math.min(.06,h/4,r/2),e=new THREE.ExtrudeGeometry(s,{depth:h,bevelEnabled:true,bevelThickness:bv,bevelSize:bv,bevelSegments:2,curveSegments:6});e.rotateX(Math.PI/2);e.translate(0,h/2,0);return e});
  return mesh(g,mat,x,y,z)}
 // sim (kabel): nuqtalar orqali silliq trubka
-function wireMesh(pts,col,r=.08){const c=new THREE.CatmullRomCurve3(pts.map(p=>p.isVector3?p:new V3(...p)));const m=new THREE.Mesh(new THREE.TubeGeometry(c,Math.max(8,pts.length*8),r,6,false),mPlastic(col,.4));m.castShadow=true;m.userData.dispose=true;return m}
+// silikon izolyatsiyali sim: yumaloq kesim, yaltiroq silikon; ikki uchida qalaylangan mis (kavsharlangan uchi)
+const mSilicone=col=>MAT('sil'+col,()=>new THREE.MeshPhysicalMaterial({color:col,roughness:.38,metalness:0,clearcoat:.55,clearcoatRoughness:.35,sheen:.4,sheenRoughness:.6,sheenColor:new THREE.Color('#ffffff')}));
+function wireMesh(pts,col,r=.08){const P=pts.map(p=>p.isVector3?p:new V3(...p)),c=new THREE.CatmullRomCurve3(P);const m=new THREE.Mesh(new THREE.TubeGeometry(c,Math.max(10,pts.length*10),r,10,false),mSilicone(col));m.castShadow=true;m.userData.dispose=true;
+ if(r>=.035)for(const t of[0,1]){const pt=c.getPoint(t),tg=c.getTangent(t),tip=new THREE.Mesh(GEO('wtip'+r.toFixed(3),()=>new THREE.CylinderGeometry(r*.72,r*.72,r*2.2,10)),mMetal('#c9ccd1',.25));
+  tip.position.copy(pt).addScaledVector(tg,t?r*.9:-r*.9);tip.quaternion.setFromUnitVectors(new V3(0,1,0),tg);tip.castShadow=true;m.add(tip)}
+ return m}
 
 // ---------------- ustaxona sahnasi ----------------
 const scene=new THREE.Scene();scene.background=new THREE.Color('#0e1219');scene.fog=new THREE.Fog('#0e1219',300,1200);

@@ -27,16 +27,22 @@ THUMB_PREFIXES = ('data:image/jpeg;base64,', 'data:image/png;base64,')
 LOGIN_FAIL_LIMIT = 10      # 10 daqiqada shuncha xato urinishdan keyin bloklanadi
 SAVE_LIMIT_PER_MIN = 20    # bir daqiqada saqlashlar soni
 MAX_BUILDS_PER_USER = 300
+MAX_PASSWORD = 128         # juda uzun parol PBKDF2 orqali CPU'ni band qilmasligi uchun
 
 
 def err(msg, status=400):
     return JsonResponse({'ok': False, 'error': msg}, status=status)
 
 
+def _bad_const(name):
+    raise ValueError(name)
+
+
 def body_json(request):
     try:
-        data = json.loads(request.body or b'{}')
-    except (ValueError, UnicodeDecodeError):
+        # NaN/Infinity JSON standartiga zid — bazada JSON_VALID xatosi (500) berardi, shuning uchun rad etamiz
+        data = json.loads(request.body or b'{}', parse_constant=_bad_const)
+    except (ValueError, UnicodeDecodeError, RecursionError):  # RecursionError — juda chuqur ichma-ich JSON
         return None
     return data if isinstance(data, dict) else None
 
@@ -92,6 +98,8 @@ def register(request):
     if data is None:
         return err("Noto'g'ri so'rov")
     username, pwd = str(data.get('username', '')).strip(), str(data.get('password', ''))
+    if len(pwd) > MAX_PASSWORD:
+        return err(f'Parol {MAX_PASSWORD} belgidan oshmasin')
     if not USER_RE.match(username):
         return err("Foydalanuvchi nomi 3–24 belgi: lotin harflari, raqam, _ . -")
     if User.objects.filter(username__iexact=username).exists():
@@ -114,11 +122,14 @@ def login(request):
     if data is None:
         return err("Noto'g'ri so'rov")
     username = str(data.get('username', '')).strip()
+    pwd = str(data.get('password', ''))
+    if len(username) > 150 or len(pwd) > MAX_PASSWORD or '\x00' in username:
+        return err("Foydalanuvchi nomi yoki parol noto'g'ri", 401)
     key = 'kons-login-fail:' + username.lower()
     if cache.get(key, 0) >= LOGIN_FAIL_LIMIT:
         return err("Juda ko'p urinish. 10 daqiqadan keyin qayta urinib ko'ring.", 429)
     real = User.objects.filter(username__iexact=username).values_list('username', flat=True).first()
-    user = authenticate(request, username=real or username, password=str(data.get('password', '')))
+    user = authenticate(request, username=real or username, password=pwd)
     if not user:
         cache.set(key, cache.get(key, 0) + 1, 600)
         return err("Foydalanuvchi nomi yoki parol noto'g'ri", 401)
@@ -143,20 +154,26 @@ def me(request):
 # ---------------- loyihalar ----------------
 def clean_build(data):
     """Kiruvchi loyihani tekshiradi; xato bo'lsa (None, xabar) qaytaradi."""
-    name = str(data.get('name', '')).strip()[:60] or 'Nomsiz loyiha'
+    name = str(data.get('name') or '').replace('\x00', '').strip()[:60] or 'Nomsiz loyiha'
     btype = data.get('type')
     payload = data.get('data')
-    if btype not in TYPES:
+    if not isinstance(btype, str) or btype not in TYPES:  # ro'yxat/dict kelsa `in` TypeError berardi
         return None, "Loyiha turi noto'g'ri"
     if not isinstance(payload, dict) or payload.get('type') != btype or payload.get('v') != 2:
         return None, "Loyiha ma'lumoti noto'g'ri"
-    if len(json.dumps(payload)) > settings.KONS_MAX_BUILD_BYTES:
+    try:
+        dumped = json.dumps(payload)
+    except (ValueError, TypeError, RecursionError):
+        return None, "Loyiha ma'lumoti noto'g'ri"
+    if len(dumped) > settings.KONS_MAX_BUILD_BYTES:
         return None, 'Loyiha juda katta'
+    if '\\u0000' in dumped:  # PostgreSQL jsonb \u0000 ni qabul qilmaydi (500)
+        return None, "Loyiha ma'lumoti noto'g'ri"
     thumb = data.get('thumb') or ''
     if thumb and (not isinstance(thumb, str) or not thumb.startswith(THUMB_PREFIXES) or len(thumb) > settings.KONS_MAX_THUMB_CHARS):
         thumb = ''
     payload.pop('id', None)
-    return {'name': name, 'type': btype, 'data': payload, 'summary': str(data.get('summary', ''))[:200],
+    return {'name': name, 'type': btype, 'data': payload, 'summary': str(data.get('summary') or '').replace('\x00', '')[:200],
             'thumb': thumb, 'public': data.get('public') is True}, None
 
 
@@ -175,7 +192,7 @@ def save_throttled(user):
 def builds(request):
     user = request.api_user
     if request.method == 'GET':
-        return JsonResponse({'ok': True, 'builds': [b.as_dict(user) for b in user.builds.all()[:MAX_BUILDS_PER_USER]]})
+        return JsonResponse({'ok': True, 'builds': [b.as_dict(user) for b in user.builds.defer('data')[:MAX_BUILDS_PER_USER]]})
     if len(request.body) > settings.KONS_MAX_BUILD_BYTES + settings.KONS_MAX_THUMB_CHARS + 4096:
         return err("So'rov juda katta", 413)
     data = body_json(request)
@@ -228,7 +245,7 @@ def build_detail(request, slug):
 
 @require_http_methods(['GET'])
 def gallery(request):
-    qs = Build.objects.filter(public=True).select_related('owner')
+    qs = Build.objects.filter(public=True).select_related('owner').defer('data')
     t = request.GET.get('type')
     if t in TYPES:
         qs = qs.filter(type=t)

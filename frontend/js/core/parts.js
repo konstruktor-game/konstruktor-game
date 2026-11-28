@@ -44,7 +44,11 @@ function mkScrew(dmm=3,col='#c0c4c9'){const g=new THREE.Group(),r=dmm*.095;g.add
 
 // ---- cho'tkasiz outrunner motor ----
 // qo'ng'iroq diametri ≈ stator + 6 mm; balandlik ≈ stator + 6,5 mm; 6 ta shamollatish to'sinchasi; o'q (M5 yoki M3) va neylon gayka
-function mkMotor(sd,sh,col){const g=new THREE.Group(),R=(sd+6)/20,H=(sh+6.5)/10,base=.28,dark=mMetal('#26292e',.45);
+function mkMotor(sd,sh,col){
+ // Blender modeli: taglik, mis o'ramli stator, shamollatish tirqishli qo'ng'iroq, val, 3 faza simi
+ if(window.ASSETS){const A=ASSETS.get('motor',{'mat:qongiroq':col});if(A){const R=(sd+6)/20,H=(sh+6.5)/10,Ht=.34+H,w=new THREE.Group();for(const c of[...A.children])if(/simlari/.test(c.userData.n||''))A.remove(c);A.scale.set(2*R,Ht,2*R);w.add(A);
+  Object.assign(w.userData,{blender:true,h:Ht,top:Ht+.6,R});return w}}
+ const g=new THREE.Group(),R=(sd+6)/20,H=(sh+6.5)/10,base=.28,dark=mMetal('#26292e',.45);
  g.add(cyl(R*.95,R*.98,base,dark,0,base/2,0,40));
  for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;g.add(cyl(.13,.13,.02,mPlastic('#0a0a0a'),Math.cos(a)*R*.55,0,Math.sin(a)*R*.55,10))}
  const st=cyl(sd/20,sd/20,sh/10,mCopper(),0,base+.06+sh/20,0,36);g.add(st);
@@ -74,7 +78,11 @@ function propBladeGeo(R,Pin,blades,hubR){return GEO(`pblade${R.toFixed(2)},${Pin
  const tc=pos.length/3;let sx=0,sy=0,sz=0;for(let k=0;k<K;k++){sx+=pos[(N*K+k)*3];sy+=pos[(N*K+k)*3+1];sz+=pos[(N*K+k)*3+2]}pos.push(sx/K,sy/K,sz/K);for(let k=0;k<K;k++)idx.push(N*K+k,N*K+(k+1)%K,tc);
  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();return g})}
 // to'liq parrak: markaziy vtulka (Ø ≈ 12 mm, 5 mm teshik) + qanotlar; dir 'CW' — oyna aksi
-function mkProp(Din,Pin,blades,mat,col,dir){const g=new THREE.Group(),R=Din*1.27,hubR=.42+Din*.035,pm=mat==='cf'?MAT('propcf',()=>new THREE.MeshPhysicalMaterial({map:carbonTex,roughness:.35,metalness:.2,clearcoat:.8,side:THREE.DoubleSide})):
+function mkProp(Din,Pin,blades,mat,col,dir){
+ // Blender modeli (tools/blender/make_models.py) bo'lsa — o'sha: Clark-Y profilli, qadam bo'yicha buralgan qanotlar
+ {const n=+blades,tc=mat==='cf'?'#1d1f22':col,A=(n===2||n===3)&&window.ASSETS&&ASSETS.get('prop'+n,{Qanot:tc,Vtulka:tc});
+  if(A){const D=Din*2.54,w=new THREE.Group();A.scale.set(D,Math.min(D*.9,6.8),D);if(dir==='CW')A.scale.z*=-1;w.add(A);w.userData.R=D/2;w.userData.blender=true;return w}}
+ const g=new THREE.Group(),R=Din*1.27,hubR=.42+Din*.035,pm=mat==='cf'?MAT('propcf',()=>new THREE.MeshPhysicalMaterial({map:carbonTex,roughness:.35,metalness:.2,clearcoat:.8,side:THREE.DoubleSide})):
   MAT('prop'+col,()=>new THREE.MeshPhysicalMaterial({color:col,roughness:.32,transmission:.2,thickness:.2,clearcoat:.6,transparent:true,opacity:.93,side:THREE.DoubleSide}));
  g.add(cyl(hubR,hubR,.75,pm,0,0,0,24));g.add(cyl(.27,.27,.77,mPlastic('#111',.5),0,0,0,16));
  const geo=propBladeGeo(R,Pin,+blades,hubR);for(let k=0;k<+blades;k++){const m=new THREE.Mesh(geo,pm);m.castShadow=true;m.rotation.y=k/blades*Math.PI*2;g.add(m)}
@@ -102,9 +110,10 @@ function mkBoard(s,base,label,kind,opt={}){const g=new THREE.Group(),t=.16;g.add
 function mkCamera(size,col,digital){const g=new THREE.Group(),s=size/10;g.add(rbox(s,s,s*.95,s*.15,mPaint(col,'satin'),0,0,0));
  g.add(rbox(s*1.02,s*.4,.12,.08,mMetal('#2a2a2a',.4),0,0,-s*.48));
  const ln=cyl(.45,.5,1.05,mPlastic('#121212',.3),0,0,-s*.48-.5);ln.rotation.x=Math.PI/2;g.add(ln);const hood=cyl(.55,.5,.25,mPlastic('#1a1a1a',.4),0,0,-s*.48-1.05);hood.rotation.x=Math.PI/2;g.add(hood);
- const gl=cyl(.38,.38,.02,mGlass(),0,0,-s*.48-1.17);gl.rotation.x=Math.PI/2;g.add(gl);
+ const gl=new THREE.Mesh(GEO('camlens',()=>new THREE.SphereGeometry(.42,28,10,0,Math.PI*2,0,.62)),MAT('lenscoat',()=>new THREE.MeshPhysicalMaterial({color:'#120a24',metalness:.2,roughness:.04,clearcoat:1,clearcoatRoughness:.02,iridescence:1,iridescenceIOR:1.6,iridescenceThicknessRange:[200,600]})));gl.rotation.x=-Math.PI/2;gl.position.z=-s*.48-1.02;g.add(gl);
+ for(let k=0;k<5;k++){const t=new THREE.Mesh(GEO('lthr',()=>new THREE.TorusGeometry(.49,.025,6,28)),mPlastic('#0c0c0c',.5));t.position.z=-s*.48-.2-k*.14;g.add(t)}
  for(const x of[-1,1]){const sc=mkScrew(2,'#1a1a1a');sc.rotation.z=x*Math.PI/2;sc.position.set(x*s/2,0,0);g.add(sc)}
- tagRanges(g,[[0,'Korpus (sensor platasi ichida)',1],[1,'Old panel',2],[2,'Linza (M8)',3],[5,'Mahkamlash vintlari',4],[7,'Kabel',5]]);
+ tagRanges(g,[[0,'Korpus (sensor platasi ichida)',1],[1,'Old panel',2],[2,'Linza (M8, rezbali, nur qaytarmaydigan qoplama)',3],[10,'Mahkamlash vintlari',4],[12,'Kabel',5]]);
  if(digital)g.add(wireMesh([[0,-s*.2,s*.45],[0,-s*.6,s*1.2],[0,-s*.3,s*2]],'#222',.06));return g}
 
 // ---- servo ----
@@ -131,7 +140,11 @@ function springGeo(R,coils,len,wr){return GEO(`spring${R},${coils},${len},${wr}`
 
 // ---- g'ildirak: shina profili (lathe) + protektor bo'rtiqlari + disk ----
 // o'q X bo'ylab. tire: slick | pin | terrain
-function mkWheel(Dmm,Wmm,tire,rimCol,tireCol){const g=new THREE.Group(),R=Dmm/20,W=Wmm/10,rr=R*.62,tm=mRubber(tireCol),side=W*.22;
+function mkWheel(Dmm,Wmm,tire,rimCol,tireCol){
+ // protektorli shinalar uchun Blender modeli (chevron protektor, 5 kegayli disk); silliq shina — dasturiy model
+ if(tire!=='slick'&&window.ASSETS){const A=ASSETS.get('wheel',{Shina:tireCol,Protektor:tireCol,'Disk gardishi':rimCol,Kegaylar:rimCol});
+  if(A){const w=new THREE.Group();A.scale.set(Wmm/10/.42,Dmm/10,Dmm/10);w.add(A);w.userData.blender=true;return w}}
+ const g=new THREE.Group(),R=Dmm/20,W=Wmm/10,rr=R*.62,tm=mRubber(tireCol),side=W*.22;
  const p2=[new THREE.Vector2(rr,-W/2),new THREE.Vector2(R-side,-W/2),new THREE.Vector2(R-side*.25,-W/2+side*.4),new THREE.Vector2(R,-W/2+side),new THREE.Vector2(R,W/2-side),new THREE.Vector2(R-side*.25,W/2-side*.4),new THREE.Vector2(R-side,W/2),new THREE.Vector2(rr,W/2)];
  const tg=new THREE.Mesh(GEO(`tire${R.toFixed(2)},${W.toFixed(2)}`,()=>new THREE.LatheGeometry(p2,48)),tm);tg.rotation.z=Math.PI/2;tg.castShadow=true;g.add(tg);
  if(tire!=='slick'){const big=tire==='terrain',n=big?18:36,lug=GEO(`lug${big},${R.toFixed(2)},${W.toFixed(2)}`,()=>new THREE.BoxGeometry(big?W*.42:W*.16,big?R*.09:R*.05,big?R*.22:R*.08)),im=new THREE.InstancedMesh(lug,tm,n*2),mx=new THREE.Matrix4(),q=new THREE.Quaternion();
